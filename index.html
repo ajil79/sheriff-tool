@@ -825,6 +825,8 @@
           <option value="sheriff_arrest">Sheriff Warrant for Arrest</option>
           <option value="sheriff_warrant">Sheriff Warrant for Questioning</option>
           <option value="sheriff_debt">Sheriff Debt Enforcement Warrant</option>
+          <option disabled>── Other Reports ──</option>
+          <option value="field_contact">Field Contact Report</option>
         </select>
         <div class="hint" style="margin-top:8px"><span>💡</span><span>Date/time, callsign and unit can still auto-fill from MDT paste or your saved template, but you can now edit them here as well.</span></div>
         <details id="reportHeaderMetaDetails" class="header-meta-details">
@@ -4254,7 +4256,7 @@ Date        P?    Amount        Offence
       hints: [
         "Outstanding debt amount and type (government fines, charges, licences)",
         "Was the traffic stop initiated by ANPR flag or manual LEAP check?",
-        "Vehicle details — rego, make, model, colour from VICROADS",
+        "Vehicle details — rego, make, model, colour from MELROADS",
         "Did the individual flee the scene? Note direction and circumstances",
         "Was the individual given opportunity to pay or arrange a plan?",
         "Debt threshold — under $10k (immediate), $10k-60k (3 weeks), $60k-100k (4 weeks), over $100k (no plan)",
@@ -4305,8 +4307,17 @@ Date        P?    Amount        Offence
         "How was the individual identified? (ID shown, LEAP/MDT, ANPR)",
         "Was the Sheriff custody caution read to the individual?",
         "Did the individual comply or refuse? What actions were taken?",
-        "VICROADS vehicle details if applicable (rego, make, colour, owner)",
+        "MELROADS vehicle details if applicable (rego, make, colour, owner)",
         "Was backup requested? Outcome?"
+      );
+    }
+
+    if (type === "field_contact" && matchedHints.length === 0) {
+      matchedHints.push(
+        "Document reason for the approach (outstanding debt, suspicious behaviour, call for service)",
+        "Was the person cooperative or resistant?",
+        "What information was gathered or verified? (ID, phone, debt acknowledgement)",
+        "Were any actions taken? (payment arranged, warning issued, further steps)"
       );
     }
 
@@ -6117,8 +6128,8 @@ function clearDebtTool() {
 
   // ── Sheriff mode constants — declared here so all hoisted functions can access them ──
   const SHERIFF_ONLY_BUILD = true;
-  const ENABLED_REPORT_TYPES = ["sheriff_arrest", "sheriff_warrant", "sheriff_debt"];
-  const LEGACY_REPORT_TYPES = ["arrest", "sheriff_arrest_legacy", "sheriff_warrant_legacy", "bail_conditions", "traffic_warrant", "field_contact", "search_seizure", "vehicle_inspection"];
+  const ENABLED_REPORT_TYPES = ["sheriff_arrest", "sheriff_warrant", "sheriff_debt", "field_contact"];
+  const LEGACY_REPORT_TYPES = ["arrest", "sheriff_arrest_legacy", "sheriff_warrant_legacy", "bail_conditions", "traffic_warrant", "search_seizure", "vehicle_inspection"];
   const LEGACY_COMPAT_STUB_IDS = ["debtGovOnly", "debtRoadsideNotice", "debtDutyNumber", "debtBadgeNumber", "debtCallsignOutput", "debtCopyCallsignBtn", "debtCopyCallScriptBtn", "debtCopyPairedNoteBtn", "debtCallsignWarn"];
   let dirtySectionState = {};
   let _pendingReviewResolve = null;
@@ -6544,7 +6555,7 @@ function clearDebtTool() {
       }
       add("");
     }
-    
+
     if (!sectionExcluded("narrative")) {
       add("REPORT:");
       add("(1) Preliminary Details:");
@@ -6554,20 +6565,22 @@ function clearDebtTool() {
       add(narrative);
       add("");
     }
-    
-    add("VICROADS VEHICLE LOOK-UP:");
-    add("=====================  VICROADS  ====================");
-    add(`    REGISTRATION:        ${s(sw.rego) || "NIL"}`);
-    add(`    MODEL:               ${s(sw.model) || "NIL"}`);
-    add(`    COLOUR:              ${s(sw.colour) || "NIL"}`);
-    add(`    REGISTERED:          ${s(sw.registered) || "NIL"}`);
-    add(`    EXPIRES:             ${s(sw.regoExpires) || "NIL"}`);
-    add(`    STOLEN:              ${s(sw.stolen) || "NO"}`);
-    add(`    SUSPENDED:           ${s(sw.suspended) || "NO"}`);
-    add("");
-    add("---------------------  OWNER DETAILS ---------------------------");
-    add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
-    add("");
+
+    if (s(sw.rego)) {
+      add("MELROADS VEHICLE LOOK-UP:");
+      add("=====================  MELROADS  ====================");
+      add(`    REGISTRATION:        ${s(sw.rego)}`);
+      add(`    MODEL:               ${s(sw.model) || "NIL"}`);
+      add(`    COLOUR:              ${s(sw.colour) || "NIL"}`);
+      add(`    REGISTERED:          ${s(sw.registered) || "NIL"}`);
+      add(`    EXPIRES:             ${s(sw.regoExpires) || "NIL"}`);
+      add(`    STOLEN:              ${s(sw.stolen) || "NO"}`);
+      add(`    SUSPENDED:           ${s(sw.suspended) || "NO"}`);
+      add("");
+      add("---------------------  OWNER DETAILS ---------------------------");
+      add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
+      add("");
+    }
     
     if (!sectionExcluded("officers")) {
       add(`(${++dn}) Officers Involved:`);
@@ -6644,7 +6657,7 @@ function clearDebtTool() {
       }
       add("");
     }
-    
+
     if (!sectionExcluded("narrative")) {
       add("REPORT:");
       add("(1) Preliminary Details:");
@@ -6654,20 +6667,22 @@ function clearDebtTool() {
       add(narrative);
       add("");
     }
-    
-    add("VICROADS VEHICLE LOOK-UP:");
-    add("=====================  VICROADS  ====================");
-    add(`    REGISTRATION:        ${s(sw.rego) || "NIL"}`);
-    add(`    MODEL:               ${s(sw.model) || "NIL"}`);
-    add(`    COLOUR:              ${s(sw.colour) || "NIL"}`);
-    add(`    REGISTERED:          ${s(sw.registered) || "NIL"}`);
-    add(`    EXPIRES:             ${s(sw.regoExpires) || "NIL"}`);
-    add(`    STOLEN:              ${s(sw.stolen) || "NO"}`);
-    add(`    SUSPENDED:           ${s(sw.suspended) || "NO"}`);
-    add("");
-    add("---------------------  OWNER DETAILS ---------------------------");
-    add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
-    add("");
+
+    if (s(sw.rego)) {
+      add("MELROADS VEHICLE LOOK-UP:");
+      add("=====================  MELROADS  ====================");
+      add(`    REGISTRATION:        ${s(sw.rego)}`);
+      add(`    MODEL:               ${s(sw.model) || "NIL"}`);
+      add(`    COLOUR:              ${s(sw.colour) || "NIL"}`);
+      add(`    REGISTERED:          ${s(sw.registered) || "NIL"}`);
+      add(`    EXPIRES:             ${s(sw.regoExpires) || "NIL"}`);
+      add(`    STOLEN:              ${s(sw.stolen) || "NO"}`);
+      add(`    SUSPENDED:           ${s(sw.suspended) || "NO"}`);
+      add("");
+      add("---------------------  OWNER DETAILS ---------------------------");
+      add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
+      add("");
+    }
     
     if (!sectionExcluded("officers")) {
       add(`(${++dn}) Officers Involved:`);
