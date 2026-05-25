@@ -777,19 +777,19 @@
       <div class="report-badge" id="reportBadge">SHERIFF WARRANT FOR ARREST</div>
     </div>
     <div class="actions">
-      <button class="btn" id="copyBtn">Copy Preview <span class="kbd">Ctrl+Shift+C</span></button>
-      <button class="btn" id="saveDraftBtn">Save Draft <span class="kbd">Ctrl+S</span></button>
+      <button class="btn" id="copyBtn" title="Copy the formatted report to clipboard">Copy Preview <span class="kbd">Ctrl+Shift+C</span></button>
+      <button class="btn" id="saveDraftBtn" title="Save the current report as a draft to revisit later">Save Draft <span class="kbd">Ctrl+S</span></button>
       <button class="btn" id="presetsBtn" title="Save or load officer presets">⚙ Templates</button>
       <button class="btn" id="themeToggleBtn" title="Toggle dark/light mode">☀ Light</button>
-      <button class="btn danger" id="clearBtn">Clear All</button>
+      <button class="btn danger" id="clearBtn" title="Clear all report fields and start fresh">Clear All</button>
     </div>
   </header>
 
   <!-- Nav Bar -->
   <nav class="tool-nav" id="toolNav">
-    <button class="nav-active" data-tool-page="sherifflogs">Sheriff Logs</button>
-    <button data-tool-page="debt">Debt Tool</button>
-    <button data-tool-page="report">Report Tool</button>
+    <button class="nav-active" data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
+    <button data-tool-page="debt" title="Process LEAP financial records and calculate overdue debt">Debt Tool</button>
+    <button data-tool-page="report" title="Write formal Sheriff warrant and arrest paperwork">Report Tool</button>
   </nav>
 
   <!-- REPORT TOOL PAGE -->
@@ -835,7 +835,7 @@
             <label><div class="lbl">Unit</div><input id="enteredUnit" placeholder="General Duties Division"/></label>
           </div>
         </details>
-        <button class="now-btn" id="nowBtn" type="button" style="margin-top:10px">Use current date/time</button>
+        <button class="now-btn" id="nowBtn" type="button" style="margin-top:10px" title="Fill the date and time fields with the current date and time">Use current date/time</button>
       </div>
 
       <!-- Offender/Subject -->
@@ -904,7 +904,7 @@
         <input id="imgFile" type="file" accept="image/*" style="margin-top:10px"/>
         <div class="row" style="margin-top:10px">
           <input id="ocrStatus" readonly value="OCR idle" style="background:rgba(0,0,0,0.3)"/>
-          <button class="btn" id="clearOcrBtn">Clear</button>
+          <button class="btn" id="clearOcrBtn" title="Clear the pasted LEAP/MDT text and reset auto-filled fields">Clear</button>
         </div>
         <label style="display:flex; align-items:center; gap:10px; margin-top:10px; cursor:pointer">
           <input id="ocrWeaponsOnly" type="checkbox"/>
@@ -921,7 +921,7 @@
           <select id="chargeFilter" style="margin:0">
             <option value="all">All categories</option>
           </select>
-          <button class="btn" id="clearChargesBtn">Clear All</button>
+          <button class="btn" id="clearChargesBtn" title="Remove all charges from the list">Clear All</button>
         </div>
         <div id="selectedCharges" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; min-height:32px; padding:8px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid var(--border)"></div>
         <div id="chargeFineTotal" style="display:none; margin-bottom:10px; padding:8px 12px; background:rgba(108,138,255,0.1); border:1px solid rgba(108,138,255,0.25); border-radius:8px; font-size:12px; justify-content:space-between; align-items:center">
@@ -939,7 +939,7 @@
           <select id="pinFilter" style="margin:0">
             <option value="all">All categories</option>
           </select>
-          <button class="btn" id="clearPinsBtn">Clear All</button>
+          <button class="btn" id="clearPinsBtn" title="Remove all PINs from the list">Clear All</button>
         </div>
         <div id="selectedPins" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; min-height:32px; padding:8px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid var(--border)"></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.15); border:1px solid var(--border); border-radius:10px">
@@ -1120,7 +1120,7 @@ Date        P?    Amount        Offence
                 <span id="calculatedBail" style="font-size:24px; font-weight:900; color:var(--ok)">$0</span>
               </div>
               <div id="bailBreakdown" style="margin-top:12px; font-size:12px; color:var(--muted)"></div>
-              <button class="btn" id="useBailAmountBtn" style="margin-top:10px; background:rgba(0,200,100,0.2); border:1px solid rgba(0,200,100,0.4)">Use This Amount</button>
+              <button class="btn" id="useBailAmountBtn" style="margin-top:10px; background:rgba(0,200,100,0.2); border:1px solid rgba(0,200,100,0.4)" title="Apply the calculated bail amount to the form">Use This Amount</button>
             </div>
           </div>
           
@@ -1134,7 +1134,7 @@ Date        P?    Amount        Offence
 
       <!-- Field Contact -->
       <div class="card" id="fieldContactCard" style="display:none" data-section="fieldContact">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Field Contact Report</h2><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn" id="fcCopySubjectBtn" type="button" style="font-size:11px;padding:6px 10px">Copy Subject</button><button class="btn" id="fcCopyPrelimBtn" type="button" style="font-size:11px;padding:6px 10px">Copy Time/Location</button><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Field Contact Report</h2><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn" id="fcCopySubjectBtn" type="button" style="font-size:11px;padding:6px 10px" title="Copy the subject/offender details for use in this section">Copy Subject</button><button class="btn" id="fcCopyPrelimBtn" type="button" style="font-size:11px;padding:6px 10px" title="Copy the date/time and location for use in this section">Copy Time/Location</button><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div></div>
         <div class="fields">
           <div class="hint" style="margin-bottom:10px"><span>🔗</span><span>Use the buttons above to pull the current report subject or preliminary details without merging this into the main offender card.</span></div>
           <label><div class="lbl">Person Name</div><div class="ac-wrap" style="position:relative"><input id="fcName" autocomplete="off"/><div id="acFcName" class="ac-drop" style="display:none"></div></div></label>
@@ -1155,7 +1155,7 @@ Date        P?    Amount        Offence
 
       <!-- Search & Seizure -->
       <div class="card" id="searchSeizureCard" style="display:none" data-section="searchSeizure">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Search &amp; Seizure</h2><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn" id="ssCopySubjectBtn" type="button" style="font-size:11px;padding:6px 10px">Copy Subject</button><button class="btn" id="ssCopyPrelimBtn" type="button" style="font-size:11px;padding:6px 10px">Copy Time/Location</button><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Search &amp; Seizure</h2><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn" id="ssCopySubjectBtn" type="button" style="font-size:11px;padding:6px 10px" title="Copy the subject/offender details for use in this section">Copy Subject</button><button class="btn" id="ssCopyPrelimBtn" type="button" style="font-size:11px;padding:6px 10px" title="Copy the date/time and location for use in this section">Copy Time/Location</button><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div></div>
         <div class="fields">
           <div class="hint" style="margin-bottom:10px"><span>🔗</span><span>Use the buttons above to pull the current report subject or preliminary details without merging this into the main offender card.</span></div>
           <label><div class="lbl">Person Name</div><div class="ac-wrap" style="position:relative"><input id="ssName" autocomplete="off"/><div id="acSsName" class="ac-drop" style="display:none"></div></div></label>
@@ -1188,8 +1188,8 @@ Date        P?    Amount        Offence
           <div class="hint" style="margin-bottom:8px"><span>💡</span><span>Click any defect to add it to your report as a separate <strong>Vehicle Defects</strong> section. On <strong>Traffic Warrants</strong> it also fills Reason &amp; Legislation Notes.</span></div>
           <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:8px">
             <input id="defectSearch" placeholder="Search defects..." style="margin:0;font-size:12px;padding:8px 10px"/>
-            <button class="btn" id="defectClearLast" style="font-size:11px;padding:6px 10px">Undo Last</button>
-            <button class="btn danger" id="defectClearAll" style="font-size:11px;padding:6px 10px">Clear All</button>
+            <button class="btn" id="defectClearLast" style="font-size:11px;padding:6px 10px" title="Remove the most recently added defect">Undo Last</button>
+            <button class="btn danger" id="defectClearAll" style="font-size:11px;padding:6px 10px" title="Remove all defects from the list">Clear All</button>
           </div>
           <div id="defectsList" style="max-height:350px;overflow-y:auto;display:grid;gap:4px"></div>
           <div id="selectedDefectsChips" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>
@@ -1247,7 +1247,7 @@ Date        P?    Amount        Offence
           <input id="itemQtyInput" type="number" min="1" value="1" style="width:60px; margin:0; flex-shrink:0" placeholder="Qty"/>
           <input id="itemText" placeholder="Item name (auto-filled or type custom)" style="flex:1; min-width:150px; margin:0"/>
           <input id="itemSerialInput" placeholder="Serial # (if applicable)" style="width:160px; min-width:120px; margin:0; flex-shrink:0"/>
-          <button class="btn" id="addItemBtn" style="flex-shrink:0">Add</button>
+          <button class="btn" id="addItemBtn" style="flex-shrink:0" title="Add the typed item to the confiscated items list">Add</button>
         </div>
         <div class="hint" style="margin-bottom:8px"><span>💡</span><span>Click an item above to fill — set qty &amp; serial, then hit Add. Or type a custom item directly.</span></div>
 
@@ -1317,7 +1317,7 @@ Date        P?    Amount        Offence
             <input id="officerText" autocomplete="off" placeholder="Start typing callsign or name..."/>
             <div id="acOfficer" class="ac-drop" style="display:none"></div>
           </div>
-          <button class="btn" id="addOfficerBtn" style="margin-top:0">Add</button>
+          <button class="btn" id="addOfficerBtn" style="margin-top:0" title="Add the officer to the attending officers list">Add</button>
         </div>
         <div class="hint"><span>💡</span><span>Format: <strong>POR 431 SC Joseph O'Connelley</strong> or <strong>SHP 607 | Luigi Johnson-Cow</strong> — callsign auto-saved</span></div>
         <div id="officerTags" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; min-height:52px; padding:10px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid var(--border); position:relative; overflow:visible"></div>
@@ -1327,7 +1327,7 @@ Date        P?    Amount        Offence
             <span style="font-size:12px; font-weight:800; color:var(--muted)">Callsign Pool <span id="savedCallsignsCount" style="font-weight:400;font-size:11px"></span></span>
             <div style="display:flex; gap:6px">
               <input id="newCallsignInput" placeholder="e.g. MEL 228" style="width:120px; font-size:11px; padding:5px 8px"/>
-              <button class="btn" id="addCallsignBtn" style="font-size:11px; padding:5px 9px">Add</button>
+              <button class="btn" id="addCallsignBtn" style="font-size:11px; padding:5px 9px" title="Add the callsign to the saved callsigns list">Add</button>
             </div>
           </div>
           <div class="hint" style="margin-top:0;margin-bottom:8px"><span>💡</span><span>Click the callsign label on officer tags above to assign. Recent callsigns are remembered automatically, and pool entries can still be reused across reports, departments, and officers who carry more than one callsign.</span></div>
@@ -1432,7 +1432,7 @@ Date        P?    Amount        Offence
             <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px">
               <input type="number" id="evidenceQty" min="1" max="50000" value="1" style="width:80px; flex-shrink:0" placeholder="Qty"/>
               <input type="text" id="evidenceItem" style="flex:1; min-width:150px" placeholder="e.g. BWC on request, Mental image of pockets, Positive GSR, MDT profile, Plate reader"/>
-              <button class="btn" id="addEvidenceBtn" style="flex-shrink:0">Add Item</button>
+              <button class="btn" id="addEvidenceBtn" style="flex-shrink:0" title="Add the typed evidence item to the evidence list">Add Item</button>
             </div>
             <div id="evidenceList" style="display:grid; gap:6px; margin-bottom:10px; max-height:200px; overflow-y:auto"></div>
             <textarea id="evidence" rows="4" placeholder="Evidence items will appear here" style="background:rgba(0,0,0,0.3)" readonly></textarea>
@@ -1446,7 +1446,7 @@ Date        P?    Amount        Offence
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
           <h2 style="margin:0">Interview Questions</h2>
           <button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button>
-          <button class="btn" id="fillQuestionsBtn">Fill Default Questions</button>
+          <button class="btn" id="fillQuestionsBtn" title="Fill in the default interview questions template">Fill Default Questions</button>
                   </div>
         <div class="hint">
           <span>❓</span>
@@ -1479,8 +1479,8 @@ Date        P?    Amount        Offence
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
           <h2 style="margin:0">Signature</h2>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <button class="btn" id="saveSignatureProfileBtn" type="button" style="font-size:11px;padding:6px 10px">Save to Pool</button>
-            <button class="btn" id="manageSignaturePoolBtn" type="button" style="font-size:11px;padding:6px 10px">Manage Pool</button>
+            <button class="btn" id="saveSignatureProfileBtn" type="button" style="font-size:11px;padding:6px 10px" title="Save the current officer signature details to the pool for reuse">Save to Pool</button>
+            <button class="btn" id="manageSignaturePoolBtn" type="button" style="font-size:11px;padding:6px 10px" title="View and manage saved officer signature profiles">Manage Pool</button>
           </div>
         </div>
         <div class="hint" style="margin-bottom:10px"><span>✍️</span><span>This signature block has its own saved pool, separate from report officers. Save monthly rank and division updates here without changing the officer list.</span></div>
@@ -1526,8 +1526,8 @@ Date        P?    Amount        Offence
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
           <h2 style="margin:0">Diagnostics</h2>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" id="refreshDiagnosticsBtn" type="button" style="font-size:11px;padding:6px 10px">Refresh</button>
-            <button class="btn" id="copyDiagnosticsBtn" type="button" style="font-size:11px;padding:6px 10px">Copy</button>
+            <button class="btn" id="refreshDiagnosticsBtn" type="button" style="font-size:11px;padding:6px 10px" title="Re-run the report diagnostics check">Refresh</button>
+            <button class="btn" id="copyDiagnosticsBtn" type="button" style="font-size:11px;padding:6px 10px" title="Copy the diagnostics summary to clipboard">Copy</button>
           </div>
         </div>
         <div class="hint" style="margin-bottom:10px"><span>🧰</span><span>Quick build checks for active mode, dirty sections, OCR status, header completeness, and legacy code paths kept disabled in this Sheriff build.</span></div>
@@ -1543,9 +1543,9 @@ Date        P?    Amount        Offence
         <h2>Preview</h2>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
           <span id="charCount" style="font-size:11px;color:var(--muted);align-self:center"></span>
-          <button class="btn" id="validateBtn" style="font-size:11px;padding:6px 10px">Validate</button>
-          <button class="btn" id="exportReportTxtBtn" style="font-size:11px;padding:6px 10px">Export TXT</button>
-          <button class="btn" id="editPreviewBtn" style="font-size:11px;padding:6px 10px">✏ Edit</button>
+          <button class="btn" id="validateBtn" style="font-size:11px;padding:6px 10px" title="Check the report for missing or invalid fields before exporting">Validate</button>
+          <button class="btn" id="exportReportTxtBtn" style="font-size:11px;padding:6px 10px" title="Download the formatted report as a .txt file">Export TXT</button>
+          <button class="btn" id="editPreviewBtn" style="font-size:11px;padding:6px 10px" title="Switch the report preview to edit mode for direct text changes">✏ Edit</button>
         </div>
       </div>
       <div class="divider"></div>
@@ -1600,10 +1600,10 @@ Date        P?    Amount        Offence
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end">
-        <button class="btn" id="debtPullFromReportBtn" type="button">Pull Missing</button>
-        <button class="btn" id="debtRefreshFromReportBtn" type="button">Refresh From Report</button>
-        <button class="btn" id="debtOpenSheriffLogsBtn" type="button">Open Sheriff Logs</button>
-        <button class="btn" id="debtSwitchReportBtn" type="button" style="white-space:nowrap">Switch to Debt Warrant</button>
+        <button class="btn" id="debtPullFromReportBtn" type="button" title="Copy any missing debtor details from the linked report">Pull Missing</button>
+        <button class="btn" id="debtRefreshFromReportBtn" type="button" title="Overwrite debtor details with the latest data from the linked report">Refresh From Report</button>
+        <button class="btn" id="debtOpenSheriffLogsBtn" type="button" title="Switch to the Sheriff Logs tab">Open Sheriff Logs</button>
+        <button class="btn" id="debtSwitchReportBtn" type="button" style="white-space:nowrap" title="Switch the Report Tool to Sheriff Debt Enforcement Warrant type">Switch to Debt Warrant</button>
       </div>
     </div>
   </div>
@@ -1656,15 +1656,15 @@ Date        P?    Amount        Offence
     <div class="fields">
       <label><div class="lbl">Financial Records Input</div><textarea id="debtInput" rows="8" placeholder="09/01/2023 N $5000 CHARGE: Contempt of Court&#10;04/01/2023 N $3000 CHARGE: Engage in a Police Pursuit / Evade Police&#10;01/01/2023 N $12000 GOV INVOICE: Outstanding Government Debt"></textarea></label>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" id="debtProcessBtn" type="button">Process Debt</button>
-        <button class="btn" id="debtApplyBtn" type="button">Fill Debt Warrant Report</button>
-        <button class="btn" id="debtFillLogsBtn" type="button">Fill Sheriff Logs</button>
-        <button class="btn" id="debtApplySummaryBtn" type="button">Add Debt Note to Report</button>
-        <button class="btn" id="debtCopyPrimaryBtn" type="button">Copy Primary Command</button>
-        <button class="btn" id="debtCopyImpoundBtn" type="button">Copy Impound Request</button>
-        <button class="btn" id="debtCopyStopPackBtn" type="button">Copy Stop Pack</button>
-        <button class="btn" id="debtExportTxtBtn" type="button">Export TXT</button>
-        <button class="btn" id="debtClearBtn" type="button">Clear Debt Tool</button>
+        <button class="btn" id="debtProcessBtn" type="button" title="Parse the financial records, total unpaid government debt older than 14 days, and calculate the tier and recommended action">Process Debt</button>
+        <button class="btn" id="debtApplyBtn" type="button" title="Send processed debt data into the Sheriff Debt Warrant report fields">Fill Debt Warrant Report</button>
+        <button class="btn" id="debtFillLogsBtn" type="button" title="Send debtor details and debt data to the Sheriff Logs helper">Fill Sheriff Logs</button>
+        <button class="btn" id="debtApplySummaryBtn" type="button" title="Append a debt summary note to the Report Tool narrative">Add Debt Note to Report</button>
+        <button class="btn" id="debtCopyPrimaryBtn" type="button" title="Copy the main Sheriff bot command for this scenario to clipboard">Copy Primary Command</button>
+        <button class="btn" id="debtCopyImpoundBtn" type="button" title="Copy the vehicle impound request text to clipboard">Copy Impound Request</button>
+        <button class="btn" id="debtCopyStopPackBtn" type="button" title="Copy the full roadside stop package (debt summary + commands) to clipboard">Copy Stop Pack</button>
+        <button class="btn" id="debtExportTxtBtn" type="button" title="Download the debt tool summary as a .txt file">Export TXT</button>
+        <button class="btn" id="debtClearBtn" type="button" title="Clear all debt tool fields and start fresh">Clear Debt Tool</button>
       </div>
       <div id="debtToolSummary" style="display:none;padding:12px;background:rgba(108,138,255,0.08);border:1px solid rgba(108,138,255,0.2);border-radius:10px"></div>
       <div id="debtActionCards" style="display:none;margin-top:10px"></div>
@@ -1714,11 +1714,11 @@ Date        P?    Amount        Offence
       </div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <button class="btn debt-preset-btn" type="button" data-debt-preset="roadside_note">Roadside stop note</button>
-      <button class="btn debt-preset-btn" type="button" data-debt-preset="payment_made">Payment made on scene</button>
-      <button class="btn debt-preset-btn" type="button" data-debt-preset="payment_plan">Payment plan arranged</button>
-      <button class="btn debt-preset-btn" type="button" data-debt-preset="apply_court">Apply court recommended</button>
-      <button class="btn debt-preset-btn" type="button" data-debt-preset="vehicle_seized">Vehicle seized</button>
+      <button class="btn debt-preset-btn" type="button" data-debt-preset="roadside_note" title="Fill Outcome with a roadside stop summary note — good default for any traffic stop">Roadside stop note</button>
+      <button class="btn debt-preset-btn" type="button" data-debt-preset="payment_made" title="Fill Outcome noting the debtor paid on scene">Payment made on scene</button>
+      <button class="btn debt-preset-btn" type="button" data-debt-preset="payment_plan" title="Fill Details with a payment plan agreed note — use with !addplan ($10k–$60k tier)">Payment plan arranged</button>
+      <button class="btn debt-preset-btn" type="button" data-debt-preset="apply_court" title="Fill Details recommending court enforcement action — use with !applycourt ($60k+ tier)">Apply court recommended</button>
+      <button class="btn debt-preset-btn" type="button" data-debt-preset="vehicle_seized" title="Fill Outcome noting the debtor's vehicle was seized">Vehicle seized</button>
     </div>
     <div id="debtPresetPreview" style="min-height:62px;padding:10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:10px;font-size:12px;line-height:1.6;color:var(--muted)">No preset selected yet.</div>
   </div>
@@ -1773,9 +1773,9 @@ Date        P?    Amount        Offence
           <div style="font-size:13px;color:var(--text);line-height:1.5">Use one debtor profile here, then copy whichever command you need below.</div><div id="slLinkStatus" style="margin-top:8px;font-size:12px;color:var(--muted)">Waiting for linked debtor details.</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" id="slPullFromReportBtn" type="button">Pull Missing</button>
-          <button class="btn" id="slRefreshFromReportBtn" type="button">Refresh From Report</button>
-          <button class="btn" id="slClearBtn" type="button">Clear Sheriff Logs</button>
+          <button class="btn" id="slPullFromReportBtn" type="button" title="Copy any missing debtor details from the linked report">Pull Missing</button>
+          <button class="btn" id="slRefreshFromReportBtn" type="button" title="Overwrite debtor details with the latest data from the linked report">Refresh From Report</button>
+          <button class="btn" id="slClearBtn" type="button" title="Clear all Sheriff log fields and start fresh">Clear Sheriff Logs</button>
         </div>
       </div>
       <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— auto-fills name &amp; phone below</span></div><textarea id="slLeapPaste" rows="3" placeholder="Paste LEAP profile here to auto-fill debtor details"></textarea></label>
@@ -1794,7 +1794,7 @@ Date        P?    Amount        Offence
       </div>
       <label style="display:block;margin-bottom:10px"><div class="lbl">Handling Officer</div><input id="slHandlingOfficer" placeholder="Senior Sheriff Chris Gray"/></label>
       <label style="display:block;margin-bottom:10px"><div class="lbl">Details</div><textarea id="slDetails" rows="4" placeholder="Mr Brown will be paying 15000 a week for 2 weeks."></textarea></label>
-      <label style="display:block"><div class="lbl" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>Outcome / Result</span><button class="btn" id="slOutcomeNaBtn" type="button" style="padding:5px 9px;font-size:10px">Set N/A for !call</button></div><textarea id="slOutcome" rows="4" placeholder="Mr Brown came down to the station and paid all his fines off in one go"></textarea></label>
+      <label style="display:block"><div class="lbl" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>Outcome / Result</span><button class="btn" id="slOutcomeNaBtn" type="button" style="padding:5px 9px;font-size:10px" title="Set the Outcome field to N/A — use when logging a !call where the debtor did not answer">Set N/A for !call</button></div><textarea id="slOutcome" rows="4" placeholder="Mr Brown came down to the station and paid all his fines off in one go"></textarea></label>
     </div>
 
     <div id="slNameWarning" class="card" style="display:none;padding:12px;margin-bottom:14px;border-color:rgba(255,190,120,0.35);background:rgba(255,190,120,0.08)"></div>
@@ -1807,11 +1807,11 @@ Date        P?    Amount        Offence
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-        <button class="btn sl-preset-btn" type="button" data-sl-preset="roadside_note">Roadside stop note</button>
-        <button class="btn sl-preset-btn" type="button" data-sl-preset="payment_made">Payment made on scene</button>
-        <button class="btn sl-preset-btn" type="button" data-sl-preset="payment_plan">Payment plan arranged</button>
-        <button class="btn sl-preset-btn" type="button" data-sl-preset="apply_court">Apply court recommended</button>
-        <button class="btn sl-preset-btn" type="button" data-sl-preset="vehicle_seized">Vehicle seized</button>
+        <button class="btn sl-preset-btn" type="button" data-sl-preset="roadside_note" title="Fill Outcome with a roadside stop summary note — good default for any traffic stop">Roadside stop note</button>
+        <button class="btn sl-preset-btn" type="button" data-sl-preset="payment_made" title="Fill Outcome noting the debtor paid on scene">Payment made on scene</button>
+        <button class="btn sl-preset-btn" type="button" data-sl-preset="payment_plan" title="Fill Details with a payment plan agreed note — use with !addplan ($10k–$60k tier)">Payment plan arranged</button>
+        <button class="btn sl-preset-btn" type="button" data-sl-preset="apply_court" title="Fill Details recommending court enforcement action — use with !applycourt ($60k+ tier)">Apply court recommended</button>
+        <button class="btn sl-preset-btn" type="button" data-sl-preset="vehicle_seized" title="Fill Outcome noting the debtor's vehicle was seized">Vehicle seized</button>
       </div>
       <div id="slPresetPreview" style="min-height:62px;padding:10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:10px;font-size:12px;line-height:1.6;color:var(--muted)">No preset selected yet.</div>
     </div>
@@ -1823,8 +1823,8 @@ Date        P?    Amount        Offence
           <div style="font-size:13px;color:var(--text)">Built from the debtor details above.</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" id="slExportTxtBtn" type="button">Export TXT</button>
-          <button class="btn" id="slCopyAllBtn" type="button">Copy All Commands</button>
+          <button class="btn" id="slExportTxtBtn" type="button" title="Download all generated bot commands as a .txt file">Export TXT</button>
+          <button class="btn" id="slCopyAllBtn" type="button" title="Copy all 8 bot commands to clipboard at once">Copy All Commands</button>
         </div>
       </div>
       <div id="slCommandList" style="display:grid;gap:10px"></div>
@@ -1855,8 +1855,8 @@ Date        P?    Amount        Offence
       <div id="changeReviewSummary" style="font-size:12px;color:var(--muted);margin-bottom:12px"></div>
       <div id="changeReviewList" style="display:grid;gap:0"></div>
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-        <button class="btn" id="changeReviewCancelBtn" type="button">Cancel</button>
-        <button class="btn" id="changeReviewApplyBtn" type="button" style="background:rgba(100,200,120,0.18);border-color:rgba(100,200,120,0.4);color:rgba(180,255,200,0.95)">Apply Changes</button>
+        <button class="btn" id="changeReviewCancelBtn" type="button" title="Dismiss and keep the current form values">Cancel</button>
+        <button class="btn" id="changeReviewApplyBtn" type="button" style="background:rgba(100,200,120,0.18);border-color:rgba(100,200,120,0.4);color:rgba(180,255,200,0.95)" title="Apply the suggested changes to the form fields">Apply Changes</button>
       </div>
     </div>
   </div>
@@ -1899,9 +1899,9 @@ Date        P?    Amount        Offence
         </label>
       </div>
       <div class="pm-actions">
-        <button class="btn pm-delete" id="pmDeleteBtn" style="display:none">🗑 Delete</button>
-        <button class="btn" id="pmCancelBtn">Cancel</button>
-        <button class="btn pm-save" id="pmSaveBtn">💾 Save to Pool</button>
+        <button class="btn pm-delete" id="pmDeleteBtn" style="display:none" title="Delete this person from the shared people pool">🗑 Delete</button>
+        <button class="btn" id="pmCancelBtn" title="Close without saving">Cancel</button>
+        <button class="btn pm-save" id="pmSaveBtn" title="Save this person to the shared people pool for reuse across reports">💾 Save to Pool</button>
       </div>
     </div>
   </div>
@@ -1925,9 +1925,9 @@ Date        P?    Amount        Offence
         <div id="presetList" style="max-height:160px;overflow-y:auto;display:grid;gap:6px;margin-bottom:10px"></div>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
-        <button class="btn" id="presetSaveBtn" style="background:rgba(100,200,120,0.18);border-color:rgba(100,200,120,0.4);color:rgba(180,255,200,0.95)">💾 Save Template</button>
-        <button class="btn" id="presetApplyBtn" style="background:rgba(108,138,255,0.18);border-color:rgba(108,138,255,0.35);color:var(--accent)">✓ Apply to Form</button>
-        <button class="btn" id="presetCloseBtn">Close</button>
+        <button class="btn" id="presetSaveBtn" style="background:rgba(100,200,120,0.18);border-color:rgba(100,200,120,0.4);color:rgba(180,255,200,0.95)" title="Save the current officer details as a reusable template">💾 Save Template</button>
+        <button class="btn" id="presetApplyBtn" style="background:rgba(108,138,255,0.18);border-color:rgba(108,138,255,0.35);color:var(--accent)" title="Apply the selected template to fill the form fields">✓ Apply to Form</button>
+        <button class="btn" id="presetCloseBtn" title="Close the templates panel">Close</button>
       </div>
       <div id="storageQuota" class="storage-warn" style="margin-top:8px"></div>
     </div>
@@ -4784,8 +4784,8 @@ Date        P?    Amount        Offence
           '<div style="font-size:10px;color:var(--muted)">' + escapeHtml([p.callsign, p.sigName].filter(Boolean).join(' — ') || 'Empty') + '</div>' +
         '</div>' +
         '<div style="display:flex;gap:6px;flex-shrink:0">' +
-          '<button class="btn preset-list-btn" data-preset-action="load" data-preset-name="' + encodeURIComponent(name) + '" style="font-size:10px;padding:4px 8px">Load</button>' +
-          '<button class="btn preset-list-btn" data-preset-action="delete" data-preset-name="' + encodeURIComponent(name) + '" style="font-size:10px;padding:4px 8px;color:rgba(255,150,150,0.9)">Del</button>' +
+          '<button class="btn preset-list-btn" data-preset-action="load" data-preset-name="' + encodeURIComponent(name) + '" style="font-size:10px;padding:4px 8px" title="Load this template into the form fields">Load</button>' +
+          '<button class="btn preset-list-btn" data-preset-action="delete" data-preset-name="' + encodeURIComponent(name) + '" style="font-size:10px;padding:4px 8px;color:rgba(255,150,150,0.9)" title="Permanently delete this saved template">Del</button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -5452,7 +5452,7 @@ function renderSheriffOpsHelper() {
       el.debtImpoundHelper.innerHTML = `
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
           <strong>Impound / seizure request helper</strong>
-          <button class="btn" id="debtCopyImpoundInlineBtn" type="button" style="padding:6px 10px;font-size:10px">Copy Text</button>
+          <button class="btn" id="debtCopyImpoundInlineBtn" type="button" style="padding:6px 10px;font-size:10px" title="Copy the impound/seizure request text to clipboard">Copy Text</button>
         </div>
         <div style="font-size:12px;line-height:1.65">${escapeHtml(impoundText)}</div>`;
       const inlineBtn = document.getElementById("debtCopyImpoundInlineBtn");
@@ -5482,7 +5482,7 @@ function renderSheriffOpsHelper() {
           <div>4. If they answer, direct them to Sheriff's Office on Innocence Blvd before clearing debt.</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-          <button class="btn" id="debtCopyAttendanceBtn" type="button" style="padding:6px 10px;font-size:10px">Copy Attendance Note</button>
+          <button class="btn" id="debtCopyAttendanceBtn" type="button" style="padding:6px 10px;font-size:10px" title="Copy the station attendance note to clipboard">Copy Attendance Note</button>
         </div>`;
       const attendBtn = document.getElementById("debtCopyAttendanceBtn");
       if (attendBtn && !attendBtn.dataset.bound) {
@@ -9457,7 +9457,7 @@ Is there anything you would like to add at this time?`;
       _defectHistory.map((d, i) =>
         '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;background:rgba(255,100,100,0.1);border:1px solid rgba(255,100,100,0.25);border-radius:8px;font-size:11px;font-weight:700;color:rgba(255,180,180,0.9)">' +
         escapeHtml(d.name) +
-        '<button data-remove-defect="' + i + '" style="background:none;border:none;color:rgba(255,100,100,0.7);cursor:pointer;padding:0;margin:0;font-size:12px;font-family:inherit">✕</button></span>'
+        '<button data-remove-defect="' + i + '" style="background:none;border:none;color:rgba(255,100,100,0.7);cursor:pointer;padding:0;margin:0;font-size:12px;font-family:inherit" title="Remove this defect">✕</button></span>'
       ).join("");
   }
   // Delegated click for defect chip removal
@@ -9749,7 +9749,7 @@ Is there anything you would like to add at this time?`;
           <input type="number" class="ev-qty-edit" data-ev-qty="${idx}" value="${qty}" min="1" max="50000" title="Quantity"/>
           <span style="font-size:11px;color:var(--muted)">x</span>
           <span class="ev-text">${escapeHtml(text)}</span>
-          <button class="btn" data-remove-evidence="${idx}" style="padding:6px 10px; font-size:11px">Remove</button>
+          <button class="btn" data-remove-evidence="${idx}" style="padding:6px 10px; font-size:11px" title="Remove this evidence item">Remove</button>
         </div>`;
       }).join('');
       
@@ -10766,7 +10766,7 @@ Is there anything you would like to add at this time?`;
           <input type="number" class="ev-qty-edit" data-ev-qty="${idx}" value="${qty}" min="1" max="50000" title="Quantity"/>
           <span style="font-size:11px;color:var(--muted)">x</span>
           <span class="ev-text">${escapeHtml(text)}</span>
-          <button class="btn" data-remove-evidence="${idx}" style="padding:6px 10px; font-size:11px">Remove</button>
+          <button class="btn" data-remove-evidence="${idx}" style="padding:6px 10px; font-size:11px" title="Remove this evidence item">Remove</button>
         </div>`;
       }).join('');
     }
@@ -12533,9 +12533,9 @@ Is there anything you would like to add at this time?`;
           <div style="font-size:11px;color:var(--muted);margin-top:2px">${escapeHtml([p.rank, p.division].filter(Boolean).join(" | ") || "No rank/division saved")}</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
-          <button class="btn" type="button" data-apply-signature="${escapeHtml(p.name)}" style="font-size:11px;padding:5px 9px">Apply</button>
-          <button class="btn" type="button" data-edit-signature="${escapeHtml(p.name)}" style="font-size:11px;padding:5px 9px">Edit</button>
-          <button class="btn danger" type="button" data-delete-signature="${escapeHtml(p.name)}" style="font-size:11px;padding:5px 9px">Delete</button>
+          <button class="btn" type="button" data-apply-signature="${escapeHtml(p.name)}" style="font-size:11px;padding:5px 9px" title="Apply this officer signature profile to the current report">Apply</button>
+          <button class="btn" type="button" data-edit-signature="${escapeHtml(p.name)}" style="font-size:11px;padding:5px 9px" title="Edit this saved officer signature profile">Edit</button>
+          <button class="btn danger" type="button" data-delete-signature="${escapeHtml(p.name)}" style="font-size:11px;padding:5px 9px" title="Permanently delete this officer signature profile">Delete</button>
         </div>
       </div>
     `).join("");
@@ -13357,7 +13357,7 @@ function renderSheriffLogsTool() {
             <div style="font-size:13px;font-weight:900">${escapeHtml(item.title)}</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">${escapeHtml(item.note)}</div>
           </div>
-          <button class="btn sl-copy-btn" type="button" data-idx="${idx}" style="padding:8px 12px;font-size:11px">Copy</button>
+          <button class="btn sl-copy-btn" type="button" data-idx="${idx}" style="padding:8px 12px;font-size:11px" title="Copy this command to clipboard">Copy</button>
         </div>
         <textarea readonly rows="2" style="font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.45">${escapeHtml(item.command)}</textarea>
       </div>
@@ -13746,8 +13746,8 @@ function updateDebtTabModeHint() {
         <span class="vic-badge ${item.mandatory ? 'vic-badge-mandatory' : 'vic-badge-advisory'}"></span>
         <span class="vic-num">${String(idx+1).padStart(2,'0')}</span>
         <span class="vic-label">${escapeHtml(item.label)}</span>
-        <button id="vicpass_${item.id}" class="vic-btn" data-vic-item="${item.id}" data-vic-state="pass" type="button">✓ PASS</button>
-        <button id="vicfail_${item.id}" class="vic-btn" data-vic-item="${item.id}" data-vic-state="fail" type="button">✗ FAIL</button>`;
+        <button id="vicpass_${item.id}" class="vic-btn" data-vic-item="${item.id}" data-vic-state="pass" type="button" title="Mark this item as passed the inspection">✓ PASS</button>
+        <button id="vicfail_${item.id}" class="vic-btn" data-vic-item="${item.id}" data-vic-state="fail" type="button" title="Mark this item as failed the inspection">✗ FAIL</button>`;
       container.appendChild(row);
       if (vicState[item.id] === 'pass' || vicState[item.id] === 'fail') {
         queueMicrotask(() => window.vicSetItem(item.id, vicState[item.id], { skipAutosave: true }));
