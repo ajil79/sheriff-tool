@@ -1043,21 +1043,25 @@
           <div id="swIdStatusWarn" style="display:none;padding:10px;border-radius:10px;border:1px solid rgba(255,200,100,0.25);background:rgba(255,200,100,0.08);font-size:12px;line-height:1.6;color:var(--warn)">ID confirmed warrants are only for when the person actually showed ID. Add the confirmation basis or this will stay ID unconfirmed.</div>
           <label><div class="lbl">MDT/LEAP Paste (auto-fill)</div><textarea id="swPaste" rows="3" placeholder="Paste profile here"></textarea></label>
           <div class="divider"></div>
-          <h2 style="margin:0 0 8px">Vehicle Info (MELROADS)</h2>
-          <div class="grid2">
-            <label><div class="lbl">Rego</div><input id="swRego"/></label>
-            <label><div class="lbl">Model</div><input id="swModel"/></label>
+          <label><div class="lbl">Interaction Type</div><select id="swInteractionType"><option value="vehicle">Vehicle Stop</option><option value="foot">On Foot / No Vehicle</option></select></label>
+          <div id="swVehicleSection">
+            <div class="divider"></div>
+            <h2 style="margin:0 0 8px">Vehicle Info (MELROADS)</h2>
+            <div class="grid2">
+              <label><div class="lbl">Rego</div><input id="swRego"/></label>
+              <label><div class="lbl">Model</div><input id="swModel"/></label>
+            </div>
+            <div class="grid3">
+              <label><div class="lbl">Colour</div><input id="swColour"/></label>
+              <label><div class="lbl">Registered</div><select id="swRegistered"><option value="">-</option><option value="YES">YES</option><option value="NO">NO</option></select></label>
+              <label><div class="lbl">Expires</div><input id="swRegoExpires"/></label>
+            </div>
+            <div class="grid2">
+              <label><div class="lbl">Stolen</div><select id="swStolen"><option value="">-</option><option value="NO">NO</option><option value="YES">YES</option></select></label>
+              <label><div class="lbl">Suspended</div><select id="swSuspended"><option value="">-</option><option value="NO">NO</option><option value="YES">YES</option></select></label>
+            </div>
+            <label><div class="lbl">Registered Owner</div><input id="swOwner"/></label>
           </div>
-          <div class="grid3">
-            <label><div class="lbl">Colour</div><input id="swColour"/></label>
-            <label><div class="lbl">Registered</div><select id="swRegistered"><option value="">-</option><option value="YES">YES</option><option value="NO">NO</option></select></label>
-            <label><div class="lbl">Expires</div><input id="swRegoExpires"/></label>
-          </div>
-          <div class="grid2">
-            <label><div class="lbl">Stolen</div><select id="swStolen"><option value="">-</option><option value="NO">NO</option><option value="YES">YES</option></select></label>
-            <label><div class="lbl">Suspended</div><select id="swSuspended"><option value="">-</option><option value="NO">NO</option><option value="YES">YES</option></select></label>
-          </div>
-          <label><div class="lbl">Registered Owner</div><input id="swOwner"/></label>
           <div id="sheriffDebtFields" style="display:none">
             <div class="divider"></div>
             <h2 style="margin:0 0 8px">Debt Enforcement Details</h2>
@@ -1589,6 +1593,7 @@ Date        P?    Amount        Offence
         <div class="lbl">Use Case</div>
         <select id="debtUseCase">
           <option value="roadside">Roadside Stop</option>
+          <option value="foot">On Foot Interaction</option>
           <option value="report">Report / Follow Up</option>
           <option value="warrant">Warrant / Enforcement</option>
         </select>
@@ -4254,7 +4259,7 @@ Date        P?    Amount        Offence
       hints: [
         "Outstanding debt amount and type (government fines, charges, licences)",
         "Was the traffic stop initiated by ANPR flag or manual LEAP check?",
-        "Vehicle details — rego, make, model, colour from VICROADS",
+        "Vehicle details — rego, make, model, colour from MELROADS",
         "Did the individual flee the scene? Note direction and circumstances",
         "Was the individual given opportunity to pay or arrange a plan?",
         "Debt threshold — under $10k (immediate), $10k-60k (3 weeks), $60k-100k (4 weeks), over $100k (no plan)",
@@ -4305,8 +4310,17 @@ Date        P?    Amount        Offence
         "How was the individual identified? (ID shown, LEAP/MDT, ANPR)",
         "Was the Sheriff custody caution read to the individual?",
         "Did the individual comply or refuse? What actions were taken?",
-        "VICROADS vehicle details if applicable (rego, make, colour, owner)",
+        ...(state.sheriffWarrant?.interactionType !== "foot" ? ["MELROADS vehicle details if applicable (rego, make, colour, owner)"] : []),
         "Was backup requested? Outcome?"
+      );
+    }
+
+    if (type === "field_contact" && matchedHints.length === 0) {
+      matchedHints.push(
+        "Document reason for the approach (outstanding debt, suspicious behaviour, call for service)",
+        "Was the person cooperative or resistant?",
+        "What information was gathered or verified? (ID, phone, debt acknowledgement)",
+        "Were any actions taken? (payment arranged, warning issued, further steps)"
       );
     }
 
@@ -4460,7 +4474,7 @@ Date        P?    Amount        Offence
     },
     sheriffWarrant: {
       idStatus: "UNCONFIRMED", idBasis: "", warrantName: "", time: "", date: "", location: "",
-      details: "", paste: "", rego: "", model: "", colour: "", registered: "",
+      details: "", paste: "", interactionType: "vehicle", rego: "", model: "", colour: "", registered: "",
       regoExpires: "", stolen: "NO", suspended: "NO", owner: "", instruction: "", debtDeadline: "", approvedBy: "", impoundTime: "", impoundPrice: "", debtNarrative: "",
       sigRank: "Senior Sheriff", sigName: ""
     },
@@ -4958,6 +4972,8 @@ Date        P?    Amount        Offence
     swIdStatusWarn: document.getElementById("swIdStatusWarn"),
     swWarrantName: document.getElementById("swWarrantName"),
     swPaste: document.getElementById("swPaste"),
+    swInteractionType: document.getElementById("swInteractionType"),
+    swVehicleSection: document.getElementById("swVehicleSection"),
     swRego: document.getElementById("swRego"),
     swModel: document.getElementById("swModel"),
     swColour: document.getElementById("swColour"),
@@ -5184,7 +5200,10 @@ Date        P?    Amount        Offence
   }
 
 function getDebtUseCaseLabel(useCase) {
-  return useCase === "roadside" ? "Roadside Stop" : useCase === "warrant" ? "Warrant / Enforcement" : "Report / Follow Up";
+  if (useCase === "roadside") return "Roadside Stop";
+  if (useCase === "foot") return "On Foot Interaction";
+  if (useCase === "warrant") return "Warrant / Enforcement";
+  return "Report / Follow Up";
 }
 
 function getDebtToolName() {
@@ -5223,6 +5242,12 @@ function getDebtRecommendedAction(total, useCase) {
     if (total > 60000) return "Escalate for Sheriff debt enforcement. Court or seizure action is likely appropriate.";
     if (total >= 10000) return "Roadside follow-up or a payment plan may be appropriate, depending on compliance.";
     return "Request immediate payment. If unpaid, consider further Sheriff action and reporting.";
+  }
+  if (useCase === "foot") {
+    if (total >= 100000) return "Debt is critical. Detain for Sheriff review — consider arrest or further enforcement action.";
+    if (total > 60000) return "Significant debt. Request immediate payment and escalate to warrant or court action if refused.";
+    if (total >= 10000) return "Request immediate payment or payment plan. Follow up with a report if unresolved.";
+    return "Request immediate payment. Document the interaction and follow up if unpaid.";
   }
   if (useCase === "warrant") {
     if (total >= 100000) return "No payment plan should be offered. Proceed toward seizure, sale, or detention pathways.";
@@ -5310,6 +5335,9 @@ function buildDebtContextNote() {
   if (useCase === "roadside") {
     return `Roadside stop conducted with ${who} at ${location}. ID status: ${idStatus}. Overdue government debt located totalling ${totalText}. Vehicle linked: ${vehicle.model} ${vehicle.rego}. Recommended action: ${action}`;
   }
+  if (useCase === "foot") {
+    return `On foot interaction conducted with ${who} at ${location}. ID status: ${idStatus}. Overdue government debt located totalling ${totalText}. Recommended action: ${action}`;
+  }
   if (useCase === "warrant") {
     return `Debt enforcement review completed for ${who}. Overdue government debt of ${totalText} was identified. Vehicle linked: ${vehicle.model} ${vehicle.rego}. Recommended action: ${action}`;
   }
@@ -5324,7 +5352,8 @@ function buildDebtNotebookLine() {
   const totalText = `$${Number(dt.total || 0).toLocaleString()}`;
   const location = norm(dt.stopLocation) || "NIL";
   const idStatus = norm(dt.idConfirmed) || "UNCONFIRMED";
-  return `${getDebtUseCaseLabel(dt.useCase || "roadside")}: ${who}, phone ${phone}, ID ${idStatus}, debt ${totalText}, vehicle ${vehicle.rego} ${vehicle.model}, location ${location}.`;
+  const vehiclePart = (dt.useCase === "foot" || dt.useCase === "report") ? "" : `, vehicle ${vehicle.rego} ${vehicle.model}`;
+  return `${getDebtUseCaseLabel(dt.useCase || "roadside")}: ${who}, phone ${phone}, ID ${idStatus}, debt ${totalText}${vehiclePart}, location ${location}.`;
 }
 
 
@@ -5423,9 +5452,11 @@ function renderSheriffOpsHelper() {
   if (el.debtRoadsideNotice) {
     const notice = dt.useCase === "roadside"
       ? "Roadside mode: Sheriffs are not Police. Do not pursue. If they fail to stop, contact VICPOL, register the debt, then follow up by phone or warrant."
-      : dt.useCase === "warrant"
-        ? "Warrant mode: Use the debt result to prepare a Sheriff debt warrant or court escalation."
-        : "Report / follow-up mode: document the debt, call the debtor, and have them attend Sheriff's Office before clearing debt.";
+      : dt.useCase === "foot"
+        ? "On foot mode: no vehicle involved. Use !interact for logs. Request ID, document the debt, and request payment or arrange a follow-up."
+        : dt.useCase === "warrant"
+          ? "Warrant mode: Use the debt result to prepare a Sheriff debt warrant or court escalation."
+          : "Report / follow-up mode: document the debt, call the debtor, and have them attend Sheriff's Office before clearing debt.";
     el.debtRoadsideNotice.textContent = notice;
   }
   if (el.debtActionCards) {
@@ -5597,9 +5628,10 @@ function getPrimaryCommandKeyFromDebtTool() {
   if (preset === "payment_plan") return "addplan";
   if (preset === "apply_court") return "applycourt";
   if (preset === "vehicle_seized") return state.debtTool?.useCase === "roadside" ? "tstop" : "applycourt";
-  if (preset === "roadside_note") return "tstop";
+  if (preset === "roadside_note") return state.debtTool?.useCase === "foot" ? "interact" : "tstop";
   if (state.debtTool?.useCase === "warrant") return "applycourt";
   if (state.debtTool?.useCase === "report") return "interact";
+  if (state.debtTool?.useCase === "foot") return "interact";
   return "tstop";
 }
 
@@ -5607,7 +5639,7 @@ function getDebtToolSheriffLogsSeed(applySuggestedText = true) {
   const split = splitFullNameForSheriffLogs(getDebtToolName());
   const dt = state.debtTool || {};
   const sl = getSheriffLogsState();
-  const payload = buildDebtPresetPayload(dt.lastPreset || (dt.useCase === "roadside" ? "roadside_note" : dt.useCase === "warrant" ? "apply_court" : "roadside_note"));
+  const payload = buildDebtPresetPayload(dt.lastPreset || (dt.useCase === "warrant" ? "apply_court" : "roadside_note"));
   const vehicleText = normalizeSheriffLogText([getDebtToolVehicle().model, getDebtToolVehicle().rego].filter(v => v && v !== 'NIL').join(' '));
   const seed = {
     firstName: split.firstName || sl.firstName,
@@ -6544,7 +6576,7 @@ function clearDebtTool() {
       }
       add("");
     }
-    
+
     if (!sectionExcluded("narrative")) {
       add("REPORT:");
       add("(1) Preliminary Details:");
@@ -6554,20 +6586,22 @@ function clearDebtTool() {
       add(narrative);
       add("");
     }
-    
-    add("VICROADS VEHICLE LOOK-UP:");
-    add("=====================  VICROADS  ====================");
-    add(`    REGISTRATION:        ${s(sw.rego) || "NIL"}`);
-    add(`    MODEL:               ${s(sw.model) || "NIL"}`);
-    add(`    COLOUR:              ${s(sw.colour) || "NIL"}`);
-    add(`    REGISTERED:          ${s(sw.registered) || "NIL"}`);
-    add(`    EXPIRES:             ${s(sw.regoExpires) || "NIL"}`);
-    add(`    STOLEN:              ${s(sw.stolen) || "NO"}`);
-    add(`    SUSPENDED:           ${s(sw.suspended) || "NO"}`);
-    add("");
-    add("---------------------  OWNER DETAILS ---------------------------");
-    add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
-    add("");
+
+    if (s(sw.rego)) {
+      add("MELROADS VEHICLE LOOK-UP:");
+      add("=====================  MELROADS  ====================");
+      add(`    REGISTRATION:        ${s(sw.rego)}`);
+      add(`    MODEL:               ${s(sw.model) || "NIL"}`);
+      add(`    COLOUR:              ${s(sw.colour) || "NIL"}`);
+      add(`    REGISTERED:          ${s(sw.registered) || "NIL"}`);
+      add(`    EXPIRES:             ${s(sw.regoExpires) || "NIL"}`);
+      add(`    STOLEN:              ${s(sw.stolen) || "NO"}`);
+      add(`    SUSPENDED:           ${s(sw.suspended) || "NO"}`);
+      add("");
+      add("---------------------  OWNER DETAILS ---------------------------");
+      add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
+      add("");
+    }
     
     if (!sectionExcluded("officers")) {
       add(`(${++dn}) Officers Involved:`);
@@ -6644,7 +6678,7 @@ function clearDebtTool() {
       }
       add("");
     }
-    
+
     if (!sectionExcluded("narrative")) {
       add("REPORT:");
       add("(1) Preliminary Details:");
@@ -6654,20 +6688,22 @@ function clearDebtTool() {
       add(narrative);
       add("");
     }
-    
-    add("VICROADS VEHICLE LOOK-UP:");
-    add("=====================  VICROADS  ====================");
-    add(`    REGISTRATION:        ${s(sw.rego) || "NIL"}`);
-    add(`    MODEL:               ${s(sw.model) || "NIL"}`);
-    add(`    COLOUR:              ${s(sw.colour) || "NIL"}`);
-    add(`    REGISTERED:          ${s(sw.registered) || "NIL"}`);
-    add(`    EXPIRES:             ${s(sw.regoExpires) || "NIL"}`);
-    add(`    STOLEN:              ${s(sw.stolen) || "NO"}`);
-    add(`    SUSPENDED:           ${s(sw.suspended) || "NO"}`);
-    add("");
-    add("---------------------  OWNER DETAILS ---------------------------");
-    add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
-    add("");
+
+    if (s(sw.rego)) {
+      add("MELROADS VEHICLE LOOK-UP:");
+      add("=====================  MELROADS  ====================");
+      add(`    REGISTRATION:        ${s(sw.rego)}`);
+      add(`    MODEL:               ${s(sw.model) || "NIL"}`);
+      add(`    COLOUR:              ${s(sw.colour) || "NIL"}`);
+      add(`    REGISTERED:          ${s(sw.registered) || "NIL"}`);
+      add(`    EXPIRES:             ${s(sw.regoExpires) || "NIL"}`);
+      add(`    STOLEN:              ${s(sw.stolen) || "NO"}`);
+      add(`    SUSPENDED:           ${s(sw.suspended) || "NO"}`);
+      add("");
+      add("---------------------  OWNER DETAILS ---------------------------");
+      add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
+      add("");
+    }
     
     if (!sectionExcluded("officers")) {
       add(`(${++dn}) Officers Involved:`);
@@ -9498,7 +9534,7 @@ Is there anything you would like to add at this time?`;
     // Sheriff Warrant fields
     const swFields = [
       'swIdStatus', 'swIdBasis', 'swWarrantName',
-      'swPaste', 'swRego', 'swModel', 'swColour', 'swRegistered', 'swRegoExpires',
+      'swPaste', 'swInteractionType', 'swRego', 'swModel', 'swColour', 'swRegistered', 'swRegoExpires',
       'swStolen', 'swSuspended', 'swOwner', 'swDebtDeadline', 'swApprovedBy', 'swImpoundTime', 'swImpoundPrice', 'swDebtNarrative', 'swInstruction'
     ];
     swFields.forEach(field => {
@@ -9507,6 +9543,7 @@ Is there anything you would like to add at this time?`;
           const key = field.substring(2);
           const lowerKey = key.charAt(0).toLowerCase() + key.slice(1);
           state.sheriffWarrant[lowerKey] = el[field].value;
+          if (field === "swInteractionType") applySwVehicleVisibility();
           if (field==="swPaste"&&el[field].value.trim()){const sp=parseOCR(el[field].value);const mg={name:sp.offender.name||state.offender.name,dob:sp.offender.dob||state.offender.dob,sex:sp.offender.sex||state.offender.sex,address:sp.offender.address||state.offender.address,phone:sp.offender.phone||state.offender.phone};if(sp.offender.name||sp.offender.dob){fillOffenderFields(mg);if(mg.name)upsertPerson(mg);}if(sp.license){state.currentDemeritPoints=sp.license.demeritPoints||0;state.licenseStatus=sp.license.licenseStatus||"";state.licenseClass=sp.license.licenseClass||"";const _di=document.getElementById("currentDemeritPoints");if(_di)_di.value=state.currentDemeritPoints;updateLicenseWarning();}if(sp.vehicle){const v=sp.vehicle,sw=state.sheriffWarrant;if(v.rego&&!sw.rego){sw.rego=v.rego;if(el.swRego)el.swRego.value=v.rego;}if(v.model&&!sw.model){sw.model=v.model;if(el.swModel)el.swModel.value=v.model;}if(v.colour&&!sw.colour){sw.colour=v.colour;if(el.swColour)el.swColour.value=v.colour;}if(v.registered&&!sw.registered){sw.registered=v.registered;if(el.swRegistered)el.swRegistered.value=v.registered;}if(v.expires&&!sw.regoExpires){sw.regoExpires=v.expires;if(el.swRegoExpires)el.swRegoExpires.value=v.expires;}if(v.stolen){sw.stolen=v.stolen;if(el.swStolen)el.swStolen.value=v.stolen;}if(v.suspended){sw.suspended=v.suspended;if(el.swSuspended)el.swSuspended.value=v.suspended;}if(v.owner&&!sw.owner){sw.owner=v.owner;if(el.swOwner)el.swOwner.value=v.owner;}}toast("MDT paste auto-filled fields", "ok");}
           if (field === "swIdStatus" || field === "swIdBasis") enforceSheriffIdStatus(field === "swIdStatus");
           debouncedRenderPreview();
@@ -9516,6 +9553,11 @@ Is there anything you would like to add at this time?`;
         el[field].addEventListener("change", updateFn);
       }
     });
+
+    function applySwVehicleVisibility() {
+      const onFoot = state.sheriffWarrant.interactionType === "foot";
+      if (el.swVehicleSection) el.swVehicleSection.style.display = onFoot ? "none" : "block";
+    }
 
     if (el.debtInput) {
       el.debtInput.addEventListener("input", () => {
@@ -10672,6 +10714,8 @@ Is there anything you would like to add at this time?`;
       if (el.swIdStatus) el.swIdStatus.value = sw.idStatus || "UNCONFIRMED";
       if (el.swWarrantName) el.swWarrantName.value = sw.warrantName || "";
       if (el.swPaste) el.swPaste.value = sw.paste || "";
+      if (el.swInteractionType) el.swInteractionType.value = sw.interactionType || "vehicle";
+      if (el.swVehicleSection) el.swVehicleSection.style.display = (sw.interactionType === "foot") ? "none" : "block";
       if (el.swRego) el.swRego.value = sw.rego || "";
       if (el.swModel) el.swModel.value = sw.model || "";
       if (el.swColour) el.swColour.value = sw.colour || "";
@@ -13657,6 +13701,9 @@ function updateDebtTabModeHint() {
   }
   if (useCase === 'roadside') {
     hint.innerHTML += ` <span style="color:var(--warn)">Sheriffs do not pursue. If they fail to stop, contact VICPOL, register the debt, then follow up by phone or warrant.</span>`;
+  }
+  if (useCase === 'foot') {
+    hint.innerHTML += ` <span style="color:var(--warn)">On foot mode: no vehicle stop. Use !interact for logs. Request ID, document the debt, and request payment or arrange a follow-up.</span>`;
   }
   if (switchBtn) switchBtn.style.display = usingDebtWarrant ? 'none' : '';
 }
