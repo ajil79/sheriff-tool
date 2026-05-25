@@ -5530,7 +5530,8 @@ function buildSheriffSharedPresetPayload(presetKey, ctx) {
   const deadline = ctx.deadline || 'the required deadline';
   const location = ctx.location || 'NIL';
   const action = ctx.action || 'Further Sheriff action required.';
-  const handlingOfficer = ctx.handlingOfficer || 'Sheriffs';
+  const handlingOfficer = ctx.handlingOfficer || '';
+  const officerLine = handlingOfficer ? ` Handling officer: ${handlingOfficer}.` : '';
 
   switch (presetKey) {
     case 'payment_made':
@@ -5538,28 +5539,28 @@ function buildSheriffSharedPresetPayload(presetKey, ctx) {
         key: presetKey,
         target: 'outcome',
         label: 'Outcome',
-        text: `${who} attended and paid ${amountText} toward the outstanding debt. Debt was addressed at ${location}. Handling officer: ${handlingOfficer}.`
+        text: `${who} attended and paid ${amountText} toward the outstanding debt. Debt was addressed at ${location}.${officerLine}`
       };
     case 'payment_plan':
       return {
         key: presetKey,
         target: 'details',
         label: 'Details',
-        text: `${who} agreed to a payment plan for ${amountText}. The debtor was advised to keep to the plan and clear the balance by ${deadline}. Handling officer: ${handlingOfficer}.`
+        text: `${who} agreed to a payment plan for ${amountText}. The debtor was advised to keep to the plan and clear the balance by ${deadline}.${officerLine}`
       };
     case 'apply_court':
       return {
         key: presetKey,
         target: 'details',
         label: 'Details',
-        text: `${who} has failed to clear ${amountText} in overdue government debt. Sheriff review recommends applying court action to seize or liquidate assets if payment is not made. Handling officer: ${handlingOfficer}.`
+        text: `${who} has failed to clear ${amountText} in overdue government debt. Sheriff review recommends applying court action to seize or liquidate assets if payment is not made.${officerLine}`
       };
     case 'vehicle_seized':
       return {
         key: presetKey,
         target: 'outcome',
         label: 'Outcome',
-        text: `${who}'s vehicle ${vehicle} was seized in relation to overdue government debt totalling ${amountText}. Handling officer: ${handlingOfficer}.`
+        text: `${who}'s vehicle ${vehicle} was seized in relation to overdue government debt totalling ${amountText}.${officerLine}`
       };
     case 'roadside_note':
     default:
@@ -5567,7 +5568,7 @@ function buildSheriffSharedPresetPayload(presetKey, ctx) {
         key: 'roadside_note',
         target: 'outcome',
         label: 'Outcome',
-        text: `Conducted a roadside interaction with ${who} at ${location}. Phone recorded as ${phone}. Overdue government debt of ${amountText} was identified. ${action} Handling officer: ${handlingOfficer}.`
+        text: `Conducted a roadside interaction with ${who} at ${location}. Phone recorded as ${phone}. Overdue government debt of ${amountText} was identified. ${action}${officerLine}`
       };
   }
 }
@@ -5578,7 +5579,7 @@ function buildDebtPresetPayload(presetKey) {
   return buildSheriffSharedPresetPayload(presetKey, {
     fullName: getDebtToolName(),
     phone: getDebtToolPhone() || 'NIL',
-    vehicle: normalizeSheriffLogText([getDebtToolVehicle().model, getDebtToolVehicle().rego].filter(Boolean).join(' ')) || 'their vehicle',
+    vehicle: normalizeSheriffLogText([getDebtToolVehicle().model, getDebtToolVehicle().rego].filter(v => v && v !== 'NIL').join(' ')) || 'their vehicle',
     amountText: totalValue > 0 ? `$${totalValue.toLocaleString()}` : 'outstanding government debt',
     deadline: norm(dt.suggestedDeadline) || 'the required deadline',
     location: norm(dt.stopLocation) || 'NIL',
@@ -5604,7 +5605,7 @@ function getDebtToolSheriffLogsSeed(applySuggestedText = true) {
   const dt = state.debtTool || {};
   const sl = getSheriffLogsState();
   const payload = buildDebtPresetPayload(dt.lastPreset || (dt.useCase === "roadside" ? "roadside_note" : dt.useCase === "warrant" ? "apply_court" : "roadside_note"));
-  const vehicleText = normalizeSheriffLogText([getDebtToolVehicle().model, getDebtToolVehicle().rego].filter(Boolean).join(' '));
+  const vehicleText = normalizeSheriffLogText([getDebtToolVehicle().model, getDebtToolVehicle().rego].filter(v => v && v !== 'NIL').join(' '));
   const seed = {
     firstName: split.firstName || sl.firstName,
     lastName: split.lastName || sl.lastName,
@@ -5616,7 +5617,7 @@ function getDebtToolSheriffLogsSeed(applySuggestedText = true) {
     details: sl.details,
     outcome: sl.outcome
   };
-  if (applySuggestedText && payload.target && payload.text) {
+  if (applySuggestedText && payload.target && payload.text && getDebtToolName() !== 'UNKNOWN') {
     if (payload.target === "details" && !seed.details) seed.details = payload.text;
     if (payload.target === "outcome" && !seed.outcome) seed.outcome = payload.text;
   }
