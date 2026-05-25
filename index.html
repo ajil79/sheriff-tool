@@ -807,8 +807,8 @@
           <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
             <ol style="margin:4px 0 0 20px;padding:0">
               <li><strong>Select report type</strong> — Sheriff Warrant for Arrest, for Questioning, or Debt Enforcement Warrant.</li>
-              <li><strong>For debt warrants use the Debt Tool first</strong> — click <strong>Fill Debt Warrant Report</strong> in the Debt Tool to auto-populate warrant fields here.</li>
-              <li><strong>Fill Offender / Subject Details</strong> — name, DOB, sex, address and phone. Paste a LEAP or MDT profile to auto-fill.</li>
+              <li><strong>For debt enforcement warrants</strong> — process the debt in the Debt Tool first, then click <strong>Fill Debt Warrant Report</strong> to push all data here automatically.</li>
+              <li><strong>For arrest / questioning warrants</strong> — paste a LEAP or MDT profile to auto-fill subject details, or type manually.</li>
               <li><strong>Fill the Report Narrative</strong> — describe events in court-ready language.</li>
               <li><strong>Add charges if applicable</strong> — use the Charges card. Sentence is auto-calculated.</li>
               <li><strong>Click Copy Preview</strong> (top-right) or press <strong>Ctrl+Shift+C</strong> — the formatted report is now on your clipboard.</li>
@@ -1571,13 +1571,13 @@ Date        P?    Amount        Offence
       <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
         <ol style="margin:4px 0 0 20px;padding:0">
           <li><strong>Select Use Case</strong> — choose Roadside Stop, Report / Follow Up, or Warrant / Enforcement.</li>
-          <li><strong>Fill identity fields</strong> — paste a LEAP profile to auto-fill name, phone and vehicle, or type manually.</li>
+          <li><strong>Fill identity fields</strong> — paste a LEAP profile to auto-fill name, phone and address, or type manually.</li>
           <li><strong>Paste financial records</strong> — enter LEAP finance lines into the Financial Records Input box.</li>
           <li><strong>Click Process Debt</strong> — the tool totals qualifying unpaid government entries older than 14 days.</li>
           <li><strong>Read the summary</strong> — check the tier badge, recommended action and suggested next steps.</li>
           <li><strong>Choose a preset</strong> — pick the wording preset that matches the outcome (e.g. Roadside stop note).</li>
-          <li><strong>Forward the data</strong> — click <strong>Fill Sheriff Logs</strong> to populate commands, or <strong>Fill Debt Warrant Report</strong> to fill the warrant.</li>
-          <li><strong>Go to Sheriff Logs tab</strong> — copy whichever bot command applies (!tstop, !adddebt, !addplan, etc.).</li>
+          <li><strong>Click Fill Sheriff Logs</strong> — sends all data across so the bot commands are ready to copy.</li>
+          <li><strong>For debt warrants</strong> — click <strong>Fill Debt Warrant Report</strong> to push the data into the Report Tool and generate the warrant.</li>
         </ol>
       </div>
     </div>
@@ -1600,8 +1600,6 @@ Date        P?    Amount        Offence
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end">
-        <button class="btn" id="debtPullFromReportBtn" type="button" title="Copy any missing debtor details from the linked report">Pull Missing</button>
-        <button class="btn" id="debtRefreshFromReportBtn" type="button" title="Overwrite debtor details with the latest data from the linked report">Refresh From Report</button>
         <button class="btn" id="debtOpenSheriffLogsBtn" type="button" title="Switch to the Sheriff Logs tab">Open Sheriff Logs</button>
         <button class="btn" id="debtSwitchReportBtn" type="button" style="white-space:nowrap" title="Switch the Report Tool to Sheriff Debt Enforcement Warrant type">Switch to Debt Warrant</button>
       </div>
@@ -1750,12 +1748,12 @@ Date        P?    Amount        Offence
       <div class="guidelines-body" id="slGuideBody">
         <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
           <ol style="margin:4px 0 0 20px;padding:0">
-            <li><strong>Best used after Debt Tool</strong> — click <strong>Fill Sheriff Logs</strong> from the Debt Tool to auto-populate all fields here.</li>
-            <li><strong>Check Common Details</strong> — confirm debtor first name, last name, phone and amount owed are correct.</li>
+            <li><strong>Start in the Debt Tool</strong> — process the debt there first, then click <strong>Fill Sheriff Logs</strong> to push all details here automatically.</li>
+            <li><strong>Check the details</strong> — confirm debtor first name, last name, phone and amount owed are correct. Edit manually if needed.</li>
             <li><strong>Choose a preset</strong> — pick the wording preset that matches what happened (e.g. Roadside stop note, Payment plan arranged).</li>
             <li><strong>Review the generated commands</strong> — each command in the list below is ready to copy.</li>
             <li><strong>Copy the right command</strong> — read the note under each command for when to use it.</li>
-            <li><strong>Paste into Sheriff logs in-game</strong> — all commands start with <strong>!</strong> so they run immediately.</li>
+            <li><strong>Paste into Discord / Sheriff logs</strong> — all commands start with <strong>!</strong> so they run immediately.</li>
           </ol>
         </div>
       </div>
@@ -1773,8 +1771,6 @@ Date        P?    Amount        Offence
           <div style="font-size:13px;color:var(--text);line-height:1.5">Use one debtor profile here, then copy whichever command you need below.</div><div id="slLinkStatus" style="margin-top:8px;font-size:12px;color:var(--muted)">Waiting for linked debtor details.</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" id="slPullFromReportBtn" type="button" title="Copy any missing debtor details from the linked report">Pull Missing</button>
-          <button class="btn" id="slRefreshFromReportBtn" type="button" title="Overwrite debtor details with the latest data from the linked report">Refresh From Report</button>
           <button class="btn" id="slClearBtn" type="button" title="Clear all Sheriff log fields and start fresh">Clear Sheriff Logs</button>
         </div>
       </div>
@@ -9556,7 +9552,7 @@ Is there anything you would like to add at this time?`;
           }
         }
         if (filled) { renderDebtToolUI(); throttledAutosave(); toast("LEAP paste auto-filled debtor details", "ok"); }
-        else if (p && p.offender && p.offender.name) { toast("Fields already filled — clear them first or use Refresh From Report to override", "warn"); }
+        else if (p && p.offender && p.offender.name) { toast("Fields already filled — clear them first to re-apply LEAP paste", "warn"); }
       };
       debtLeapPaste.addEventListener("input", applyDebtLeapPaste);
       debtLeapPaste.addEventListener("paste", () => setTimeout(applyDebtLeapPaste, 0));
