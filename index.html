@@ -1593,6 +1593,7 @@ Date        P?    Amount        Offence
         <div class="lbl">Use Case</div>
         <select id="debtUseCase">
           <option value="roadside">Roadside Stop</option>
+          <option value="foot">On Foot Interaction</option>
           <option value="report">Report / Follow Up</option>
           <option value="warrant">Warrant / Enforcement</option>
         </select>
@@ -5199,7 +5200,10 @@ Date        P?    Amount        Offence
   }
 
 function getDebtUseCaseLabel(useCase) {
-  return useCase === "roadside" ? "Roadside Stop" : useCase === "warrant" ? "Warrant / Enforcement" : "Report / Follow Up";
+  if (useCase === "roadside") return "Roadside Stop";
+  if (useCase === "foot") return "On Foot Interaction";
+  if (useCase === "warrant") return "Warrant / Enforcement";
+  return "Report / Follow Up";
 }
 
 function getDebtToolName() {
@@ -5238,6 +5242,12 @@ function getDebtRecommendedAction(total, useCase) {
     if (total > 60000) return "Escalate for Sheriff debt enforcement. Court or seizure action is likely appropriate.";
     if (total >= 10000) return "Roadside follow-up or a payment plan may be appropriate, depending on compliance.";
     return "Request immediate payment. If unpaid, consider further Sheriff action and reporting.";
+  }
+  if (useCase === "foot") {
+    if (total >= 100000) return "Debt is critical. Detain for Sheriff review — consider arrest or further enforcement action.";
+    if (total > 60000) return "Significant debt. Request immediate payment and escalate to warrant or court action if refused.";
+    if (total >= 10000) return "Request immediate payment or payment plan. Follow up with a report if unresolved.";
+    return "Request immediate payment. Document the interaction and follow up if unpaid.";
   }
   if (useCase === "warrant") {
     if (total >= 100000) return "No payment plan should be offered. Proceed toward seizure, sale, or detention pathways.";
@@ -5325,6 +5335,9 @@ function buildDebtContextNote() {
   if (useCase === "roadside") {
     return `Roadside stop conducted with ${who} at ${location}. ID status: ${idStatus}. Overdue government debt located totalling ${totalText}. Vehicle linked: ${vehicle.model} ${vehicle.rego}. Recommended action: ${action}`;
   }
+  if (useCase === "foot") {
+    return `On foot interaction conducted with ${who} at ${location}. ID status: ${idStatus}. Overdue government debt located totalling ${totalText}. Recommended action: ${action}`;
+  }
   if (useCase === "warrant") {
     return `Debt enforcement review completed for ${who}. Overdue government debt of ${totalText} was identified. Vehicle linked: ${vehicle.model} ${vehicle.rego}. Recommended action: ${action}`;
   }
@@ -5339,7 +5352,8 @@ function buildDebtNotebookLine() {
   const totalText = `$${Number(dt.total || 0).toLocaleString()}`;
   const location = norm(dt.stopLocation) || "NIL";
   const idStatus = norm(dt.idConfirmed) || "UNCONFIRMED";
-  return `${getDebtUseCaseLabel(dt.useCase || "roadside")}: ${who}, phone ${phone}, ID ${idStatus}, debt ${totalText}, vehicle ${vehicle.rego} ${vehicle.model}, location ${location}.`;
+  const vehiclePart = (dt.useCase === "foot" || dt.useCase === "report") ? "" : `, vehicle ${vehicle.rego} ${vehicle.model}`;
+  return `${getDebtUseCaseLabel(dt.useCase || "roadside")}: ${who}, phone ${phone}, ID ${idStatus}, debt ${totalText}${vehiclePart}, location ${location}.`;
 }
 
 
@@ -5438,9 +5452,11 @@ function renderSheriffOpsHelper() {
   if (el.debtRoadsideNotice) {
     const notice = dt.useCase === "roadside"
       ? "Roadside mode: Sheriffs are not Police. Do not pursue. If they fail to stop, contact VICPOL, register the debt, then follow up by phone or warrant."
-      : dt.useCase === "warrant"
-        ? "Warrant mode: Use the debt result to prepare a Sheriff debt warrant or court escalation."
-        : "Report / follow-up mode: document the debt, call the debtor, and have them attend Sheriff's Office before clearing debt.";
+      : dt.useCase === "foot"
+        ? "On foot mode: no vehicle involved. Use !interact for logs. Request ID, document the debt, and request payment or arrange a follow-up."
+        : dt.useCase === "warrant"
+          ? "Warrant mode: Use the debt result to prepare a Sheriff debt warrant or court escalation."
+          : "Report / follow-up mode: document the debt, call the debtor, and have them attend Sheriff's Office before clearing debt.";
     el.debtRoadsideNotice.textContent = notice;
   }
   if (el.debtActionCards) {
@@ -5612,9 +5628,10 @@ function getPrimaryCommandKeyFromDebtTool() {
   if (preset === "payment_plan") return "addplan";
   if (preset === "apply_court") return "applycourt";
   if (preset === "vehicle_seized") return state.debtTool?.useCase === "roadside" ? "tstop" : "applycourt";
-  if (preset === "roadside_note") return "tstop";
+  if (preset === "roadside_note") return state.debtTool?.useCase === "foot" ? "interact" : "tstop";
   if (state.debtTool?.useCase === "warrant") return "applycourt";
   if (state.debtTool?.useCase === "report") return "interact";
+  if (state.debtTool?.useCase === "foot") return "interact";
   return "tstop";
 }
 
@@ -5622,7 +5639,7 @@ function getDebtToolSheriffLogsSeed(applySuggestedText = true) {
   const split = splitFullNameForSheriffLogs(getDebtToolName());
   const dt = state.debtTool || {};
   const sl = getSheriffLogsState();
-  const payload = buildDebtPresetPayload(dt.lastPreset || (dt.useCase === "roadside" ? "roadside_note" : dt.useCase === "warrant" ? "apply_court" : "roadside_note"));
+  const payload = buildDebtPresetPayload(dt.lastPreset || (dt.useCase === "warrant" ? "apply_court" : "roadside_note"));
   const vehicleText = normalizeSheriffLogText([getDebtToolVehicle().model, getDebtToolVehicle().rego].filter(v => v && v !== 'NIL').join(' '));
   const seed = {
     firstName: split.firstName || sl.firstName,
@@ -13684,6 +13701,9 @@ function updateDebtTabModeHint() {
   }
   if (useCase === 'roadside') {
     hint.innerHTML += ` <span style="color:var(--warn)">Sheriffs do not pursue. If they fail to stop, contact VICPOL, register the debt, then follow up by phone or warrant.</span>`;
+  }
+  if (useCase === 'foot') {
+    hint.innerHTML += ` <span style="color:var(--warn)">On foot mode: no vehicle stop. Use !interact for logs. Request ID, document the debt, and request payment or arrange a follow-up.</span>`;
   }
   if (switchBtn) switchBtn.style.display = usingDebtWarrant ? 'none' : '';
 }
