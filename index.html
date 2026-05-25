@@ -797,6 +797,27 @@
   <main role="main">
     <div style="display:grid; gap:14px; grid-auto-rows:max-content">
 
+      <!-- HOW TO USE — Report Tool -->
+      <div class="card" style="padding:0;border-color:rgba(0,191,255,0.3);overflow:hidden">
+        <div class="guidelines-toggle" id="reportGuideToggle" style="border:none;border-radius:0;background:rgba(0,191,255,0.07);border-bottom:1px solid rgba(0,191,255,0.18)">
+          <span><span style="color:var(--accent)">📋</span> <strong>HOW TO USE — Report Tool</strong> <span style="font-weight:400;color:var(--muted);font-size:11px">— click to collapse</span></span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="guidelines-body" id="reportGuideBody">
+          <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
+            <ol style="margin:4px 0 0 20px;padding:0">
+              <li><strong>Select report type</strong> — Sheriff Warrant for Arrest, for Questioning, or Debt Enforcement Warrant.</li>
+              <li><strong>For debt warrants use the Debt Tool first</strong> — click <strong>Fill Debt Warrant Report</strong> in the Debt Tool to auto-populate warrant fields here.</li>
+              <li><strong>Fill Offender / Subject Details</strong> — name, DOB, sex, address and phone. Paste a LEAP or MDT profile to auto-fill.</li>
+              <li><strong>Fill the Report Narrative</strong> — describe events in court-ready language.</li>
+              <li><strong>Add charges if applicable</strong> — use the Charges card. Sentence is auto-calculated.</li>
+              <li><strong>Click Copy Preview</strong> (top-right) or press <strong>Ctrl+Shift+C</strong> — the formatted report is now on your clipboard.</li>
+              <li><strong>Save a draft</strong> — use Save Draft (Ctrl+S) to keep the report for later, or use Templates to store reusable officer details.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
       <!-- Report Type -->
       <div class="card" id="reportMetaCard">
         <h2>Report Type</h2>
@@ -1541,6 +1562,27 @@ Date        P?    Amount        Offence
 <div style="max-width:980px;margin:0 auto;padding:16px 22px 40px">
   <div style="font-size:18px;font-weight:900;margin-bottom:14px">Sheriff Debt Tool</div>
 
+  <div class="card" style="padding:0;margin-bottom:14px;border-color:rgba(0,191,255,0.3);overflow:hidden">
+    <div class="guidelines-toggle" id="debtGuideToggle" style="border:none;border-radius:0;background:rgba(0,191,255,0.07);border-bottom:1px solid rgba(0,191,255,0.18)">
+      <span><span style="color:var(--accent)">📋</span> <strong>HOW TO USE — Debt Tool</strong> <span style="font-weight:400;color:var(--muted);font-size:11px">— click to collapse</span></span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="guidelines-body" id="debtGuideBody">
+      <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
+        <ol style="margin:4px 0 0 20px;padding:0">
+          <li><strong>Select Use Case</strong> — choose Roadside Stop, Report / Follow Up, or Warrant / Enforcement.</li>
+          <li><strong>Fill identity fields</strong> — paste a LEAP profile to auto-fill name, phone and vehicle, or type manually.</li>
+          <li><strong>Paste financial records</strong> — enter LEAP finance lines into the Financial Records Input box.</li>
+          <li><strong>Click Process Debt</strong> — the tool totals qualifying unpaid government entries older than 14 days.</li>
+          <li><strong>Read the summary</strong> — check the tier badge, recommended action and suggested next steps.</li>
+          <li><strong>Choose a preset</strong> — pick the wording preset that matches the outcome (e.g. Roadside stop note).</li>
+          <li><strong>Forward the data</strong> — click <strong>Fill Sheriff Logs</strong> to populate commands, or <strong>Fill Debt Warrant Report</strong> to fill the warrant.</li>
+          <li><strong>Go to Sheriff Logs tab</strong> — copy whichever bot command applies (!tstop, !adddebt, !addplan, etc.).</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
   <div class="card" style="padding:16px;margin-bottom:14px">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;align-items:end">
       <label>
@@ -1561,7 +1603,7 @@ Date        P?    Amount        Offence
         <button class="btn" id="debtPullFromReportBtn" type="button">Pull Missing</button>
         <button class="btn" id="debtRefreshFromReportBtn" type="button">Refresh From Report</button>
         <button class="btn" id="debtOpenSheriffLogsBtn" type="button">Open Sheriff Logs</button>
-        <button class="btn" id="debtSwitchReportBtn" type="button" style="white-space:nowrap">Use Sheriff Debt Warrant</button>
+        <button class="btn" id="debtSwitchReportBtn" type="button" style="white-space:nowrap">Switch to Debt Warrant</button>
       </div>
     </div>
   </div>
@@ -1615,9 +1657,9 @@ Date        P?    Amount        Offence
       <label><div class="lbl">Financial Records Input</div><textarea id="debtInput" rows="8" placeholder="09/01/2023 N $5000 CHARGE: Contempt of Court&#10;04/01/2023 N $3000 CHARGE: Engage in a Police Pursuit / Evade Police&#10;01/01/2023 N $12000 GOV INVOICE: Outstanding Government Debt"></textarea></label>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="debtProcessBtn" type="button">Process Debt</button>
-        <button class="btn" id="debtApplyBtn" type="button">Apply to Warrant</button>
+        <button class="btn" id="debtApplyBtn" type="button">Fill Debt Warrant Report</button>
         <button class="btn" id="debtFillLogsBtn" type="button">Fill Sheriff Logs</button>
-        <button class="btn" id="debtApplySummaryBtn" type="button">Add Note to Report</button>
+        <button class="btn" id="debtApplySummaryBtn" type="button">Add Debt Note to Report</button>
         <button class="btn" id="debtCopyPrimaryBtn" type="button">Copy Primary Command</button>
         <button class="btn" id="debtCopyImpoundBtn" type="button">Copy Impound Request</button>
         <button class="btn" id="debtCopyStopPackBtn" type="button">Copy Stop Pack</button>
@@ -1631,6 +1673,35 @@ Date        P?    Amount        Offence
       <div>
         <div class="lbl">Matched Overdue Debt Lines</div>
         <div id="debtMatchedLines" style="min-height:72px;max-height:220px;overflow-y:auto;padding:10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:10px;font-size:12px;line-height:1.5;color:var(--muted)">No processed debt lines yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0;margin-bottom:14px;overflow:hidden">
+    <div class="guidelines-toggle" id="debtTierGuideToggle" style="border:none;border-radius:0;background:rgba(255,170,0,0.07);border-bottom:1px solid rgba(255,170,0,0.18)">
+      <span><span>⚖️</span> <strong>Debt Tier Reference</strong> <span style="font-weight:400;color:var(--muted);font-size:11px">— click to expand / collapse</span></span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="guidelines-body" id="debtTierGuideBody">
+      <div class="guidelines-body-inner">
+        <div style="display:grid;gap:8px;font-size:11px;line-height:1.6">
+          <div style="padding:8px 10px;background:rgba(100,255,150,0.06);border:1px solid rgba(100,255,150,0.18);border-radius:4px">
+            <strong style="color:var(--ok)">Under $10,000 — Immediate Payment</strong>
+            <div style="margin-top:4px;color:var(--text)">Full payment required on the spot. No payment plans allowed. Non-compliance: suspend licence + impound vehicle ($250 fee, 1 month). Use <code>!tstop</code> for roadside stops. Consider <code>!adddebt</code> to register the debt first.</div>
+          </div>
+          <div style="padding:8px 10px;background:rgba(255,200,100,0.06);border:1px solid rgba(255,200,100,0.18);border-radius:4px">
+            <strong style="color:var(--warn)">$10,000 – $60,000 — 3 Week Deadline</strong>
+            <div style="margin-top:4px;color:var(--text)">Payment within 3 weeks. Payment plan may be allowed — use <code>!addplan</code> to record it. Non-compliance: suspend licence + impound + warn of asset seizure. Use <code>!adddebt</code> first, then <code>!addplan</code> if a plan is agreed.</div>
+          </div>
+          <div style="padding:8px 10px;background:rgba(255,160,80,0.06);border:1px solid rgba(255,160,80,0.18);border-radius:4px">
+            <strong style="color:rgba(255,160,80,0.95)">$60,000 – $100,000 — 4 Week Deadline</strong>
+            <div style="margin-top:4px;color:var(--text)">Payment within 4 weeks. Warn the debtor that crossing $100k triggers an automatic bank freeze (deposit only). No new payment plans unless pre-approved. Use <code>!applycourt</code> if enforcement is required.</div>
+          </div>
+          <div style="padding:8px 10px;background:rgba(255,80,80,0.06);border:1px solid rgba(255,80,80,0.22);border-radius:4px">
+            <strong style="color:rgba(255,100,100,0.95)">Over $100,000 — No Plans / Seizure Action</strong>
+            <div style="margin-top:4px;color:var(--text)">No payment plans available. Options: (1) Pay in full, (2) Forfeit asset of equal value, (3) Vehicle seizure via <code>!applycourt</code>, (4) Detention — 60 weeks flat. Sheriff Leadership approval required.</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1670,6 +1741,25 @@ Date        P?    Amount        Offence
   <div id="sheriffLogsPage" class="tool-page active">
   <div style="max-width:860px;margin:0 auto;padding:16px 22px 40px">
     <div style="font-size:18px;font-weight:900;margin-bottom:14px">Sheriff Log Helper</div>
+
+    <div class="card" style="padding:0;margin-bottom:14px;border-color:rgba(0,191,255,0.3);overflow:hidden">
+      <div class="guidelines-toggle" id="slGuideToggle" style="border:none;border-radius:0;background:rgba(0,191,255,0.07);border-bottom:1px solid rgba(0,191,255,0.18)">
+        <span><span style="color:var(--accent)">📋</span> <strong>HOW TO USE — Sheriff Logs</strong> <span style="font-weight:400;color:var(--muted);font-size:11px">— click to collapse</span></span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="guidelines-body" id="slGuideBody">
+        <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
+          <ol style="margin:4px 0 0 20px;padding:0">
+            <li><strong>Best used after Debt Tool</strong> — click <strong>Fill Sheriff Logs</strong> from the Debt Tool to auto-populate all fields here.</li>
+            <li><strong>Check Common Details</strong> — confirm debtor first name, last name, phone and amount owed are correct.</li>
+            <li><strong>Choose a preset</strong> — pick the wording preset that matches what happened (e.g. Roadside stop note, Payment plan arranged).</li>
+            <li><strong>Review the generated commands</strong> — each command in the list below is ready to copy.</li>
+            <li><strong>Copy the right command</strong> — read the note under each command for when to use it.</li>
+            <li><strong>Paste into Sheriff logs in-game</strong> — all commands start with <strong>!</strong> so they run immediately.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
 
     <div class="card" style="padding:16px;margin-bottom:14px;border-color:rgba(255,190,120,0.35);background:rgba(255,190,120,0.08)">
       <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px">IMPORTANT</div>
@@ -5557,6 +5647,60 @@ function renderDebtHistory() {
   `).join("");
 }
 
+function buildTierBadgeHtml(total) {
+  const amount = Number(total || 0);
+  if (!amount) return '<span style="color:var(--muted)">No debt processed</span>';
+  if (amount >= 100000) {
+    return '<span style="display:inline-block;padding:3px 10px;border-radius:3px;background:rgba(255,80,80,0.14);border:1px solid rgba(255,80,80,0.35);color:rgba(255,120,120,0.95);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.04em">OVER $100,000 — NO PLANS / SEIZURE</span>';
+  }
+  if (amount > 60000) {
+    return '<span style="display:inline-block;padding:3px 10px;border-radius:3px;background:rgba(255,80,80,0.10);border:1px solid rgba(255,80,80,0.25);color:rgba(255,120,120,0.9);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.04em">$60K–$100K — 4 WEEK DEADLINE</span>';
+  }
+  if (amount >= 10000) {
+    return '<span style="display:inline-block;padding:3px 10px;border-radius:3px;background:rgba(255,200,100,0.10);border:1px solid rgba(255,200,100,0.25);color:var(--warn);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.04em">$10K–$60K — 3 WEEK DEADLINE</span>';
+  }
+  return '<span style="display:inline-block;padding:3px 10px;border-radius:3px;background:rgba(100,255,150,0.08);border:1px solid rgba(100,255,150,0.22);color:var(--ok);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.04em">UNDER $10,000 — IMMEDIATE PAYMENT</span>';
+}
+
+function getDebtNextStepHint(total, useCase) {
+  const amount = Number(total || 0);
+  if (!amount) return '';
+  const uc = useCase || 'roadside';
+  let hint = '';
+  if (uc === 'roadside') {
+    if (amount >= 100000) {
+      hint = '&#8594; Detain for Sheriff review &rarr; Use <strong>Roadside stop note</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!tstop</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong>, click <strong>Fill Debt Warrant Report</strong>. Escalate to leadership.';
+    } else if (amount > 60000) {
+      hint = '&#8594; Use <strong>Roadside stop note</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!tstop</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong>, click <strong>Fill Debt Warrant Report</strong> &rarr; Warn debtor of 4-week window.';
+    } else if (amount >= 10000) {
+      hint = '&#8594; If plan agreed: use <strong>Payment plan arranged</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!adddebt</strong> then <strong>!addplan</strong>. If no plan: use <strong>Roadside stop note</strong> preset &rarr; Copy <strong>!tstop</strong>.';
+    } else {
+      hint = '&#8594; Request immediate payment. If paid: use <strong>Payment made on scene</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!cleardebt</strong>. If refused: use <strong>Roadside stop note</strong> preset &rarr; Copy <strong>!tstop</strong> &rarr; Consider impound.';
+    }
+  } else if (uc === 'warrant') {
+    if (amount >= 100000) {
+      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>. Escalate to leadership.';
+    } else if (amount > 60000) {
+      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>.';
+    } else if (amount >= 10000) {
+      hint = '&#8594; Use <strong>Apply court recommended</strong> or <strong>Payment plan arranged</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> or <strong>!addplan</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>.';
+    } else {
+      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!adddebt</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>.';
+    }
+  } else {
+    if (amount >= 100000) {
+      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> &rarr; Click <strong>Add Debt Note to Report</strong> to append to narrative.';
+    } else if (amount > 60000) {
+      hint = '&#8594; Contact debtor by phone &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!call</strong> to log attempt &rarr; If plan agreed: use <strong>Payment plan arranged</strong> preset &rarr; Copy <strong>!addplan</strong> &rarr; Click <strong>Add Debt Note to Report</strong>.';
+    } else if (amount >= 10000) {
+      hint = '&#8594; Contact debtor &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!call</strong> to log attempt &rarr; If plan agreed: use <strong>Payment plan arranged</strong> preset &rarr; Copy <strong>!addplan</strong>. If escalating: use <strong>Apply court recommended</strong> &rarr; Copy <strong>!applycourt</strong>.';
+    } else {
+      hint = '&#8594; Contact debtor &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!call</strong> to log attempt &rarr; Click <strong>Add Debt Note to Report</strong> to append to narrative &rarr; Follow up at station for payment.';
+    }
+  }
+  return `<div style="margin-top:10px;padding:10px 12px;border-radius:4px;background:rgba(0,191,255,0.06);border:1px solid rgba(0,191,255,0.22);font-size:12px;line-height:1.65"><div style="font-size:10px;font-weight:900;color:var(--accent);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px">SUGGESTED NEXT STEPS</div><div>${hint}</div></div>`;
+}
+
 function renderDebtToolUI() {
   const dt = state.debtTool || INITIAL_STATE.debtTool;
   const fieldMap = {
@@ -5616,7 +5760,7 @@ function renderDebtToolUI() {
           <div><div class="lbl">Use Case</div><div style="font-size:16px;font-weight:900">${escapeHtml(getDebtUseCaseLabel(dt.useCase || "roadside"))}</div></div>
           <div><div class="lbl">Matched Entries</div><div style="font-size:22px;font-weight:900">${dt.matchedCount || 0}</div></div>
           <div><div class="lbl">Total Overdue Debt</div><div style="font-size:22px;font-weight:900">$${Number(dt.total || 0).toLocaleString()}</div></div>
-          <div><div class="lbl">Threshold</div><div style="font-size:14px;font-weight:900">${escapeHtml(dt.thresholdLabel || "NIL")}</div></div>
+          <div><div class="lbl">Tier</div><div id="debtTierBadge" style="font-size:13px;font-weight:900;margin-top:2px">${buildTierBadgeHtml(dt.total)}</div></div>
         </div>
         <div style="font-size:12px;line-height:1.65">
           ${oldestLine}
@@ -5630,6 +5774,7 @@ function renderDebtToolUI() {
           </div>
           <div style="margin-top:8px"><strong>Notebook Line:</strong> ${escapeHtml(dt.notebookLine || buildDebtNotebookLine())}</div>
         </div>
+        ${getDebtNextStepHint(dt.total, dt.useCase)}
         ${processedLine}`;
     } else {
       el.debtToolSummary.style.display = "none";
@@ -9410,6 +9555,7 @@ Is there anything you would like to add at this time?`;
           }
         }
         if (filled) { renderDebtToolUI(); throttledAutosave(); toast("LEAP paste auto-filled debtor details", "ok"); }
+        else if (p && p.offender && p.offender.name) { toast("Fields already filled — clear them first or use Refresh From Report to override", "warn"); }
       };
       debtLeapPaste.addEventListener("input", applyDebtLeapPaste);
       debtLeapPaste.addEventListener("paste", () => setTimeout(applyDebtLeapPaste, 0));
@@ -13115,14 +13261,14 @@ function getSheriffCommandTemplates(sl) {
   const outcome = escapeSheriffCommandArg(sl.outcome) || 'Outcome';
 
   return [
-    { key: 'adddebt', title: '!adddebt', note: 'Adds overdue debt to the debtor profile.', command: `!adddebt ${firstName} ${lastName} ${phone} ${amount}` },
-    { key: 'cleardebt', title: '!cleardebt', note: 'Use when debt has been paid and you need to log the outcome.', command: `!cleardebt ${firstName} ${lastName} ${amount} ${outcome}` },
-    { key: 'addplan', title: '!addplan', note: 'Adds a payment plan against the debtor.', command: `!addplan ${firstName} ${lastName} ${phone} ${amount} ${details}` },
-    { key: 'clearcourtfee', title: '!clearcourtfee', note: 'Clears a court fee payment.', command: `!clearcourtfee ${firstName} ${lastName} ${amount}` },
-    { key: 'applycourt', title: '!applycourt', note: 'Applies for court seizure action using the debtor details.', command: `!applycourt ${firstName} ${lastName} ${phone} ${amount} ${details}` },
-    { key: 'call', title: '!call', note: 'Logs the result of a call.', command: `!call ${firstName} ${lastName} ${outcome}` },
-    { key: 'tstop', title: '!tstop', note: 'Logs a traffic stop interaction.', command: `!tstop ${firstName} ${lastName} ${phone} ${outcome}` },
-    { key: 'interact', title: '!interact', note: 'Logs a general debtor interaction.', command: `!interact ${firstName} ${lastName} ${phone} ${outcome}` }
+    { key: 'adddebt', title: '!adddebt', note: 'Use first to register the debt with the Sheriff system. Required before you can issue a payment plan or apply for court action. Needs name, phone and full owed amount.', command: `!adddebt ${firstName} ${lastName} ${phone} ${amount}` },
+    { key: 'cleardebt', title: '!cleardebt', note: "Use when the debtor has paid in full (on scene or at the station). Amount field should be the amount paid. Include the outcome — e.g. 'Paid in full on scene at Mirror Park'.", command: `!cleardebt ${firstName} ${lastName} ${amount} ${outcome}` },
+    { key: 'addplan', title: '!addplan', note: 'Use when a debtor agrees to staged payments — only valid for the $10k–$60k tier. Supervisor approval may be required. Details field should describe the plan (e.g. "$5000 per week for 6 weeks").', command: `!addplan ${firstName} ${lastName} ${phone} ${amount} ${details}` },
+    { key: 'clearcourtfee', title: '!clearcourtfee', note: 'Use after a court-applied fee has been paid. Different from !cleardebt — this specifically clears court-issued fees rather than general government debt.', command: `!clearcourtfee ${firstName} ${lastName} ${amount}` },
+    { key: 'applycourt', title: '!applycourt', note: 'Use when escalating to court enforcement. Required for $60k–$100k and over-$100k tiers. The Details field should describe the reason for escalation.', command: `!applycourt ${firstName} ${lastName} ${phone} ${amount} ${details}` },
+    { key: 'call', title: '!call', note: "Use after calling the debtor by phone. If they did not answer, click 'Set N/A for !call' above to fill the Outcome field automatically. Always log every call attempt.", command: `!call ${firstName} ${lastName} ${outcome}` },
+    { key: 'tstop', title: '!tstop', note: "Use for roadside stops where a Sheriff physically intercepted the debtor's vehicle. Outcome should describe what happened (paid on scene, failed to stop, etc.).", command: `!tstop ${firstName} ${lastName} ${phone} ${outcome}` },
+    { key: 'interact', title: '!interact', note: 'Use for in-person or station interactions that are not a roadside stop — typically for Report / Follow Up use-case or when the debtor attends the Sheriff\'s Office.', command: `!interact ${firstName} ${lastName} ${phone} ${outcome}` }
   ].map(item => ({ ...item, command: item.command.replace(/\s+/g, ' ').trim() }));
 }
 
@@ -13328,6 +13474,7 @@ function bindSheriffLogsTool() {
         filled = true;
       }
       if (filled) { renderSheriffLogsTool(); throttledAutosave(); toast('LEAP paste auto-filled debtor details', 'ok'); }
+      else if (p && p.offender && p.offender.name) { toast('Name fields already filled — clear them manually to re-apply LEAP paste', 'warn'); }
     };
     slLeapPaste.addEventListener('input', applySlLeapPaste);
     slLeapPaste.addEventListener('paste', () => setTimeout(applySlLeapPaste, 0));
@@ -13396,6 +13543,32 @@ function bindSheriffLogsTool() {
   }
   window.showToolPage = showToolPage;
 
+  function bindGuideCard(toggleId, bodyId, storageKey) {
+    const toggle = document.getElementById(toggleId);
+    const body = document.getElementById(bodyId);
+    if (!toggle || !body) return;
+    if (toggle.dataset.bound === '1') return;
+    toggle.dataset.bound = '1';
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved === 'collapsed') {
+        toggle.classList.remove('open');
+        body.classList.remove('open');
+      } else {
+        toggle.classList.add('open');
+        body.classList.add('open');
+      }
+    } catch (_) {
+      toggle.classList.add('open');
+      body.classList.add('open');
+    }
+    toggle.addEventListener('click', () => {
+      toggle.classList.toggle('open');
+      body.classList.toggle('open');
+      try { localStorage.setItem(storageKey, body.classList.contains('open') ? 'expanded' : 'collapsed'); } catch (_) {}
+    });
+  }
+
   function initUiBindings() {
     document.querySelectorAll('.tool-nav button[data-tool-page]').forEach(btn => {
       if (btn.dataset.bound === '1') return;
@@ -13412,6 +13585,11 @@ function bindSheriffLogsTool() {
         guidelinesBody.classList.toggle('open');
       });
     }
+
+    bindGuideCard('debtGuideToggle',     'debtGuideBody',     'sheriff_guide_collapsed_debt');
+    bindGuideCard('debtTierGuideToggle', 'debtTierGuideBody', 'sheriff_guide_collapsed_tier');
+    bindGuideCard('slGuideToggle',       'slGuideBody',       'sheriff_guide_collapsed_logs');
+    bindGuideCard('reportGuideToggle',   'reportGuideBody',   'sheriff_guide_collapsed_report');
 
     const presetList = document.getElementById('presetList');
     if (presetList && presetList.dataset.bound !== '1') {
@@ -13458,7 +13636,7 @@ function updateDebtTabModeHint() {
   if (usingDebtWarrant) {
     hint.innerHTML = `Current mode: <strong>${escapeHtml(useCaseLabel)}</strong>. Results can be used for roadside stops, reports, or applied straight into <strong>Sheriff Debt Enforcement Warrant</strong>.`;
   } else {
-    hint.innerHTML = `Current mode: <strong>${escapeHtml(useCaseLabel)}</strong>. This tool works for roadside stops, reports, and Sheriff debt warrants. <strong>Apply to Warrant</strong> works best when the report type is set to <strong>Sheriff Debt Enforcement Warrant</strong>.`;
+    hint.innerHTML = `Current mode: <strong>${escapeHtml(useCaseLabel)}</strong>. This tool works for roadside stops, reports, and Sheriff debt warrants. <strong>Fill Debt Warrant Report</strong> works best when the report type is set to <strong>Sheriff Debt Enforcement Warrant</strong>.`;
   }
   if (useCase === 'roadside') {
     hint.innerHTML += ` <span style="color:var(--warn)">Sheriffs do not pursue. If they fail to stop, contact VICPOL, register the debt, then follow up by phone or warrant.</span>`;
