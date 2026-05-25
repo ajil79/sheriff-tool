@@ -1688,6 +1688,7 @@ Date        P?    Amount        Offence
           <button class="btn" id="slClearBtn" type="button">Clear Sheriff Logs</button>
         </div>
       </div>
+      <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— auto-fills name &amp; phone below</span></div><textarea id="slLeapPaste" rows="3" placeholder="Paste LEAP profile here to auto-fill debtor details"></textarea></label>
       <div class="grid2" style="margin-bottom:10px">
         <label><div class="lbl">Debtor First Name</div><input id="slFirstName" placeholder="James"/></label>
         <label><div class="lbl">Debtor Last Name</div><input id="slLastName" placeholder="Brown"/></label>
@@ -13294,6 +13295,33 @@ function bindSheriffLogsTool() {
     node.dataset.bound = '1';
     node.addEventListener('input', () => updateSheriffLogsField(key, node.value || ''));
   });
+
+  const slLeapPaste = document.getElementById('slLeapPaste');
+  if (slLeapPaste && !slLeapPaste.dataset.bound) {
+    slLeapPaste.dataset.bound = '1';
+    const applySlLeapPaste = () => {
+      const text = slLeapPaste.value.trim();
+      if (!text) return;
+      const p = parseOCR(text);
+      let filled = false;
+      const fnNode = document.getElementById('slFirstName');
+      const lnNode = document.getElementById('slLastName');
+      const phNode = document.getElementById('slPhone');
+      if (p.offender.name && fnNode && !fnNode.value && !lnNode.value) {
+        const split = splitFullNameForSheriffLogs(p.offender.name);
+        if (split.firstName) { fnNode.value = split.firstName; updateSheriffLogsField('firstName', split.firstName); filled = true; }
+        if (split.lastName) { lnNode.value = split.lastName; updateSheriffLogsField('lastName', split.lastName); filled = true; }
+      }
+      if (p.offender.phone && phNode && !phNode.value) {
+        phNode.value = p.offender.phone;
+        updateSheriffLogsField('phone', p.offender.phone);
+        filled = true;
+      }
+      if (filled) { renderSheriffLogsTool(); throttledAutosave(); toast('LEAP paste auto-filled debtor details', 'ok'); }
+    };
+    slLeapPaste.addEventListener('input', applySlLeapPaste);
+    slLeapPaste.addEventListener('paste', () => setTimeout(applySlLeapPaste, 0));
+  }
 
   const pullBtn = document.getElementById('slPullFromReportBtn');
   if (pullBtn && !pullBtn.dataset.bound) {
