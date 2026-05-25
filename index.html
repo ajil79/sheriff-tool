@@ -1615,10 +1615,13 @@ Date        P?    Amount        Offence
     </div>
     <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— auto-fills name, phone &amp; vehicle below</span></div><textarea id="debtLeapPaste" rows="3" placeholder="Paste LEAP profile here to auto-fill debtor details"></textarea></label>
     <div class="grid2" style="margin-bottom:10px">
-      <label><div class="lbl">Debtor Full Name</div><input id="debtDebtorName" placeholder="James Brown"/></label>
-      <label><div class="lbl">Debtor Phone</div><input id="debtDebtorPhone" placeholder="123456"/></label>
+      <label><div class="lbl">Debtor First Name</div><input id="debtDebtorFirstName" placeholder="James"/></label>
+      <label><div class="lbl">Debtor Last Name</div><input id="debtDebtorLastName" placeholder="Brown"/></label>
     </div>
-    <label style="margin-bottom:10px"><div class="lbl">Debtor Address</div><input id="debtDebtorAddress" placeholder="Sandy Shores, Blaine County"/></label>
+    <div class="grid2" style="margin-bottom:10px">
+      <label><div class="lbl">Debtor Phone</div><input id="debtDebtorPhone" placeholder="123456"/></label>
+      <label><div class="lbl">Debtor Address</div><input id="debtDebtorAddress" placeholder="Sandy Shores, Blaine County"/></label>
+    </div>
     <div class="grid2" style="margin-bottom:10px">
       <label>
         <div class="lbl">ID Confirmed</div>
@@ -3614,8 +3617,8 @@ Date        P?    Amount        Offence
 
     return {
       name: useDebtPriority
-        ? norm(debt.debtorName) || norm(sw.warrantName) || norm(sw.owner) || norm(offender.name)
-        : norm(offender.name) || norm(sw.warrantName) || norm(sw.owner) || norm(debt.debtorName),
+        ? (norm([norm(debt.debtorFirstName), norm(debt.debtorLastName)].filter(Boolean).join(' '))) || norm(sw.warrantName) || norm(sw.owner) || norm(offender.name)
+        : norm(offender.name) || norm(sw.warrantName) || norm(sw.owner) || (norm([norm(debt.debtorFirstName), norm(debt.debtorLastName)].filter(Boolean).join(' '))),
       dob: norm(offender.dob),
       sex: norm(offender.sex),
       address: useDebtPriority
@@ -3670,7 +3673,7 @@ Date        P?    Amount        Offence
     const slStatus = document.getElementById('slLinkStatus');
     if (slStatus) {
       const debtSeed = getLinkedReportSeed('sheriffLogs');
-      const sheriffBits = [norm(state.debtTool?.debtorName) || debtSeed.name, norm(state.debtTool?.vehicleRego) || debtSeed.rego, norm(state.debtTool?.total) ? `$${Number(state.debtTool.total).toLocaleString()}` : ''].filter(Boolean);
+      const sheriffBits = [getDebtToolName() !== 'UNKNOWN' ? getDebtToolName() : debtSeed.name, norm(state.debtTool?.vehicleRego) || debtSeed.rego, norm(state.debtTool?.total) ? `$${Number(state.debtTool.total).toLocaleString()}` : ''].filter(Boolean);
       slStatus.textContent = sheriffBits.length ? `Linked debtor details available: ${sheriffBits.join(' • ')}` : 'Waiting for linked debtor details.';
     }
   }
@@ -4467,7 +4470,8 @@ Date        P?    Amount        Offence
       govOnly: true,
       dutyNumber: "1",
       badgeNumber: "",
-      debtorName: "",
+      debtorFirstName: "",
+      debtorLastName: "",
       debtorPhone: "",
       debtorAddress: "",
       idConfirmed: "UNCONFIRMED",
@@ -5184,7 +5188,10 @@ function getDebtUseCaseLabel(useCase) {
 }
 
 function getDebtToolName() {
-  return norm(state.debtTool?.debtorName) || norm(state.sheriffWarrant?.warrantName) || norm(state.offender?.name) || "UNKNOWN";
+  const fn = norm(state.debtTool?.debtorFirstName);
+  const ln = norm(state.debtTool?.debtorLastName);
+  const full = [fn, ln].filter(Boolean).join(' ');
+  return full || norm(state.sheriffWarrant?.warrantName) || norm(state.offender?.name) || "UNKNOWN";
 }
 
 function getDebtToolPhone() {
@@ -5705,7 +5712,8 @@ function renderDebtToolUI() {
     debtUseCase: dt.useCase || "roadside",
     debtDutyNumber: dt.dutyNumber || "1",
     debtBadgeNumber: dt.badgeNumber || "",
-    debtDebtorName: dt.debtorName || "",
+    debtDebtorFirstName: dt.debtorFirstName || "",
+    debtDebtorLastName: dt.debtorLastName || "",
     debtDebtorPhone: dt.debtorPhone || "",
     debtDebtorAddress: dt.debtorAddress || "",
     debtIdConfirmed: dt.idConfirmed || "UNCONFIRMED",
@@ -5790,7 +5798,8 @@ function syncDebtToolFromInputs() {
     govOnly: document.getElementById("debtGovOnly") ? !!document.getElementById("debtGovOnly").checked : true,
     dutyNumber: document.getElementById("debtDutyNumber")?.value || "1",
     badgeNumber: document.getElementById("debtBadgeNumber")?.value || "",
-    debtorName: document.getElementById("debtDebtorName")?.value || "",
+    debtorFirstName: document.getElementById("debtDebtorFirstName")?.value || "",
+    debtorLastName: document.getElementById("debtDebtorLastName")?.value || "",
     debtorPhone: document.getElementById("debtDebtorPhone")?.value || "",
     debtorAddress: document.getElementById("debtDebtorAddress")?.value || "",
     idConfirmed: document.getElementById("debtIdConfirmed")?.value || "UNCONFIRMED",
@@ -6064,7 +6073,11 @@ function pullDebtToolFromReport(options = {}) {
   const seed = getLinkedReportSeed('debt');
   let changed = false;
 
-  changed = setIfPresent(state.debtTool, 'debtorName', seed.name, overwrite) || changed;
+  if (seed.name) {
+    const nameParts = seed.name.trim().split(/\s+/);
+    changed = setIfPresent(state.debtTool, 'debtorFirstName', nameParts[0] || '', overwrite) || changed;
+    changed = setIfPresent(state.debtTool, 'debtorLastName', nameParts.slice(1).join(' '), overwrite) || changed;
+  }
   changed = setIfPresent(state.debtTool, 'debtorPhone', seed.phone, overwrite) || changed;
   changed = setIfPresent(state.debtTool, 'debtorAddress', seed.address, overwrite) || changed;
   changed = setIfPresent(state.debtTool, 'vehicleRego', seed.rego, overwrite) || changed;
@@ -9519,14 +9532,20 @@ Is there anything you would like to add at this time?`;
         if (!text) return;
         const p = parseOCR(text);
         let filled = false;
-        const nameNode = document.getElementById("debtDebtorName");
+        const firstNameNode = document.getElementById("debtDebtorFirstName");
+        const lastNameNode = document.getElementById("debtDebtorLastName");
         const phoneNode = document.getElementById("debtDebtorPhone");
         const addrNode = document.getElementById("debtDebtorAddress");
         const regoNode = document.getElementById("debtVehicleRego");
         const modelNode = document.getElementById("debtVehicleModel");
-        if (p.offender.name && nameNode && !nameNode.value) {
-          nameNode.value = p.offender.name;
-          state.debtTool.debtorName = p.offender.name;
+        if (p.offender.name && firstNameNode && lastNameNode && !firstNameNode.value && !lastNameNode.value) {
+          const nameParts = p.offender.name.trim().split(/\s+/);
+          const fn = nameParts[0] || '';
+          const ln = nameParts.slice(1).join(' ');
+          firstNameNode.value = fn;
+          lastNameNode.value = ln;
+          state.debtTool.debtorFirstName = fn;
+          state.debtTool.debtorLastName = ln;
           filled = true;
         }
         if (p.offender.phone && phoneNode && !phoneNode.value) {
@@ -9552,7 +9571,7 @@ Is there anything you would like to add at this time?`;
           }
         }
         if (filled) { renderDebtToolUI(); throttledAutosave(); toast("LEAP paste auto-filled debtor details", "ok"); }
-        else if (p && p.offender && p.offender.name) { toast("Fields already filled — clear them first to re-apply LEAP paste", "warn"); }
+        else if (p && p.offender && p.offender.name) { toast("Name fields already filled — clear them first to re-apply LEAP paste", "warn"); }
       };
       debtLeapPaste.addEventListener("input", applyDebtLeapPaste);
       debtLeapPaste.addEventListener("paste", () => setTimeout(applyDebtLeapPaste, 0));
@@ -9562,7 +9581,8 @@ Is there anything you would like to add at this time?`;
       ["debtUseCase", "useCase"],
       ["debtDutyNumber", "dutyNumber"],
       ["debtBadgeNumber", "badgeNumber"],
-      ["debtDebtorName", "debtorName"],
+      ["debtDebtorFirstName", "debtorFirstName"],
+      ["debtDebtorLastName", "debtorLastName"],
       ["debtDebtorPhone", "debtorPhone"],
       ["debtDebtorAddress", "debtorAddress"],
       ["debtIdConfirmed", "idConfirmed"],
@@ -13407,7 +13427,7 @@ function pullSheriffLogsFromReport(options = {}) {
   if (typeof options === 'boolean') options = { showToast: options };
   const { overwrite = false, showToast = true } = options;
   const seed = getLinkedReportSeed('sheriffLogs');
-  const fromReport = norm(state.debtTool?.debtorName) || seed.name || norm(el.swWarrantName?.value);
+  const fromReport = (getDebtToolName() !== 'UNKNOWN' ? getDebtToolName() : '') || seed.name || norm(el.swWarrantName?.value);
   const phone = norm(state.debtTool?.debtorPhone) || seed.phone;
   const amount = normalizeSheriffAmount(state.debtTool?.total || '');
   const location = norm(state.debtTool?.stopLocation) || seed.location;
@@ -14669,15 +14689,18 @@ function updateDebtTabModeHint() {
     if (typeof options === "boolean") options = { showToast: options };
     const { overwrite = false, showToast = true } = options;
     const seed = getLinkedReportSeed("debt");
+    const nameParts = (seed.name || '').trim().split(/\s+/);
     const proposed = {
-      debtorName: seed.name,
+      debtorFirstName: nameParts[0] || '',
+      debtorLastName: nameParts.slice(1).join(' '),
       debtorPhone: seed.phone,
       vehicleRego: seed.rego,
       vehicleModel: seed.model,
       stopLocation: seed.location
     };
     const labelMap = {
-      debtorName: "Debtor name",
+      debtorFirstName: "Debtor first name",
+      debtorLastName: "Debtor last name",
       debtorPhone: "Debtor phone",
       vehicleRego: "Vehicle rego",
       vehicleModel: "Vehicle model",
@@ -14701,7 +14724,7 @@ function updateDebtTabModeHint() {
     if (typeof options === "boolean") options = { showToast: options };
     const { overwrite = false, showToast = true } = options;
     const seed = getLinkedReportSeed("sheriffLogs");
-    const fromReport = norm(state.debtTool?.debtorName) || seed.name || norm(el.swWarrantName?.value);
+    const fromReport = (getDebtToolName() !== 'UNKNOWN' ? getDebtToolName() : '') || seed.name || norm(el.swWarrantName?.value);
     const phone = norm(state.debtTool?.debtorPhone) || seed.phone;
     const amount = normalizeSheriffAmount(state.debtTool?.total || "");
     const location = norm(state.debtTool?.stopLocation) || seed.location;
