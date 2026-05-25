@@ -3532,7 +3532,9 @@ Date        P?    Amount        Offence
         : norm(offender.name) || norm(sw.warrantName) || norm(sw.owner) || norm(debt.debtorName),
       dob: norm(offender.dob),
       sex: norm(offender.sex),
-      address: norm(offender.address),
+      address: useDebtPriority
+        ? norm(debt.debtorAddress) || norm(offender.address)
+        : norm(offender.address) || norm(debt.debtorAddress),
       phone: useDebtPriority
         ? norm(debt.debtorPhone) || norm(offender.phone)
         : norm(offender.phone) || norm(debt.debtorPhone),
@@ -5922,6 +5924,7 @@ function pullDebtToolFromReport(options = {}) {
 
   changed = setIfPresent(state.debtTool, 'debtorName', seed.name, overwrite) || changed;
   changed = setIfPresent(state.debtTool, 'debtorPhone', seed.phone, overwrite) || changed;
+  changed = setIfPresent(state.debtTool, 'debtorAddress', seed.address, overwrite) || changed;
   changed = setIfPresent(state.debtTool, 'vehicleRego', seed.rego, overwrite) || changed;
   changed = setIfPresent(state.debtTool, 'vehicleModel', seed.model, overwrite) || changed;
   changed = setIfPresent(state.debtTool, 'stopLocation', seed.location, overwrite) || changed;
@@ -5934,6 +5937,8 @@ function pullDebtToolFromReport(options = {}) {
 
 function clearDebtTool() {
   state.debtTool = JSON.parse(JSON.stringify(INITIAL_STATE.debtTool));
+  const debtLeapPaste = document.getElementById("debtLeapPaste");
+  if (debtLeapPaste) debtLeapPaste.value = "";
   renderDebtToolUI();
   debouncedRenderPreview();
   throttledAutosave();
@@ -8030,7 +8035,10 @@ Is there anything you would like to add at this time?`;
             const re = new RegExp(`(?:^|\\b)${escaped}[\\s:;.,-]*${valuePattern.source}`, 'i');
             const m = lineU.match(re);
             if (m && m[1]) {
-              const value = clean(cleanedRaw[i].slice(m.index + m[0].length - m[1].length));
+              let raw = cleanedRaw[i].slice(m.index + m[0].length - m[1].length);
+              raw = raw.replace(/\s+[A-Z][A-Z. \/-]*\s*:.*$/, '');
+              if (/^[A-Z][A-Z. \/-]*\s*:/i.test(raw)) continue;
+              const value = clean(raw);
               if (value) return value;
             }
           }
@@ -13245,6 +13253,8 @@ function updateSheriffLogsField(key, value) {
 
 function clearSheriffLogsTool() {
   state.sheriffLogs = JSON.parse(JSON.stringify(INITIAL_STATE.sheriffLogs));
+  const slLeapPaste = document.getElementById('slLeapPaste');
+  if (slLeapPaste) slLeapPaste.value = '';
   renderSheriffLogsTool();
   throttledAutosave();
   toast('Sheriff log helper cleared', 'ok');
