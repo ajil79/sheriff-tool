@@ -1573,6 +1573,7 @@ Date        P?    Amount        Offence
         <div style="font-size:13px;color:var(--text);line-height:1.5">Use this for roadside stops as well as follow-up debt enforcement. Keep the debtor details here so the result can feed logs, reports, and warrants cleanly.</div><div id="debtLinkStatus" style="margin-top:8px;font-size:12px;color:var(--muted)">Waiting for linked report details.</div>
       </div>
     </div>
+    <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— auto-fills name, phone &amp; vehicle below</span></div><textarea id="debtLeapPaste" rows="3" placeholder="Paste LEAP profile here to auto-fill debtor details"></textarea></label>
     <div class="grid2" style="margin-bottom:10px">
       <label><div class="lbl">Debtor Full Name</div><input id="debtDebtorName" placeholder="James Brown"/></label>
       <label><div class="lbl">Debtor Phone</div><input id="debtDebtorPhone" placeholder="123456"/></label>
@@ -9353,6 +9354,46 @@ Is there anything you would like to add at this time?`;
         state.debtTool.rawInput = el.debtInput.value || "";
         throttledAutosave();
       });
+    }
+
+    const debtLeapPaste = document.getElementById("debtLeapPaste");
+    if (debtLeapPaste && !debtLeapPaste.dataset.bound) {
+      debtLeapPaste.dataset.bound = "1";
+      const applyDebtLeapPaste = () => {
+        const text = debtLeapPaste.value.trim();
+        if (!text) return;
+        const p = parseOCR(text);
+        let filled = false;
+        const nameNode = document.getElementById("debtDebtorName");
+        const phoneNode = document.getElementById("debtDebtorPhone");
+        const regoNode = document.getElementById("debtVehicleRego");
+        const modelNode = document.getElementById("debtVehicleModel");
+        if (p.offender.name && nameNode && !nameNode.value) {
+          nameNode.value = p.offender.name;
+          state.debtTool.debtorName = p.offender.name;
+          filled = true;
+        }
+        if (p.offender.phone && phoneNode && !phoneNode.value) {
+          phoneNode.value = p.offender.phone;
+          state.debtTool.debtorPhone = p.offender.phone;
+          filled = true;
+        }
+        if (p.vehicle) {
+          if (p.vehicle.rego && regoNode && !regoNode.value) {
+            regoNode.value = p.vehicle.rego;
+            state.debtTool.vehicleRego = p.vehicle.rego;
+            filled = true;
+          }
+          if (p.vehicle.model && modelNode && !modelNode.value) {
+            modelNode.value = p.vehicle.model;
+            state.debtTool.vehicleModel = p.vehicle.model;
+            filled = true;
+          }
+        }
+        if (filled) { renderDebtToolUI(); throttledAutosave(); toast("LEAP paste auto-filled debtor details", "ok"); }
+      };
+      debtLeapPaste.addEventListener("input", applyDebtLeapPaste);
+      debtLeapPaste.addEventListener("paste", () => setTimeout(applyDebtLeapPaste, 0));
     }
 
     [
