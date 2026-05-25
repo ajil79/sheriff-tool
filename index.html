@@ -955,81 +955,6 @@
         <div id="licenseWarningText" style="font-size:14px; line-height:1.6"></div>
       </div>
 
-      <!-- Traffic Warrant -->
-      <div class="card" id="trafficWarrantCard" style="display:none" data-section="trafficWarrant">
-        <h2>Traffic Warrant Details</h2>
-        <div class="fields">
-          <!-- MELROADS paste -->
-          <div style="margin-bottom:10px;padding:10px;background:rgba(108,138,255,0.06);border:1px solid rgba(108,138,255,0.18);border-radius:10px">
-            <div class="lbl" style="margin-bottom:6px">Paste MELROADS Excerpt <span style="font-weight:400;color:var(--muted);font-size:10px">— auto-fills vehicle fields below</span></div>
-            <textarea id="twMelroadsPaste" rows="4" placeholder="Paste MELROADS excerpt here..." style="font-size:11px;line-height:1.4"></textarea>
-          </div>
-          <div class="grid2">
-            <label><div class="lbl">Rego</div><input id="twRego" placeholder="ABC 123"/></label>
-            <label><div class="lbl">Model</div><input id="twModel" placeholder="PEGASSI TEMPESTA"/></label>
-          </div>
-          <div class="grid3">
-            <label><div class="lbl">Colour</div><input id="twColour"/></label>
-            <label><div class="lbl">Registered</div><select id="twRegistered"><option value="">-</option><option value="YES">YES</option><option value="NO">NO</option></select></label>
-            <label><div class="lbl">Expires</div><input id="twRegoExpires"/></label>
-          </div>
-          <div class="grid2">
-            <label><div class="lbl">Stolen</div><select id="twStolen"><option value="">-</option><option value="NO">NO</option><option value="YES">YES</option></select></label>
-            <label><div class="lbl">Suspended</div><select id="twSuspended"><option value="">-</option><option value="NO">NO</option><option value="YES">YES</option></select></label>
-          </div>
-          <label><div class="lbl">Registered Owner</div><input id="twOwner"/></label>
-          <label><div class="lbl">Location Observed</div><input id="twLocation"/></label>
-          <div class="grid3">
-            <label><div class="lbl">Time</div><input id="twTime" placeholder="20:04 HOURS"/></label>
-            <label><div class="lbl">Date</div><input id="twDate" placeholder="23/01/2026"/></label>
-            <label><div class="lbl">Speed</div><input id="twSpeed" placeholder="261km/h in 80 zone"/></label>
-          </div>
-          <div class="divider"></div>
-          <h2 style="margin:0 0 8px">Processing Actions</h2>
-          <div class="grid2">
-            <label><div class="lbl">Licence Suspension (hours)</div><input id="twSuspHours" placeholder="24"/></label>
-            <label><div class="lbl">Approved By</div><input id="twApprovedBy"/></label>
-          </div>
-          <div style="margin-top:8px;padding:10px;background:rgba(255,180,80,0.06);border:1px solid rgba(255,180,80,0.18);border-radius:10px">
-            <div class="lbl" style="margin-bottom:6px">Impound Vehicle</div>
-            <div class="grid2">
-              <label><div class="lbl">Impound Offence #</div>
-                <select id="twImpoundNum">
-                  <option value="">— No Impound —</option>
-                  <option value="1">#1 — 12 Hours / $6,500 (LSC+)</option>
-                  <option value="2">#2 — 24 Hours / $13,000 (LSC+)</option>
-                  <option value="3">#3 — 48 Hours / $19,500 (LSC+)</option>
-                  <option value="4">#4 — 7 Days / $26,000 (LSC+)</option>
-                  <option value="5">#5 — 10 Days / $39,000 (LSC+)</option>
-                  <option value="6">#6 — 14 Days / $52,000 (SGT+)</option>
-                  <option value="7">#7 — 18 Days / $65,000 (SGT+)</option>
-                  <option value="8">#8 — 24 Days / $78,000 (SGT+)</option>
-                  <option value="9">#9 — 28 Days / $91,000 (SGT+)</option>
-                  <option value="10">#10 — 35 Days / $104,000 (SGT+)</option>
-                  <option value="11">#11 — 40 Days / $117,000 (SGT+)</option>
-                  <option value="12">#12 — VEHICLE CRUSH (SGT+)</option>
-                </select>
-              </label>
-              <div>
-                <div class="lbl">Auto-filled</div>
-                <div id="twImpoundInfo" style="padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:8px;font-size:12px;color:var(--muted);min-height:36px;display:flex;align-items:center">Select an offence number</div>
-              </div>
-            </div>
-            <div class="grid2" style="margin-top:8px">
-              <label><div class="lbl">Duration</div><input id="twImpoundDays" readonly style="background:rgba(0,0,0,0.2);cursor:default"/></label>
-              <label><div class="lbl">Fine Amount</div><input id="twFineAmount" readonly style="background:rgba(0,0,0,0.2);cursor:default"/></label>
-            </div>
-          </div>
-          <label><div class="lbl">Reason for PIN</div><textarea id="twReason" rows="3"></textarea></label>
-          <label><div class="lbl">Actions Required</div><textarea id="twActions" rows="3"></textarea></label>
-          <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-top:4px">
-            <input type="checkbox" id="twFailedIntercept" style="width:auto; transform:scale(1.3)"/>
-            <span>Failed attempt to intercept vehicle (excessive speed / public safety risk)</span>
-          </label>
-          <label><div class="lbl">Legislation Notes (optional)</div><textarea id="twLegNotes" rows="3" placeholder="Leave blank for default Road Safety Act notes"></textarea></label>
-        </div>
-      </div>
-
       <!-- Sheriff Warrant -->
       <div class="card" id="sheriffWarrantCard" style="display:none">
         <h2 id="sharedWarrantCardTitle">Subject / Vehicle Details</h2>
@@ -1076,106 +1001,6 @@
             <label><div class="lbl">Debt Narrative Override (optional)</div><textarea id="swDebtNarrative" rows="3" placeholder="Leave blank to auto-build the debt breach wording"></textarea></label>
           </div>
           <label><div class="lbl">Instruction Block (optional override)</div><input id="swInstruction" placeholder="Leave blank for default"/></label>
-        </div>
-      </div>
-
-      <!-- Bail Conditions -->
-      <div class="card" id="bailConditionsCard" style="display:none">
-        <h2>Bail Conditions Details</h2>
-        <div class="fields">
-          <div>
-            <div class="lbl" style="margin-bottom:8px">Bail Multipliers</div>
-            <div style="display:grid; gap:10px; margin-bottom:16px">
-              <label style="display:flex; align-items:center; gap:10px; cursor:pointer">
-                <input type="checkbox" id="bcOrgMember" style="width:auto; transform:scale(1.3)"/>
-                <span>Known member of a <strong>violent</strong> org/crew</span>
-              </label>
-              <label style="display:flex; align-items:center; gap:10px; cursor:pointer">
-                <input type="checkbox" id="bcViolence" style="width:auto; transform:scale(1.3)"/>
-                <span>Has Violence / Violence Police flag</span>
-              </label>
-              <label style="display:flex; align-items:center; gap:10px; cursor:pointer">
-                <input type="checkbox" id="bcFPO" style="width:auto; transform:scale(1.3)"/>
-                <span>Has Firearm Prohibition Order (FPO)</span>
-              </label>
-            </div>
-          </div>
-          
-          <div>
-            <div class="lbl" style="margin-bottom:8px">LEAP Criminal History (Optional)</div>
-            <div class="hint" style="margin-bottom:10px">
-              <span>📋</span>
-              <span>Paste LEAP Criminal History from MDT. Unpaid charges will be added to bail total.</span>
-            </div>
-            <textarea id="bcLeapHistory" rows="6" placeholder="===========================LEAP CRIMINAL HISTORY=========================
-
---------------------------------------------------------------------------
-Date        P?    Amount        Offence
---------------------------------------------------------------------------
-12/05/2024    N    $2000            CHARGE: Dangerous Driving
-12/05/2024    N    $3000            CHARGE: Engage in a Police Pursuit"></textarea>
-          </div>
-          
-          <div>
-            <div class="lbl" style="margin-bottom:8px">Auto-Calculate Bail Amount from Charges</div>
-            <div style="padding:16px; background:rgba(0,200,100,0.12); border:1px solid rgba(0,200,100,0.3); border-radius:12px; margin-bottom:16px">
-              <div style="display:flex; justify-content:space-between; align-items:center">
-                <span style="font-weight:900; font-size:15px">Total Bail Amount:</span>
-                <span id="calculatedBail" style="font-size:24px; font-weight:900; color:var(--ok)">$0</span>
-              </div>
-              <div id="bailBreakdown" style="margin-top:12px; font-size:12px; color:var(--muted)"></div>
-              <button class="btn" id="useBailAmountBtn" style="margin-top:10px; background:rgba(0,200,100,0.2); border:1px solid rgba(0,200,100,0.4)" title="Apply the calculated bail amount to the form">Use This Amount</button>
-            </div>
-          </div>
-          
-          <label><div class="lbl">Bail Amount (Final)</div><input id="bcBailAmount" placeholder="$34,550"/></label>
-          <div class="grid2">
-            <label><div class="lbl">Date</div><input id="bcDate" placeholder="e.g. 15/03/2026 or 09/03/26"/></label>
-            <label><div class="lbl">Time</div><input id="bcTime" placeholder="18:00 PM"/></label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Field Contact -->
-      <div class="card" id="fieldContactCard" style="display:none" data-section="fieldContact">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Field Contact Report</h2><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn" id="fcCopySubjectBtn" type="button" style="font-size:11px;padding:6px 10px" title="Copy the subject/offender details for use in this section">Copy Subject</button><button class="btn" id="fcCopyPrelimBtn" type="button" style="font-size:11px;padding:6px 10px" title="Copy the date/time and location for use in this section">Copy Time/Location</button><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div></div>
-        <div class="fields">
-          <div class="hint" style="margin-bottom:10px"><span>🔗</span><span>Use the buttons above to pull the current report subject or preliminary details without merging this into the main offender card.</span></div>
-          <label><div class="lbl">Person Name</div><div class="ac-wrap" style="position:relative"><input id="fcName" autocomplete="off"/><div id="acFcName" class="ac-drop" style="display:none"></div></div></label>
-          <div class="grid2">
-            <label><div class="lbl">DOB</div><div class="ac-wrap" style="position:relative"><input id="fcDOB" autocomplete="off" placeholder="e.g. 15/03/2026 or 09/03/26"/><div id="acFcDOB" class="ac-drop" style="display:none"></div></div></label>
-            <label><div class="lbl">Phone</div><div class="ac-wrap" style="position:relative"><input id="fcPhone" autocomplete="off"/><div id="acFcPhone" class="ac-drop" style="display:none"></div></div></label>
-          </div>
-          <div class="grid2">
-            <label><div class="lbl">Time</div><input id="fcTime"/></label>
-            <label><div class="lbl">Date</div><input id="fcDate"/></label>
-          </div>
-          <label><div class="lbl">Location</div><input id="fcLocation"/></label>
-          <label><div class="lbl">Type of Contact</div><textarea id="fcReason" rows="3" placeholder="e.g. Amnesty Act Interaction, Welfare Check, Community Engagement"></textarea></label>
-          <label><div class="lbl">Summary of Events</div><textarea id="fcSummary" rows="4"></textarea></label>
-          <label><div class="lbl">Additional Notes</div><textarea id="fcNotes" rows="3"></textarea></label>
-        </div>
-      </div>
-
-      <!-- Search & Seizure -->
-      <div class="card" id="searchSeizureCard" style="display:none" data-section="searchSeizure">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h2 style="margin:0">Search &amp; Seizure</h2><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn" id="ssCopySubjectBtn" type="button" style="font-size:11px;padding:6px 10px" title="Copy the subject/offender details for use in this section">Copy Subject</button><button class="btn" id="ssCopyPrelimBtn" type="button" style="font-size:11px;padding:6px 10px" title="Copy the date/time and location for use in this section">Copy Time/Location</button><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div></div>
-        <div class="fields">
-          <div class="hint" style="margin-bottom:10px"><span>🔗</span><span>Use the buttons above to pull the current report subject or preliminary details without merging this into the main offender card.</span></div>
-          <label><div class="lbl">Person Name</div><div class="ac-wrap" style="position:relative"><input id="ssName" autocomplete="off"/><div id="acSsName" class="ac-drop" style="display:none"></div></div></label>
-          <div class="grid2">
-            <label><div class="lbl">DOB</div><div class="ac-wrap" style="position:relative"><input id="ssDOB" autocomplete="off" placeholder="e.g. 15/03/2026 or 09/03/26"/><div id="acSsDOB" class="ac-drop" style="display:none"></div></div></label>
-            <label><div class="lbl">Phone</div><div class="ac-wrap" style="position:relative"><input id="ssPhone" autocomplete="off"/><div id="acSsPhone" class="ac-drop" style="display:none"></div></div></label>
-          </div>
-          <div class="grid2">
-            <label><div class="lbl">Time</div><input id="ssTime"/></label>
-            <label><div class="lbl">Date</div><input id="ssDate"/></label>
-          </div>
-          <label><div class="lbl">Location</div><input id="ssLocation"/></label>
-          <label><div class="lbl">Legal Authority</div><input id="ssAuthority" placeholder="Section 10, Controlled Substances Act"/></label>
-          <label><div class="lbl">Reason for Search</div><textarea id="ssReason" rows="3"></textarea></label>
-          <label><div class="lbl">Search Summary</div><textarea id="ssSummary" rows="4"></textarea></label>
-          <label><div class="lbl">Additional Notes</div><textarea id="ssNotes" rows="3"></textarea></label>
         </div>
       </div>
 
@@ -1256,52 +1081,6 @@ Date        P?    Amount        Offence
         <div class="hint" style="margin-bottom:8px"><span>💡</span><span>Click an item above to fill — set qty &amp; serial, then hit Add. Or type a custom item directly.</span></div>
 
         <textarea id="itemsList" rows="5" style="margin-top:4px" placeholder="Items appear here"></textarea>
-      </div>
-
-      <!-- Vehicle Inspection -->
-      <div class="card" id="vehicleInspectionCard" style="display:none" data-section="vehicleInspection">
-        <h2>Vehicle Inspection — MVS 2025</h2>
-        <div class="fields">
-          <div class="grid3">
-            <label><div class="lbl">Vehicle Class</div>
-              <select id="vicVehicleType">
-                <option value="">— Select —</option>
-                <option value="car">Car / SUV / Ute</option>
-                <option value="bike">Motorcycle</option>
-                <option value="heavy">Heavy Vehicle</option>
-              </select>
-            </label>
-            <label><div class="lbl">Rego</div><input id="vicRego" placeholder="ABC 123" style="text-transform:uppercase"/></label>
-            <label><div class="lbl">Make / Model</div><input id="vicMake" placeholder="e.g. Vapid Interceptor"/></label>
-          </div>
-          <div class="grid3">
-            <label><div class="lbl">Colour</div><input id="vicColour"/></label>
-            <label><div class="lbl">Driver / Owner</div><input id="vicDriver" style="text-transform:uppercase"/></label>
-            <label><div class="lbl">Location</div><input id="vicLocation"/></label>
-          </div>
-        </div>
-
-        <!-- Idle -->
-        <div id="vicIdle" style="padding:20px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--border);border-radius:10px;margin-top:12px">
-          Select a vehicle class above to start the checklist
-        </div>
-
-        <!-- Checklist -->
-        <div id="vicChecklistWrap" style="display:none;margin-top:12px">
-          <div style="display:flex;gap:14px;margin-bottom:8px;font-size:10px;font-weight:700">
-            <span style="color:rgba(255,80,80,0.8)">■ MANDATORY — instant defect</span>
-            <span style="color:rgba(255,180,80,0.8)">■ ADVISORY — fix-it notice</span>
-          </div>
-          <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px" id="vicItems"></div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:11px;color:var(--muted)">
-            <span id="vicCheckedCount">0</span> / <span id="vicTotalCount">0</span> checked
-            <div style="flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
-              <div id="vicProgressBar" style="height:100%;width:0%;background:var(--accent);transition:width 0.25s"></div>
-            </div>
-          </div>
-          <textarea id="vicNotes" rows="2" placeholder="Officer notes / observations (optional)"></textarea>
-          <div id="vicOutcomeBanner" style="display:none;padding:12px 16px;border-radius:10px;margin-top:10px;font-weight:800;font-size:13px"></div>
-        </div>
       </div>
 
       <!-- Officers -->
@@ -4466,12 +4245,6 @@ Date        P?    Amount        Offence
     licenseClass: "",
     ocrWeaponsOnly: false,
     ocrText: "",
-    trafficWarrant: {
-      rego: "", model: "", colour: "", registered: "", regoExpires: "",
-      stolen: "NO", suspended: "NO", owner: "", location: "", time: "", date: "",
-      speed: "", reason: "", actions: "", legNotes: "", suspHours: "", impoundNum: "", impoundDays: "",
-      fineAmount: "", approvedBy: "", demeritPoints: "", failedIntercept: false
-    },
     sheriffWarrant: {
       idStatus: "UNCONFIRMED", idBasis: "", warrantName: "", time: "", date: "", location: "",
       details: "", paste: "", interactionType: "vehicle", rego: "", model: "", colour: "", registered: "",
@@ -4523,20 +4296,6 @@ Date        P?    Amount        Offence
       outcome: "",
       lastPreset: "",
       presetPreview: ""
-    },
-    bailConditions: {
-      bailAmount: "", date: "", time: "", orgMember: false, violence: false, fpo: false, leapHistory: ""
-    },
-    fieldContact: {
-      name: "", dob: "", phone: "", time: "", date: "", location: "",
-      reason: "", summary: "", notes: ""
-    },
-    searchSeizure: {
-      name: "", dob: "", phone: "", time: "", date: "", location: "",
-      authority: "", reason: "", summary: "", notes: ""
-    },
-    vehicleInspection: {
-      vehicleType: "", rego: "", make: "", colour: "", driver: "", location: "", notes: "", checklistState: {}
     },
     itemsList: "",
     officersList: "",
