@@ -1578,6 +1578,7 @@ Date        P?    Amount        Offence
       <label><div class="lbl">Debtor Full Name</div><input id="debtDebtorName" placeholder="James Brown"/></label>
       <label><div class="lbl">Debtor Phone</div><input id="debtDebtorPhone" placeholder="123456"/></label>
     </div>
+    <label style="margin-bottom:10px"><div class="lbl">Debtor Address</div><input id="debtDebtorAddress" placeholder="Sandy Shores, Blaine County"/></label>
     <div class="grid2" style="margin-bottom:10px">
       <label>
         <div class="lbl">ID Confirmed</div>
@@ -4379,6 +4380,7 @@ Date        P?    Amount        Offence
       badgeNumber: "",
       debtorName: "",
       debtorPhone: "",
+      debtorAddress: "",
       idConfirmed: "UNCONFIRMED",
       vehicleRego: "",
       vehicleModel: "",
@@ -5561,6 +5563,7 @@ function renderDebtToolUI() {
     debtBadgeNumber: dt.badgeNumber || "",
     debtDebtorName: dt.debtorName || "",
     debtDebtorPhone: dt.debtorPhone || "",
+    debtDebtorAddress: dt.debtorAddress || "",
     debtIdConfirmed: dt.idConfirmed || "UNCONFIRMED",
     debtVehicleRego: dt.vehicleRego || "",
     debtVehicleModel: dt.vehicleModel || "",
@@ -5644,6 +5647,7 @@ function syncDebtToolFromInputs() {
     badgeNumber: document.getElementById("debtBadgeNumber")?.value || "",
     debtorName: document.getElementById("debtDebtorName")?.value || "",
     debtorPhone: document.getElementById("debtDebtorPhone")?.value || "",
+    debtorAddress: document.getElementById("debtDebtorAddress")?.value || "",
     idConfirmed: document.getElementById("debtIdConfirmed")?.value || "UNCONFIRMED",
     vehicleRego: document.getElementById("debtVehicleRego")?.value || "",
     vehicleModel: document.getElementById("debtVehicleModel")?.value || "",
@@ -9366,6 +9370,7 @@ Is there anything you would like to add at this time?`;
         let filled = false;
         const nameNode = document.getElementById("debtDebtorName");
         const phoneNode = document.getElementById("debtDebtorPhone");
+        const addrNode = document.getElementById("debtDebtorAddress");
         const regoNode = document.getElementById("debtVehicleRego");
         const modelNode = document.getElementById("debtVehicleModel");
         if (p.offender.name && nameNode && !nameNode.value) {
@@ -9376,6 +9381,11 @@ Is there anything you would like to add at this time?`;
         if (p.offender.phone && phoneNode && !phoneNode.value) {
           phoneNode.value = p.offender.phone;
           state.debtTool.debtorPhone = p.offender.phone;
+          filled = true;
+        }
+        if (p.offender.address && addrNode && !addrNode.value) {
+          addrNode.value = p.offender.address;
+          state.debtTool.debtorAddress = p.offender.address;
           filled = true;
         }
         if (p.vehicle) {
@@ -9402,6 +9412,7 @@ Is there anything you would like to add at this time?`;
       ["debtBadgeNumber", "badgeNumber"],
       ["debtDebtorName", "debtorName"],
       ["debtDebtorPhone", "debtorPhone"],
+      ["debtDebtorAddress", "debtorAddress"],
       ["debtIdConfirmed", "idConfirmed"],
       ["debtVehicleRego", "vehicleRego"],
       ["debtVehicleModel", "vehicleModel"],
