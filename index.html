@@ -824,6 +824,7 @@
         <select id="reportType">
           <option value="sheriff_arrest">Sheriff Warrant for Arrest</option>
           <option value="sheriff_warrant">Sheriff Warrant for Questioning</option>
+          <option value="sheriff_court">Sheriff Court Warrant</option>
           <option value="sheriff_debt">Sheriff Debt Enforcement Warrant</option>
         </select>
         <div class="hint" style="margin-top:8px"><span>💡</span><span>Date/time, callsign and unit can still auto-fill from MDT paste or your saved template, but you can now edit them here as well.</span></div>
@@ -999,6 +1000,22 @@
               <label><div class="lbl">Impound Fee</div><input id="swImpoundPrice" placeholder="e.g. $300k"/><div class="muted" style="font-size:11px;margin-top:6px">Impound amount. Output wording stays as city wording.</div></label>
             </div>
             <label><div class="lbl">Debt Narrative Override (optional)</div><textarea id="swDebtNarrative" rows="3" placeholder="Leave blank to auto-build the debt breach wording"></textarea></label>
+          </div>
+          <div id="sheriffCourtFields" style="display:none">
+            <div class="divider"></div>
+            <h2 style="margin:0 0 8px">Court Warrant Details</h2>
+            <label><div class="lbl">Charges Before the Court</div><textarea id="swCourtCharges" rows="4" placeholder="One per line: Charge Name | LEVEL&#10;e.g. Contempt of Court | MEDIUM&#10;Failure to Attend | HIGH"></textarea><div class="muted" style="font-size:11px;margin-top:6px">One charge per line as <strong>Charge Name | LEVEL</strong>. Levels: LOW / MEDIUM / HIGH / MAX (defaults to MEDIUM if omitted).</div></label>
+            <div class="grid2">
+              <label><div class="lbl">Imprisonment (weeks)</div><input id="swImprisonmentWeeks" inputmode="numeric" placeholder="e.g. 40"/></label>
+              <label><div class="lbl">Court Fees</div><input id="swCourtFees" inputmode="numeric" placeholder="e.g. 25,000"/></label>
+            </div>
+            <label><div class="lbl">Court-Ordered Actions</div><input id="swCourtActions" placeholder="e.g. 15 Actions"/></label>
+            <label><div class="lbl">Sentencing Magistrate</div><input id="swMagistrate" placeholder="e.g. Magistrate Anderson"/></label>
+            <label><div class="lbl">Evidence Override (optional)</div><textarea id="swCourtEvidence" rows="3" placeholder="Leave blank for default court-records wording"></textarea></label>
+          </div>
+          <div id="swMrcWeeksWrap" style="display:none">
+            <div class="divider"></div>
+            <label><div class="lbl">MRC Remand (weeks)</div><input id="swMrcWeeks" inputmode="numeric" placeholder="up to 60"/><div class="muted" style="font-size:11px;margin-top:6px">Handbook recommends a maximum of 60 weeks MRC unless directed by court or leadership.</div></label>
           </div>
           <label><div class="lbl">Instruction Block (optional override)</div><input id="swInstruction" placeholder="Leave blank for default"/></label>
         </div>
@@ -1288,6 +1305,7 @@
               </div>
             </label>
           </div>
+          <label><div class="lbl">Callsign / SRF # <span style="font-weight:400;color:var(--muted);font-size:11px">— appears in the warrant signature, e.g. "Stephen Palmes - SRF 116"</span></div><input id="sigCallsign" autocomplete="off" placeholder="e.g. SRF 116"/></label>
         </div>
         <div id="signaturePoolPanel" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
@@ -4249,6 +4267,7 @@
       idStatus: "UNCONFIRMED", idBasis: "", warrantName: "", time: "", date: "", location: "",
       details: "", paste: "", interactionType: "vehicle", rego: "", model: "", colour: "", registered: "",
       regoExpires: "", stolen: "NO", suspended: "NO", owner: "", instruction: "", debtDeadline: "", approvedBy: "", impoundTime: "", impoundPrice: "", debtNarrative: "",
+      courtCharges: "", imprisonmentWeeks: "", courtActions: "", courtFees: "", magistrate: "", courtEvidence: "", mrcWeeks: "",
       sigRank: "Senior Sheriff", sigName: ""
     },
     debtTool: {
@@ -4315,6 +4334,7 @@
     sigName: "",
     sigRank: "",
     sigDivision: "",
+    sigCallsign: "",
     officerCallsigns: {},
     savedCallsigns: [],
     excludedSections: []
@@ -4721,6 +4741,13 @@
     swImpoundTime: document.getElementById("swImpoundTime"),
     swImpoundPrice: document.getElementById("swImpoundPrice"),
     swDebtNarrative: document.getElementById("swDebtNarrative"),
+    swCourtCharges: document.getElementById("swCourtCharges"),
+    swImprisonmentWeeks: document.getElementById("swImprisonmentWeeks"),
+    swCourtActions: document.getElementById("swCourtActions"),
+    swCourtFees: document.getElementById("swCourtFees"),
+    swMagistrate: document.getElementById("swMagistrate"),
+    swCourtEvidence: document.getElementById("swCourtEvidence"),
+    swMrcWeeks: document.getElementById("swMrcWeeks"),
     swInstruction: document.getElementById("swInstruction"),
     debtInput: document.getElementById("debtInput"),
     debtGovOnly: document.getElementById("debtGovOnly"),
@@ -4771,6 +4798,7 @@
     sigName: document.getElementById("sigName"),
     sigRank: document.getElementById("sigRank"),
     sigDivision: document.getElementById("sigDivision"),
+    sigCallsign: document.getElementById("sigCallsign"),
     
     // UI
     preview: document.getElementById("preview"),
@@ -5841,6 +5869,7 @@ function clearDebtTool() {
     arrest: "ARREST REPORT",
     sheriff_arrest: "OUTSTANDING WARRANT FOR ARREST",
     sheriff_warrant: "OUTSTANDING WARRANT FOR QUESTIONING",
+    sheriff_court: "OUTSTANDING COURT WARRANT",
     sheriff_debt: "OUTSTANDING DEBT ENFORCEMENT WARRANT",
     sheriff_arrest_legacy: "ARREST WARRANT",
     sheriff_warrant_legacy: "CRIMINAL WARRANT",
@@ -5853,7 +5882,7 @@ function clearDebtTool() {
 
   // ── Sheriff mode constants — declared here so all hoisted functions can access them ──
   const SHERIFF_ONLY_BUILD = true;
-  const ENABLED_REPORT_TYPES = ["sheriff_arrest", "sheriff_warrant", "sheriff_debt"];
+  const ENABLED_REPORT_TYPES = ["sheriff_arrest", "sheriff_warrant", "sheriff_court", "sheriff_debt"];
   const LEGACY_REPORT_TYPES = ["arrest", "sheriff_arrest_legacy", "sheriff_warrant_legacy", "bail_conditions", "traffic_warrant", "field_contact", "search_seizure", "vehicle_inspection"];
   const LEGACY_COMPAT_STUB_IDS = ["debtGovOnly", "debtRoadsideNotice", "debtDutyNumber", "debtBadgeNumber", "debtCallsignOutput", "debtCopyCallsignBtn", "debtCopyCallScriptBtn", "debtCopyPairedNoteBtn", "debtCallsignWarn"];
   let dirtySectionState = {};
@@ -5871,8 +5900,17 @@ function clearDebtTool() {
     
     const debtFields = document.getElementById("sheriffDebtFields");
     if (debtFields) debtFields.style.display = type === "sheriff_debt" ? "block" : "none";
+    const courtFields = document.getElementById("sheriffCourtFields");
+    if (courtFields) courtFields.style.display = type === "sheriff_court" ? "block" : "none";
+    const mrcWrap = document.getElementById("swMrcWeeksWrap");
+    if (mrcWrap) mrcWrap.style.display = type === "sheriff_arrest" ? "block" : "none";
+    const vehSection = document.getElementById("swVehicleSection");
+    if (vehSection) {
+      const onFoot = state.sheriffWarrant.interactionType === "foot";
+      vehSection.style.display = (type === "sheriff_court" || onFoot) ? "none" : "block";
+    }
     const sigDivisionWrap = document.getElementById("sigDivisionWrap");
-    if (sigDivisionWrap) sigDivisionWrap.style.display = ["sheriff_arrest","sheriff_warrant","sheriff_debt"].includes(type) ? "none" : "block";
+    if (sigDivisionWrap) sigDivisionWrap.style.display = ["sheriff_arrest","sheriff_warrant","sheriff_court","sheriff_debt"].includes(type) ? "none" : "block";
     // Hide all optional cards
     const cards = [
       el.sheriffWarrantCard,
@@ -5907,6 +5945,10 @@ function clearDebtTool() {
       el.sentenceCard.style.display = "block";
       el.narrativeCard.style.display = "block";
       el.interviewCard.style.display = "block";
+    } else if (type === "sheriff_court") {
+      el.sheriffWarrantCard.style.display = "block";
+      el.officersCard.style.display = "block";
+      el.narrativeCard.style.display = "block";
     } else if (type === "sheriff_debt") {
       el.sheriffWarrantCard.style.display = "block";
       el.sheriffRefCard.style.display = "block";
@@ -5924,6 +5966,8 @@ function clearDebtTool() {
       output = generateSheriffArrest();
     } else if (type === "sheriff_warrant") {
       output = generateSheriffWarrant();
+    } else if (type === "sheriff_court") {
+      output = generateSheriffCourt();
     } else if (type === "sheriff_debt") {
       output = generateSheriffDebtWarrant();
     } else {
@@ -5962,6 +6006,38 @@ function clearDebtTool() {
     });
     lines.push("");
     return lines;
+  }
+
+  // ── Shared handbook-aligned warrant boilerplate (arrest / questioning / court) ──
+  // charge:true adds the "charge with the above offence" line (arrest/questioning only —
+  // a Court Warrant is post-conviction so there is no offence to charge).
+  function sheriffActionNotice(opts = {}) {
+    const lines = [
+      "ACTION NOTICE",
+      "PLEASE DETAIN THE INDIVIDUAL AND CONTACT ANY AVAILABLE SHERIFFS IMMEDIATELY."
+    ];
+    if (opts.charge) lines.push("PLEASE CHARGE WITH THE ABOVE OFFENCE IF ENOUGH EVIDENCE.");
+    lines.push("IF NO SHERIFF IS AVAILABLE, DO NOT CLEAR THE WARRANT - MAKE A NOTE AND ADVISE SHERIFFS IN THE DPS EMAILS.");
+    return lines;
+  }
+
+  // Normalises a signature callsign to "SRF ###" form
+  function formatSheriffCallsign(raw) {
+    const cs = norm(raw);
+    if (!cs) return "";
+    if (/^srf\b/i.test(cs)) return cs.replace(/^srf/i, "SRF");
+    if (/^\d+$/.test(cs)) return "SRF " + cs;
+    return cs;
+  }
+
+  // Builds the handbook signature block lines shared by all sheriff warrants
+  function buildSheriffSignatureLines() {
+    const rank = norm(state.sigRank) || "Senior Sheriff";
+    const rankLine = /^sheriff\b/i.test(rank) ? rank : "Sheriff " + rank;
+    const name = norm(state.sigName) || "NIL";
+    const cs = formatSheriffCallsign(state.sigCallsign);
+    const nameLine = cs ? `${name} - ${cs}` : name;
+    return ["Signed:", rankLine, nameLine, "VICTORIAN DEPT. OF JUSTICE"];
   }
 
   // Sheriff Arrest Generator
@@ -6031,21 +6107,23 @@ function clearDebtTool() {
     if (!sectionExcluded("sentence")) {
       const sentenceNum = ++dn;
       add(`(${sentenceNum}) Sentence:`);
+      const mrcWeeks = norm(sw.mrcWeeks);
+      if (mrcWeeks) add(`- The individual is to be remanded to MRC for ${mrcWeeks} weeks.`);
       if (norm(state.sentence)) {
         add(`- ${norm(state.sentence)}`);
-      } else {
+      } else if (!mrcWeeks) {
         add("- NIL");
       }
       if (norm(state.sentenceApproval)) add(`- ${norm(state.sentenceApproval)}`);
       add("");
-      
+
       if (norm(state.victims)) {
         add(`(${sentenceNum}.1) Victim(s):`);
         getLines(state.victims).forEach(x => add(`- ${x}`));
         add("");
       }
     }
-    
+
     if (!sectionExcluded("narrative")) {
       add(`(${++dn}) Evidence:`);
       const ev = lines(state.evidence);
@@ -6056,12 +6134,9 @@ function clearDebtTool() {
       }
       add("");
     }
-    add("PLEASE DETAIN THE INDIVIDUAL AND CONTACT ANY AVAILABLE SHERIFF IMMEDIATELY. PLEASE CHARGE WITH THE ABOVE OFFENCE IF ENOUGH EVIDENCE. IF NO AVAILABLE SHERIFF, PLEASE MAKE A NOTE OF THE INDIVIDUAL AND ADVISE SHERIFF'S IN THE DPS EMAILS.");
+    sheriffActionNotice({ charge: true }).forEach(x => add(x));
     add("");
-    add("Signed:");
-    add(norm(state.sigRank) || "Senior Sheriff");
-    add(norm(state.sigName) || "NIL");
-    add("VICTORIAN DEPT. OF JUSTICE");
+    buildSheriffSignatureLines().forEach(x => add(x));
     
     return L.join("\n");
   }
@@ -6159,18 +6234,109 @@ function clearDebtTool() {
       add("");
     }
     if (!sectionExcluded("interview") && norm(state.interviewQs)) {
-      add(`(${++dn}) Interview Questions Outstanding:`);
-      lines(state.interviewQs).forEach(x => add(`- ${x}`));
+      add(`(${++dn}) INTERVIEW QUESTIONS (GUIDANCE ONLY - MAY VARY):`);
+      lines(state.interviewQs).forEach(x => {
+        const isHeader = x.endsWith(":") && !x.includes("?");
+        add(isHeader ? x : `- ${x}`);
+      });
       add("");
     }
-    
-    add("PLEASE DETAIN THE INDIVIDUAL AND CONTACT ANY AVAILABLE SHERIFF IMMEDIATELY. PLEASE CHARGE WITH THE ABOVE OFFENCE IF ENOUGH EVIDENCE. IF NO AVAILABLE SHERIFF, PLEASE MAKE A NOTE OF THE INDIVIDUAL AND ADVISE SHERIFF'S IN THE DPS EMAILS.");
+
+    sheriffActionNotice({ charge: true }).forEach(x => add(x));
     add("");
-    add("Signed:");
-    add(norm(state.sigRank) || "Senior Sheriff");
-    add(norm(state.sigName) || "NIL");
-    add("VICTORIAN DEPT. OF JUSTICE");
+    buildSheriffSignatureLines().forEach(x => add(x));
     
+    return L.join("\n");
+  }
+
+  // Sheriff Court Warrant Generator
+  function generateSheriffCourt() {
+    const L = [];
+    const add = (s = "") => L.push(s);
+    const sw = state.sheriffWarrant;
+    const s = (v) => norm(v);
+    const lines = (txt) => getLines(txt);
+
+    const who = s(sw.warrantName) || s(state.offender.name) || s(sw.owner) || "UNKNOWN";
+
+    add("THIS WARRANT IS ISSUED ON BEHALF OF THE COURTS OF VICTORIA");
+    add("OUTSTANDING COURT WARRANT - ID CONFIRMED");
+    add("");
+    add("(1) ACCUSED");
+    add(`Full Name: ${who}`);
+    add("");
+    add("(2) PERSON DETAILS");
+    add(`Phone Number: ${s(state.offender.phone) || "Not on Record"}`);
+    add("");
+    add("(3) CHARGES BEFORE THE COURT (FOUND GUILTY)");
+    const courtCharges = lines(sw.courtCharges);
+    if (courtCharges.length) {
+      courtCharges.forEach(line => {
+        const parts = line.split(/\s*\|\s*/);
+        const name = (parts[0] || "").trim();
+        let level = (parts[1] || "").trim().toUpperCase();
+        if (!["LOW", "MEDIUM", "HIGH", "MAX"].includes(level)) level = "MEDIUM";
+        add(`Charge: ${name}`);
+        add(`Penalty Level: ${level}`);
+      });
+    } else {
+      add("Charge: NIL");
+      add("Penalty Level: NIL");
+    }
+    add("");
+    add("(4) COURT-ORDERED OUTCOMES");
+    add(`Imprisonment: ${s(sw.imprisonmentWeeks) ? s(sw.imprisonmentWeeks) + " weeks" : "NIL"}`);
+    add(`Court Actions: ${s(sw.courtActions) || "NIL"}`);
+    const fees = s(sw.courtFees);
+    add(`Court Fees: ${fees ? (fees.startsWith("$") ? fees : "$" + fees) : "NIL"}`);
+    add("");
+    add("ENFORCEMENT NOTICE");
+    add("This warrant is issued under the authority of the Courts of Victoria and must be executed in full.");
+    add("All imprisonment weeks, actions, and fees listed above are court-ordered and mandatory.");
+    add("No officer, agency, or department has authority to alter, reduce, convert, defer, waive, or remove any part of this warrant.");
+    add("The accused must be dealt with strictly in accordance with the terms set out above.");
+    add("");
+    add("(5) OFFICERS INVOLVED");
+    const off = lines(state.officersList);
+    if (off.length) {
+      off.forEach(x => add(getOfficerLineForPreview(x)));
+    } else {
+      add("NIL");
+    }
+    add("");
+    add("PRELIMINARY DETAILS");
+    const pt = s(state.prelimTime), pd = s(state.prelimDate), pl = s(state.prelimLocation);
+    add(`Time: ${pt || "NIL"}`);
+    add(`Date: ${pd || "NIL"}`);
+    add(`Location: ${pl || "NIL"}`);
+    add("");
+    add("(6) SUMMARY OF EVENTS");
+    if (s(state.summary)) {
+      add(s(state.summary));
+    } else {
+      const mag = s(sw.magistrate) || "the presiding Magistrate";
+      const when = (pd || "[date]") + (pt ? ` at approximately ${pt}` : "");
+      add(`On ${when}, ${who} was found guilty before the court for the offences listed above. Sentencing was delivered by ${mag}.`);
+    }
+    add("This warrant is issued on behalf of the court to locate, arrest, and detain the accused in accordance with the court-ordered outcomes.");
+    add("");
+    add("(7) APPEAL NOTICE");
+    add("Any appeal or challenge to this matter may only be made through the District Court of Victoria (DCV) or the Supreme Court of Victoria.");
+    add("This warrant remains valid and enforceable unless formally stayed or overturned by one of those courts.");
+    add("");
+    add("(8) EVIDENCE");
+    if (s(sw.courtEvidence)) {
+      lines(sw.courtEvidence).forEach(x => add(x));
+    } else {
+      add("Court records are available.");
+      add("Bodycam available if arrest is conducted.");
+      add("Images available in Sheriff Warrants under the Sheriff Warrants thread.");
+    }
+    add("");
+    sheriffActionNotice().forEach(x => add(x));
+    add("");
+    buildSheriffSignatureLines().forEach(x => add(x));
+
     return L.join("\n");
   }
 
@@ -6486,7 +6652,7 @@ function clearDebtTool() {
     const warnings = [];
     const type = state.reportType;
     const hasPrimarySubject = () => {
-      if (["sheriff_arrest", "sheriff_warrant", "sheriff_debt"].includes(type)) return !!norm(state.sheriffWarrant.warrantName || state.offender.name || state.sheriffWarrant.owner);
+      if (["sheriff_arrest", "sheriff_warrant", "sheriff_court", "sheriff_debt"].includes(type)) return !!norm(state.sheriffWarrant.warrantName || state.offender.name || state.sheriffWarrant.owner);
       return !!norm(state.offender.name);
     };
     if (norm(state.offender.dob)) { const dobErr = VALIDATORS.dob(state.offender.dob); if (dobErr) warnings.push("DOB format: " + dobErr); }
@@ -6501,6 +6667,16 @@ function clearDebtTool() {
       if (!norm(state.chargesList)) warnings.push("No charges selected.");
       if (!norm(state.officersList)) warnings.push("No officers listed.");
       if (!norm(state.summary) && !norm(state.sheriffWarrant.details)) warnings.push("Missing summary / warrant details.");
+      if (!norm(state.sigName)) warnings.push("Missing signature name.");
+      if (type === "sheriff_arrest") {
+        const w = parseInt(norm(state.sheriffWarrant.mrcWeeks), 10);
+        if (!isNaN(w) && w > 60) warnings.push("MRC remand exceeds the handbook maximum of 60 weeks.");
+      }
+    } else if (type === "sheriff_court") {
+      if (!hasPrimarySubject()) warnings.push("Missing accused name.");
+      if (!norm(state.sheriffWarrant.courtCharges)) warnings.push("No charges before the court listed.");
+      if (!norm(state.officersList)) warnings.push("No officers listed.");
+      if (!norm(state.summary) && !norm(state.sheriffWarrant.magistrate)) warnings.push("Missing summary of events / sentencing magistrate.");
       if (!norm(state.sigName)) warnings.push("Missing signature name.");
     } else if (type === "sheriff_debt") {
       if (!hasPrimarySubject()) warnings.push("Missing warrant name.");
@@ -6528,7 +6704,7 @@ function clearDebtTool() {
     const charges = Array.from(selectedChargesSet).join(" ").toLowerCase();
 
     // Only run quality hints on report types that have narratives
-    if (!["arrest","sheriff_arrest","sheriff_warrant","sheriff_arrest_legacy","sheriff_warrant_legacy","traffic_warrant"].includes(type)) return hints;
+    if (!["arrest","sheriff_arrest","sheriff_warrant","sheriff_court","sheriff_arrest_legacy","sheriff_warrant_legacy","traffic_warrant"].includes(type)) return hints;
     
     // Don't nag if no summary written yet (missing summary is already a warning)
     if (!norm(state.summary)) return hints;
@@ -6635,15 +6811,30 @@ Do you wish to nominate another person as the driver if you were not driving?
 Do you wish to contact a lawyer before answering further questions?
 Is there anything you would like to say regarding the charges?`;
     } else if (type === "sheriff_warrant") {
-      return `Can you confirm your full name and date of birth?
-Do you understand why you have been detained?
-Are you aware of your outstanding government fines/debts?
-Do you have the means to settle the outstanding amount?
-Would you like to arrange a payment plan for the outstanding debt?
-Where were you on [DATE] at [TIME] when the Sheriff's Office attempted to contact you?
-Are you willing to participate in a formal interview?
-Do you wish to contact a lawyer before answering further questions?
-Is there anything you would like to say regarding the charges?`;
+      return `Identity:
+Can you confirm your full name?
+Do you own or have access to the vehicle registered as [PLATE]?
+Do you regularly use this vehicle?
+Who normally drives this vehicle?
+Vehicle Access:
+Does anyone else have access to the vehicle?
+Was anyone else using the vehicle on [DATE]?
+Has the vehicle been lent to anyone recently?
+Who had possession of the keys at the time?
+Movement:
+Where were you at approximately [TIME] on [DATE]?
+Were you travelling through [LOCATION]?
+What was the purpose of your travel?
+Who were you with at the time?
+Knowledge:
+Are you aware of any interaction involving Sheriff's Officers on that date?
+Do you recall seeing emergency lights behind a vehicle you were travelling in?
+Are you aware of any reason Sheriffs may wish to speak with you?
+Evidence-Based:
+Can you explain why the vehicle did not remain stopped when directed?
+Can you explain why the vehicle drove off after initially slowing down?
+Can you explain why your vehicle was identified during this incident?
+Is there any reason your vehicle would have been present at that location?`;
     } else if (type === "sheriff_debt") {
       return "";
     } else if (type === "sheriff_arrest_legacy") {
@@ -8070,7 +8261,8 @@ Is there anything you would like to add at this time?`;
     const swFields = [
       'swIdStatus', 'swIdBasis', 'swWarrantName',
       'swPaste', 'swInteractionType', 'swRego', 'swModel', 'swColour', 'swRegistered', 'swRegoExpires',
-      'swStolen', 'swSuspended', 'swOwner', 'swDebtDeadline', 'swApprovedBy', 'swImpoundTime', 'swImpoundPrice', 'swDebtNarrative', 'swInstruction'
+      'swStolen', 'swSuspended', 'swOwner', 'swDebtDeadline', 'swApprovedBy', 'swImpoundTime', 'swImpoundPrice', 'swDebtNarrative', 'swInstruction',
+      'swCourtCharges', 'swImprisonmentWeeks', 'swCourtActions', 'swCourtFees', 'swMagistrate', 'swCourtEvidence', 'swMrcWeeks'
     ];
     swFields.forEach(field => {
       if (el[field]) {
@@ -8430,7 +8622,7 @@ Is there anything you would like to add at this time?`;
     });
 
     // Sentence & Signature
-    const miscFields = ['sentence', 'sentenceApproval', 'victims', 'evidenceLocker', 'sigName', 'sigRank', 'sigDivision'];
+    const miscFields = ['sentence', 'sentenceApproval', 'victims', 'evidenceLocker', 'sigName', 'sigRank', 'sigDivision', 'sigCallsign'];
     miscFields.forEach(field => {
       if (el[field]) {
         el[field].addEventListener("input", () => {
@@ -9160,6 +9352,13 @@ Is there anything you would like to add at this time?`;
       if (el.swImpoundTime) el.swImpoundTime.value = sw.impoundTime || "";
       if (el.swImpoundPrice) el.swImpoundPrice.value = sw.impoundPrice || "";
       if (el.swDebtNarrative) el.swDebtNarrative.value = sw.debtNarrative || "";
+      if (el.swCourtCharges) el.swCourtCharges.value = sw.courtCharges || "";
+      if (el.swImprisonmentWeeks) el.swImprisonmentWeeks.value = sw.imprisonmentWeeks || "";
+      if (el.swCourtActions) el.swCourtActions.value = sw.courtActions || "";
+      if (el.swCourtFees) el.swCourtFees.value = sw.courtFees || "";
+      if (el.swMagistrate) el.swMagistrate.value = sw.magistrate || "";
+      if (el.swCourtEvidence) el.swCourtEvidence.value = sw.courtEvidence || "";
+      if (el.swMrcWeeks) el.swMrcWeeks.value = sw.mrcWeeks || "";
       if (el.swInstruction) el.swInstruction.value = sw.instruction || "";
     }
 
@@ -9203,6 +9402,7 @@ Is there anything you would like to add at this time?`;
     if (el.sigName) el.sigName.value = state.sigName;
     if (el.sigRank) el.sigRank.value = state.sigRank;
     if (el.sigDivision) el.sigDivision.value = state.sigDivision;
+    if (el.sigCallsign) el.sigCallsign.value = state.sigCallsign || "";
 
     // Callsigns — always sync from persistent storage
     if (!state.officerCallsigns) state.officerCallsigns = {};
@@ -10283,8 +10483,9 @@ Is there anything you would like to add at this time?`;
   function getOfficerLineForPreview(line) {
     const cs = getAssignedCallsign(line);
     const nameOnly = stripCallsignFromLine(line) || line.trim();
-    if (cs) return cs + " | " + nameOnly;
-    return nameOnly;
+    const namePart = /^sheriff\b/i.test(nameOnly) ? nameOnly : "Sheriff " + nameOnly;
+    if (cs) return cs + " - " + namePart;
+    return namePart;
   }
 
   function closeAllCsPickers() {
@@ -10759,7 +10960,7 @@ Is there anything you would like to add at this time?`;
 
   function saveLastSignature() {
     try {
-      const sig = { name: state.sigName || "", rank: state.sigRank || "", division: state.sigDivision || "" };
+      const sig = { name: state.sigName || "", rank: state.sigRank || "", division: state.sigDivision || "", callsign: state.sigCallsign || "" };
       if (sig.name.trim()) localStorage.setItem(SIG_KEY, JSON.stringify(sig));
     } catch(e) {}
   }
@@ -10807,7 +11008,8 @@ Is there anything you would like to add at this time?`;
       return Array.isArray(raw) ? raw.filter(p => norm(p?.name)).map(p => ({
         name: norm(p.name),
         rank: norm(p.rank),
-        division: norm(p.division)
+        division: norm(p.division),
+        callsign: norm(p.callsign)
       })) : [];
     } catch(e) { return []; }
   }
@@ -10862,7 +11064,8 @@ Is there anything you would like to add at this time?`;
     const profile = {
       name: norm(state.sigName || el.sigName?.value),
       rank: norm(state.sigRank || el.sigRank?.value),
-      division: norm(state.sigDivision || el.sigDivision?.value)
+      division: norm(state.sigDivision || el.sigDivision?.value),
+      callsign: norm(state.sigCallsign || el.sigCallsign?.value)
     };
     if (!profile.name) {
       toast("Add a signature name first", "warn");
@@ -10876,7 +11079,8 @@ Is there anything you would like to add at this time?`;
       profiles[idx] = {
         name: profile.name,
         rank: profile.rank || existing.rank,
-        division: profile.division || existing.division
+        division: profile.division || existing.division,
+        callsign: profile.callsign || existing.callsign
       };
     } else {
       profiles.unshift(profile);
@@ -10893,6 +11097,7 @@ Is there anything you would like to add at this time?`;
     if (el.sigName) { el.sigName.value = profile.name || ""; state.sigName = el.sigName.value; }
     if (el.sigRank) { el.sigRank.value = profile.rank || ""; state.sigRank = el.sigRank.value; }
     if (el.sigDivision) { el.sigDivision.value = profile.division || ""; state.sigDivision = el.sigDivision.value; }
+    if (el.sigCallsign) { el.sigCallsign.value = profile.callsign || ""; state.sigCallsign = el.sigCallsign.value; }
     saveLastSignature();
     debouncedRenderPreview();
     throttledAutosave();
@@ -10910,10 +11115,13 @@ Is there anything you would like to add at this time?`;
     if (nextRank === null) return;
     const nextDivision = prompt("Division", current.division || "");
     if (nextDivision === null) return;
+    const nextCallsign = prompt("Callsign / SRF #", current.callsign || "");
+    if (nextCallsign === null) return;
     const updated = {
       name: norm(nextName) || current.name,
       rank: norm(nextRank),
-      division: norm(nextDivision)
+      division: norm(nextDivision),
+      callsign: norm(nextCallsign)
     };
     if (!confirm(`Save changes to ${updated.name}?`)) return;
     profiles[idx] = updated;
@@ -10941,7 +11149,7 @@ Is there anything you would like to add at this time?`;
     if (!container) return;
     const q = norm(filter).toUpperCase();
     const profiles = loadSignatureProfiles().filter(p => {
-      const hay = [p.name, p.rank, p.division].join(" ").toUpperCase();
+      const hay = [p.name, p.rank, p.division, p.callsign].join(" ").toUpperCase();
       return !q || hay.includes(q);
     });
     if (countEl) countEl.textContent = `(${profiles.length})`;
@@ -10953,7 +11161,7 @@ Is there anything you would like to add at this time?`;
       <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,0.14)">
         <div>
           <div style="font-weight:800">${escapeHtml(p.name)}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${escapeHtml([p.rank, p.division].filter(Boolean).join(" | ") || "No rank/division saved")}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${escapeHtml([p.callsign, p.rank, p.division].filter(Boolean).join(" | ") || "No rank/division saved")}</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
           <button class="btn" type="button" data-apply-signature="${escapeHtml(p.name)}" style="font-size:11px;padding:5px 9px" title="Apply this officer signature profile to the current report">Apply</button>
@@ -10978,10 +11186,10 @@ Is there anything you would like to add at this time?`;
           const q = val.trim().toUpperCase();
           const all = loadSignatureProfiles();
           return q
-            ? all.filter(p => [p.name, p.rank, p.division].some(part => String(part || "").toUpperCase().includes(q))).slice(0, 8)
+            ? all.filter(p => [p.name, p.rank, p.division, p.callsign].some(part => String(part || "").toUpperCase().includes(q))).slice(0, 8)
             : all.slice(0, 8);
         },
-        p => ({ main: p.name, sub: [p.rank, p.division].filter(Boolean).join("  |  "), profile: p }),
+        p => ({ main: p.name, sub: [p.callsign, p.rank, p.division].filter(Boolean).join("  |  "), profile: p }),
         item => {
           applySignatureProfile(item.profile);
           closeAllDropdowns();
@@ -11095,6 +11303,7 @@ Is there anything you would like to add at this time?`;
         if (input && last.name) { input.value = last.name; state.sigName = last.name; }
         if (rankInput && last.rank) { rankInput.value = last.rank; state.sigRank = last.rank; }
         if (divInput && last.division) { divInput.value = last.division; state.sigDivision = last.division; }
+        if (el.sigCallsign && last.callsign) { el.sigCallsign.value = last.callsign; state.sigCallsign = last.callsign; }
         debouncedRenderPreview();
         throttledAutosave();
       }
@@ -11388,6 +11597,7 @@ Is there anything you would like to add at this time?`;
         state.sigName = '';
         state.sigRank = '';
         state.sigDivision = '';
+        state.sigCallsign = '';
         break;
       default:
         return;
@@ -12424,7 +12634,7 @@ function updateDebtTabModeHint() {
   }
 
   function reportTypeUsesHeaderMeta(type) {
-    return ["sheriff_arrest", "sheriff_warrant", "sheriff_debt", "traffic_warrant", "sheriff_arrest_legacy", "sheriff_warrant_legacy", "search_seizure", "vehicle_inspection"].includes(type);
+    return ["sheriff_arrest", "sheriff_warrant", "sheriff_court", "sheriff_debt", "traffic_warrant", "sheriff_arrest_legacy", "sheriff_warrant_legacy", "search_seizure", "vehicle_inspection"].includes(type);
   }
 
   function updateSharedWarrantCardMeta() {
