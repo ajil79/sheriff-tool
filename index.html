@@ -6009,11 +6009,17 @@ function clearDebtTool() {
   }
 
   // ── Shared handbook-aligned warrant boilerplate (arrest / questioning / court) ──
-  const SHERIFF_ACTION_NOTICE = [
-    "ACTION NOTICE",
-    "PLEASE DETAIN THE INDIVIDUAL AND CONTACT ANY AVAILABLE SHERIFFS IMMEDIATELY.",
-    "IF NO SHERIFF IS AVAILABLE, DO NOT CLEAR THE WARRANT - MAKE A NOTE AND ADVISE SHERIFFS IN THE DPS EMAILS."
-  ];
+  // charge:true adds the "charge with the above offence" line (arrest/questioning only —
+  // a Court Warrant is post-conviction so there is no offence to charge).
+  function sheriffActionNotice(opts = {}) {
+    const lines = [
+      "ACTION NOTICE",
+      "PLEASE DETAIN THE INDIVIDUAL AND CONTACT ANY AVAILABLE SHERIFFS IMMEDIATELY."
+    ];
+    if (opts.charge) lines.push("PLEASE CHARGE WITH THE ABOVE OFFENCE IF ENOUGH EVIDENCE.");
+    lines.push("IF NO SHERIFF IS AVAILABLE, DO NOT CLEAR THE WARRANT - MAKE A NOTE AND ADVISE SHERIFFS IN THE DPS EMAILS.");
+    return lines;
+  }
 
   // Normalises a signature callsign to "SRF ###" form
   function formatSheriffCallsign(raw) {
@@ -6128,7 +6134,7 @@ function clearDebtTool() {
       }
       add("");
     }
-    SHERIFF_ACTION_NOTICE.forEach(x => add(x));
+    sheriffActionNotice({ charge: true }).forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
     
@@ -6236,7 +6242,7 @@ function clearDebtTool() {
       add("");
     }
 
-    SHERIFF_ACTION_NOTICE.forEach(x => add(x));
+    sheriffActionNotice({ charge: true }).forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
     
@@ -6327,7 +6333,7 @@ function clearDebtTool() {
       add("Images available in Sheriff Warrants under the Sheriff Warrants thread.");
     }
     add("");
-    SHERIFF_ACTION_NOTICE.forEach(x => add(x));
+    sheriffActionNotice().forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
 
@@ -10954,7 +10960,7 @@ Is there anything you would like to add at this time?`;
 
   function saveLastSignature() {
     try {
-      const sig = { name: state.sigName || "", rank: state.sigRank || "", division: state.sigDivision || "" };
+      const sig = { name: state.sigName || "", rank: state.sigRank || "", division: state.sigDivision || "", callsign: state.sigCallsign || "" };
       if (sig.name.trim()) localStorage.setItem(SIG_KEY, JSON.stringify(sig));
     } catch(e) {}
   }
@@ -11002,7 +11008,8 @@ Is there anything you would like to add at this time?`;
       return Array.isArray(raw) ? raw.filter(p => norm(p?.name)).map(p => ({
         name: norm(p.name),
         rank: norm(p.rank),
-        division: norm(p.division)
+        division: norm(p.division),
+        callsign: norm(p.callsign)
       })) : [];
     } catch(e) { return []; }
   }
@@ -11057,7 +11064,8 @@ Is there anything you would like to add at this time?`;
     const profile = {
       name: norm(state.sigName || el.sigName?.value),
       rank: norm(state.sigRank || el.sigRank?.value),
-      division: norm(state.sigDivision || el.sigDivision?.value)
+      division: norm(state.sigDivision || el.sigDivision?.value),
+      callsign: norm(state.sigCallsign || el.sigCallsign?.value)
     };
     if (!profile.name) {
       toast("Add a signature name first", "warn");
@@ -11071,7 +11079,8 @@ Is there anything you would like to add at this time?`;
       profiles[idx] = {
         name: profile.name,
         rank: profile.rank || existing.rank,
-        division: profile.division || existing.division
+        division: profile.division || existing.division,
+        callsign: profile.callsign || existing.callsign
       };
     } else {
       profiles.unshift(profile);
@@ -11088,6 +11097,7 @@ Is there anything you would like to add at this time?`;
     if (el.sigName) { el.sigName.value = profile.name || ""; state.sigName = el.sigName.value; }
     if (el.sigRank) { el.sigRank.value = profile.rank || ""; state.sigRank = el.sigRank.value; }
     if (el.sigDivision) { el.sigDivision.value = profile.division || ""; state.sigDivision = el.sigDivision.value; }
+    if (el.sigCallsign) { el.sigCallsign.value = profile.callsign || ""; state.sigCallsign = el.sigCallsign.value; }
     saveLastSignature();
     debouncedRenderPreview();
     throttledAutosave();
@@ -11105,10 +11115,13 @@ Is there anything you would like to add at this time?`;
     if (nextRank === null) return;
     const nextDivision = prompt("Division", current.division || "");
     if (nextDivision === null) return;
+    const nextCallsign = prompt("Callsign / SRF #", current.callsign || "");
+    if (nextCallsign === null) return;
     const updated = {
       name: norm(nextName) || current.name,
       rank: norm(nextRank),
-      division: norm(nextDivision)
+      division: norm(nextDivision),
+      callsign: norm(nextCallsign)
     };
     if (!confirm(`Save changes to ${updated.name}?`)) return;
     profiles[idx] = updated;
@@ -11136,7 +11149,7 @@ Is there anything you would like to add at this time?`;
     if (!container) return;
     const q = norm(filter).toUpperCase();
     const profiles = loadSignatureProfiles().filter(p => {
-      const hay = [p.name, p.rank, p.division].join(" ").toUpperCase();
+      const hay = [p.name, p.rank, p.division, p.callsign].join(" ").toUpperCase();
       return !q || hay.includes(q);
     });
     if (countEl) countEl.textContent = `(${profiles.length})`;
@@ -11148,7 +11161,7 @@ Is there anything you would like to add at this time?`;
       <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,0.14)">
         <div>
           <div style="font-weight:800">${escapeHtml(p.name)}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${escapeHtml([p.rank, p.division].filter(Boolean).join(" | ") || "No rank/division saved")}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${escapeHtml([p.callsign, p.rank, p.division].filter(Boolean).join(" | ") || "No rank/division saved")}</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
           <button class="btn" type="button" data-apply-signature="${escapeHtml(p.name)}" style="font-size:11px;padding:5px 9px" title="Apply this officer signature profile to the current report">Apply</button>
@@ -11173,10 +11186,10 @@ Is there anything you would like to add at this time?`;
           const q = val.trim().toUpperCase();
           const all = loadSignatureProfiles();
           return q
-            ? all.filter(p => [p.name, p.rank, p.division].some(part => String(part || "").toUpperCase().includes(q))).slice(0, 8)
+            ? all.filter(p => [p.name, p.rank, p.division, p.callsign].some(part => String(part || "").toUpperCase().includes(q))).slice(0, 8)
             : all.slice(0, 8);
         },
-        p => ({ main: p.name, sub: [p.rank, p.division].filter(Boolean).join("  |  "), profile: p }),
+        p => ({ main: p.name, sub: [p.callsign, p.rank, p.division].filter(Boolean).join("  |  "), profile: p }),
         item => {
           applySignatureProfile(item.profile);
           closeAllDropdowns();
@@ -11290,6 +11303,7 @@ Is there anything you would like to add at this time?`;
         if (input && last.name) { input.value = last.name; state.sigName = last.name; }
         if (rankInput && last.rank) { rankInput.value = last.rank; state.sigRank = last.rank; }
         if (divInput && last.division) { divInput.value = last.division; state.sigDivision = last.division; }
+        if (el.sigCallsign && last.callsign) { el.sigCallsign.value = last.callsign; state.sigCallsign = last.callsign; }
         debouncedRenderPreview();
         throttledAutosave();
       }
@@ -11583,6 +11597,7 @@ Is there anything you would like to add at this time?`;
         state.sigName = '';
         state.sigRank = '';
         state.sigDivision = '';
+        state.sigCallsign = '';
         break;
       default:
         return;
