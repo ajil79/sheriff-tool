@@ -606,10 +606,22 @@
     .guidelines-body-inner{padding:10px 14px}
 
     /* ── Recruit Guide ──────────────────────────────── */
-    .guide-scenario-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+    /* The app's <main> is a 2-column form|preview grid; the guide has no preview, so give it
+       a single full-width column instead of leaving its content stuck in the narrow left col. */
+    #guidePage main{display:block}
+    .guide-md{display:grid;grid-template-columns:minmax(210px,250px) 1fr;gap:18px;align-items:start}
+    .guide-scenario-btns{display:flex;flex-direction:column;gap:8px}
+    .guide-scenario-btns .btn{text-align:left;justify-content:flex-start}
     .guide-scenario-btns .btn.guide-active{background:var(--vp-accent-btn);border-color:var(--accent);color:#fff;box-shadow:0 0 0 2px var(--accent-glow)}
+    .guide-scenario-panels{border-left:1px solid var(--border);padding-left:18px;min-height:280px}
     .guide-scenario{display:none}
     .guide-scenario.active{display:block;animation:cardIn 0.2s ease}
+    @media (max-width:760px){
+      .guide-md{grid-template-columns:1fr;gap:12px}
+      .guide-scenario-btns{flex-direction:row;flex-wrap:wrap}
+      .guide-scenario-btns .btn{text-align:center;justify-content:center}
+      .guide-scenario-panels{border-left:none;padding-left:0;min-height:0}
+    }
     .guide-steps{margin:6px 0 0;padding-left:22px;line-height:1.75;font-size:13px}
     .guide-steps li{margin-bottom:7px}
     .guide-q{margin:10px 0 4px;font-weight:900;font-size:13px}
@@ -621,7 +633,7 @@
     .guide-branch h4{margin:0 0 6px;font-size:13px;font-weight:900}
     .guide-branch p{margin:0;font-size:12px;line-height:1.6;color:var(--muted)}
     .guide-jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-    .guide-ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .guide-ref-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
     @media (max-width:600px){.guide-ref-grid{grid-template-columns:1fr}}
     .guide-ref{padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.03);font-size:12px;line-height:1.6}
     .guide-ref strong{color:var(--accent)}
@@ -823,7 +835,7 @@
   <!-- RECRUIT GUIDE PAGE -->
   <div id="guidePage" class="tool-page active">
   <main role="main">
-    <div style="display:grid; gap:14px; grid-auto-rows:max-content; max-width:920px; margin:0 auto">
+    <div style="display:grid; grid-template-columns:minmax(0,1fr); gap:14px; grid-auto-rows:max-content; max-width:1100px; margin:0 auto">
 
       <!-- Intro / golden rules -->
       <div class="card" style="border-color:rgba(0,191,255,0.3)">
@@ -843,7 +855,8 @@
       <!-- Scenario picker -->
       <div class="card">
         <h2 style="margin:0 0 4px">Pick your situation</h2>
-        <div class="muted" style="margin-bottom:12px">Tap a situation to see the steps.</div>
+        <div class="muted" style="margin-bottom:12px">Pick a situation on the left — the steps open on the right.</div>
+        <div class="guide-md">
         <div class="guide-scenario-btns" id="guideScenarioBtns">
           <button class="btn guide-active" type="button" data-scenario="roadside">🚓 Roadside stop (debt check)</button>
           <button class="btn" type="button" data-scenario="foot">🚶 On-foot interaction</button>
@@ -851,6 +864,7 @@
           <button class="btn" type="button" data-scenario="impound">🔧 Impound / Debt Enforcement</button>
           <button class="btn" type="button" data-scenario="court">⚖️ Court warrant</button>
         </div>
+        <div class="guide-scenario-panels">
 
         <!-- A. Roadside stop -->
         <div class="guide-scenario active" data-scenario="roadside">
@@ -949,6 +963,8 @@
             <button class="btn" type="button" data-guide-jump="report" data-report-type="sheriff_court">Start Court Warrant</button>
           </div>
         </div>
+        </div><!-- /guide-scenario-panels -->
+        </div><!-- /guide-md -->
       </div>
 
       <!-- Quick reference -->
