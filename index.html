@@ -600,6 +600,28 @@
     .guidelines-body.open{max-height:2000px}
     .guidelines-body-inner{padding:10px 14px}
 
+    /* ── Recruit Guide ──────────────────────────────── */
+    .guide-scenario-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+    .guide-scenario-btns .btn.guide-active{background:var(--vp-accent-btn);border-color:var(--accent);color:#fff;box-shadow:0 0 0 2px var(--accent-glow)}
+    .guide-scenario{display:none}
+    .guide-scenario.active{display:block;animation:cardIn 0.2s ease}
+    .guide-steps{margin:6px 0 0;padding-left:22px;line-height:1.75;font-size:13px}
+    .guide-steps li{margin-bottom:7px}
+    .guide-q{margin:10px 0 4px;font-weight:900;font-size:13px}
+    .guide-decision{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+    @media (max-width:600px){.guide-decision{grid-template-columns:1fr}}
+    .guide-branch{padding:12px 14px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.03)}
+    .guide-branch.yes{border-color:rgba(100,200,120,0.45);background:rgba(100,200,120,0.08)}
+    .guide-branch.no{border-color:rgba(0,191,255,0.45);background:rgba(0,191,255,0.08)}
+    .guide-branch h4{margin:0 0 6px;font-size:13px;font-weight:900}
+    .guide-branch p{margin:0;font-size:12px;line-height:1.6;color:var(--muted)}
+    .guide-jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .guide-ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:600px){.guide-ref-grid{grid-template-columns:1fr}}
+    .guide-ref{padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.03);font-size:12px;line-height:1.6}
+    .guide-ref strong{color:var(--accent)}
+    .guide-callout{padding:10px 12px;border-radius:8px;border:1px solid rgba(255,170,0,0.3);background:rgba(255,170,0,0.08);font-size:12px;line-height:1.6;margin-top:10px}
+
     /* ── v47: Template/Preset Modal ──────────────── */
     .preset-modal-overlay{
       position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.72);z-index:99999;
@@ -787,10 +809,159 @@
 
   <!-- Nav Bar -->
   <nav class="tool-nav" id="toolNav">
-    <button class="nav-active" data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
+    <button class="nav-active" data-tool-page="guide" title="Step-by-step guide for recruits: stops, fleeing, arrests and impounds">Recruit Guide</button>
+    <button data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
     <button data-tool-page="debt" title="Process LEAP financial records and calculate overdue debt">Debt Tool</button>
     <button data-tool-page="report" title="Write formal Sheriff warrant and arrest paperwork">Report Tool</button>
   </nav>
+
+  <!-- RECRUIT GUIDE PAGE -->
+  <div id="guidePage" class="tool-page active">
+  <main role="main">
+    <div style="display:grid; gap:14px; grid-auto-rows:max-content; max-width:920px; margin:0 auto">
+
+      <!-- Intro / golden rules -->
+      <div class="card" style="border-color:rgba(0,191,255,0.3)">
+        <h2 style="margin:0 0 6px">Recruit Guide — what do I actually do?</h2>
+        <div class="muted" style="margin-bottom:10px">Plain-English steps for the situations you'll hit on patrol. Pick your situation below; each one tells you what to do on scene and which part of this tool to use. Based on the Sheriff Warrant Handbook v3.0.</div>
+        <div style="font-weight:900;font-size:12px;letter-spacing:0.04em;color:var(--muted);margin-bottom:6px">THE GOLDEN RULES</div>
+        <ul class="guide-steps" style="margin-top:0">
+          <li>A standard Sheriff warrant is for <strong>failing to stop</strong>, not for the debt itself.</li>
+          <li><strong>No force, no pursuit.</strong> You may signal with lights and a brief siren blip, but never chase a fleeing vehicle. Keep following the road rules.</li>
+          <li><strong>Confidentiality.</strong> Never tell a person they have a warrant. The only exception is when it shows up on a paid criminal-history check.</li>
+          <li><strong>ANPR is a guide only</strong> — it can be wrong. Confirm debt through LEAP / MELROADS.</li>
+          <li><strong>One incident = one warrant.</strong> Don't create a second warrant for something already actioned.</li>
+          <li><strong>If unsure, ask.</strong> An FTO or a Sheriff ranked above you first, then Sheriff Leadership.</li>
+        </ul>
+      </div>
+
+      <!-- Scenario picker -->
+      <div class="card">
+        <h2 style="margin:0 0 4px">Pick your situation</h2>
+        <div class="muted" style="margin-bottom:12px">Tap a situation to see the steps.</div>
+        <div class="guide-scenario-btns" id="guideScenarioBtns">
+          <button class="btn guide-active" type="button" data-scenario="roadside">🚓 Roadside stop (debt check)</button>
+          <button class="btn" type="button" data-scenario="foot">🚶 On-foot interaction</button>
+          <button class="btn" type="button" data-scenario="fled">🏃 They fled — Failure to Stop</button>
+          <button class="btn" type="button" data-scenario="impound">🔧 Impound / Debt Enforcement</button>
+          <button class="btn" type="button" data-scenario="court">⚖️ Court warrant</button>
+        </div>
+
+        <!-- A. Roadside stop -->
+        <div class="guide-scenario active" data-scenario="roadside">
+          <h3 style="margin:0 0 4px">Simple roadside stop (debt / fine check)</h3>
+          <div class="muted" style="margin-bottom:4px">The person stops and co-operates. No warrant is needed if it's resolved.</div>
+          <ol class="guide-steps">
+            <li><strong>Start your bodycam</strong> before you light them up (if you can run one).</li>
+            <li><strong>Signal them to stop</strong> with emergency lights and a brief siren blip. <em>Do not pursue</em> if they don't stop.</li>
+            <li><strong>Approach and explain</strong> you're a Sheriff conducting a debt / fine check.</li>
+            <li><strong>Request ID / driver licence.</strong> You may request fingerprints if needed. <strong>No force</strong> — if they refuse both, request MelPol.</li>
+            <li><strong>Run the checks</strong> — MELROADS for the vehicle, LEAP for debt. ANPR is only a guide.</li>
+            <li><strong>If debt is owed,</strong> explain the options for their debt tier (pay now / payment plan / forfeiture). The Debt Tool works this out for you.</li>
+            <li><strong>Log the interaction</strong> in Sheriff Logs so there's a record.</li>
+            <li>If they comply and it's dealt with → <strong>no warrant required.</strong></li>
+          </ol>
+          <div class="guide-jump">
+            <button class="btn" type="button" data-guide-jump="debt" data-debt-usecase="roadside" style="background:rgba(108,138,255,0.18);border-color:rgba(108,138,255,0.4)">Open Debt Tool (Roadside)</button>
+            <button class="btn" type="button" data-guide-jump="sherifflogs">Open Sheriff Logs</button>
+          </div>
+        </div>
+
+        <!-- B. On-foot -->
+        <div class="guide-scenario" data-scenario="foot">
+          <h3 style="margin:0 0 4px">On-foot interaction (no vehicle)</h3>
+          <div class="muted" style="margin-bottom:4px">Same idea as a roadside stop, just without a vehicle to look up.</div>
+          <ol class="guide-steps">
+            <li><strong>Start your bodycam</strong> if you can run one.</li>
+            <li><strong>Approach and explain</strong> you're a Sheriff conducting a debt / fine check.</li>
+            <li><strong>Request ID / driver licence</strong> (fingerprints if needed). <strong>No force</strong> — refusal → request MelPol.</li>
+            <li><strong>Run LEAP</strong> to confirm any outstanding debt. ANPR / a verbal name is not proof.</li>
+            <li><strong>If debt is owed,</strong> explain the tier options and deal with it.</li>
+            <li><strong>Log the interaction</strong> in Sheriff Logs.</li>
+            <li>If they walk off before you confirm ID and there's an enforcement reason → treat it like a <em>Failure to Stop</em> (see that tab).</li>
+          </ol>
+          <div class="guide-jump">
+            <button class="btn" type="button" data-guide-jump="debt" data-debt-usecase="foot" style="background:rgba(108,138,255,0.18);border-color:rgba(108,138,255,0.4)">Open Debt Tool (On Foot)</button>
+            <button class="btn" type="button" data-guide-jump="sherifflogs">Open Sheriff Logs</button>
+          </div>
+        </div>
+
+        <!-- C. They fled -->
+        <div class="guide-scenario" data-scenario="fled">
+          <h3 style="margin:0 0 4px">They fled / failed to stop</h3>
+          <ol class="guide-steps">
+            <li><strong>Stop. Do not pursue.</strong> Note the registration, vehicle description and direction of travel.</li>
+            <li><strong>Keep recording</strong> until the vehicle is out of sight and you are safely stopped.</li>
+            <li>Run <strong>MELROADS</strong> to find the registered owner, and check stolen status.</li>
+          </ol>
+          <div class="guide-q">Which warrant do I write? Ask one question:</div>
+          <div class="muted" style="font-size:12px;margin-bottom:2px">Did you <strong>formally confirm the driver's identity</strong> (checked ID/licence or a fingerprint result) <strong>before</strong> they failed to stop?</div>
+          <div class="guide-decision">
+            <div class="guide-branch yes">
+              <h4>✅ YES → Arrest Warrant</h4>
+              <p>Names the confirmed person. ID Confirmed. Record the basis (licence/ID/fingerprint).</p>
+            </div>
+            <div class="guide-branch no">
+              <h4>❔ NO → Questioning Warrant</h4>
+              <p>Names the <strong>registered owner</strong> from MELROADS (never a verbal name). ID Unconfirmed — MelPol question them to work out who was driving.</p>
+            </div>
+          </div>
+          <div class="guide-callout">Both warrants: Charge = <strong>Failure to Stop for an Enforcement Vehicle (Non-Police)</strong> · Sentence = <strong>PRISON TIME: 60 WEEKS</strong>. Sheriffs don't add a fine. Then: draft in Warrant Practice → ping an FTO (recruits wait 1 min) → enter in the MDT → put the warrant + evidence in DPS emails.</div>
+          <div class="guide-jump">
+            <button class="btn" type="button" data-guide-jump="report" data-report-type="sheriff_arrest" data-id-status="CONFIRMED" style="background:rgba(100,200,120,0.18);border-color:rgba(100,200,120,0.4)">Start Arrest Warrant</button>
+            <button class="btn" type="button" data-guide-jump="report" data-report-type="sheriff_warrant" data-id-status="UNCONFIRMED" style="background:rgba(0,191,255,0.18);border-color:rgba(0,191,255,0.4)">Start Questioning Warrant</button>
+          </div>
+        </div>
+
+        <!-- D. Impound / Debt Enforcement -->
+        <div class="guide-scenario" data-scenario="impound">
+          <h3 style="margin:0 0 4px">Impound / Debt Enforcement warrant</h3>
+          <div class="muted" style="margin-bottom:4px">For vehicle debt-enforcement only — <strong>not</strong> a Failure to Stop.</div>
+          <ol class="guide-steps">
+            <li><strong>Get senior-leadership approval first</strong> (Regional Manager or above) in Large-Debts-New. Record the approver by <strong>rank and name</strong> — no warrant without it.</li>
+            <li><strong>Process the debt</strong> in the Debt Tool (use case: Warrant / Enforcement).</li>
+            <li><strong>Choose the vehicle</strong> to impound: diamond → gold → most valuable → newest registration.</li>
+            <li><strong>Set</strong> the impound duration, price and deadline.</li>
+            <li><strong>Push it</strong> into the Debt Enforcement Warrant and check every field.</li>
+            <li><strong>Vehicle only</strong> — never list a house, cash or other assets. Don't add the Failure to Stop charge unless there's a separate Failure to Stop warrant.</li>
+          </ol>
+          <div class="guide-jump">
+            <button class="btn" type="button" data-guide-jump="debt" data-debt-usecase="warrant" style="background:rgba(108,138,255,0.18);border-color:rgba(108,138,255,0.4)">Open Debt Tool (Enforcement)</button>
+            <button class="btn" type="button" data-guide-jump="report" data-report-type="sheriff_debt">Start Debt Enforcement Warrant</button>
+          </div>
+        </div>
+
+        <!-- E. Court warrant -->
+        <div class="guide-scenario" data-scenario="court">
+          <h3 style="margin:0 0 4px">Court warrant</h3>
+          <ol class="guide-steps">
+            <li>Only write one when a <strong>presiding official directs you to</strong> (commonly a guilty no-show).</li>
+            <li>Record the charges, fines and the <strong>single total outcome exactly</strong> as the official gives them.</li>
+            <li>Include the official's name and position, the court date and location.</li>
+            <li>Court Warrants use the court's outcome — not the standard Sheriff charge or 60-week sentence.</li>
+          </ol>
+          <div class="guide-jump">
+            <button class="btn" type="button" data-guide-jump="report" data-report-type="sheriff_court">Start Court Warrant</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick reference -->
+      <div class="card">
+        <h2 style="margin:0 0 10px">Quick reference</h2>
+        <div class="guide-ref-grid">
+          <div class="guide-ref"><strong>The one Sheriff charge</strong><br>Failure to Stop for an Enforcement Vehicle (Non-Police). Sentence: PRISON TIME: 60 WEEKS. No fine added by Sheriffs.</div>
+          <div class="guide-ref"><strong>Arrest vs Questioning</strong><br>ID confirmed before they fled → Arrest. ID not confirmed → Questioning, naming the MELROADS registered owner.</div>
+          <div class="guide-ref"><strong>No force · No pursuit</strong><br>Request ID/fingerprints, but never force them. Never chase a fleeing vehicle — record and request MelPol.</div>
+          <div class="guide-ref"><strong>Confidentiality</strong><br>Never tell a person they have a warrant (only exception: a paid criminal-history check).</div>
+          <div class="guide-ref"><strong>Evidence</strong><br>Bodycam from before the lights until you're clear, or still images if you can't run one. Submit the warrant + evidence in DPS emails. CCTV is court-only.</div>
+          <div class="guide-ref"><strong>If unsure</strong><br>Ask an FTO or a Sheriff ranked above you first; escalate to Sheriff Leadership only if it can't be resolved.</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+  </div>
 
   <!-- REPORT TOOL PAGE -->
   <div id="reportPage" class="tool-page">
@@ -806,11 +977,12 @@
         <div class="guidelines-body" id="reportGuideBody">
           <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
             <ol style="margin:4px 0 0 20px;padding:0">
-              <li><strong>Select report type</strong> — Sheriff Warrant for Arrest, for Questioning, or Debt Enforcement Warrant.</li>
+              <li><strong>New here? Start on the <a href="#" class="js-open-guide" style="color:var(--accent)">Recruit Guide</a></strong> — it walks you through stops, fleeing, arrests and impounds and sends you to the right place.</li>
+              <li><strong>Select report type</strong> — Arrest (ID confirmed before they fled), Questioning (ID unconfirmed → names the registered owner), Court (on court direction), or Debt Enforcement.</li>
               <li><strong>For debt enforcement warrants</strong> — process the debt in the Debt Tool first, then click <strong>Fill Debt Warrant Report</strong> to push all data here automatically.</li>
-              <li><strong>For arrest / questioning warrants</strong> — paste a LEAP or MDT profile to auto-fill subject details, or type manually.</li>
-              <li><strong>Fill the Report Narrative</strong> — describe events in court-ready language.</li>
-              <li><strong>Add charges if applicable</strong> — use the Charges card. Sentence is auto-calculated.</li>
+              <li><strong>For arrest / questioning warrants</strong> — paste a LEAP or MDT profile to auto-fill subject details, or type manually. The only charge is Failure to Stop; the sentence is 60 weeks.</li>
+              <li><strong>Fill the Report Narrative</strong> — describe events in court-ready language. Don't guess why they fled.</li>
+              <li><strong>Validate before submitting</strong> — the Validate button flags missing fields and handbook issues.</li>
               <li><strong>Click Copy Preview</strong> (top-right) or press <strong>Ctrl+Shift+C</strong> — the formatted report is now on your clipboard.</li>
               <li><strong>Save a draft</strong> — use Save Draft (Ctrl+S) to keep the report for later, or use Templates to store reusable officer details.</li>
             </ol>
@@ -827,13 +999,14 @@
           <option value="sheriff_court">Sheriff Court Warrant</option>
           <option value="sheriff_debt">Sheriff Debt Enforcement Warrant</option>
         </select>
+        <div class="hint" style="margin-top:8px"><span>🧭</span><span><strong>Which warrant?</strong> ID confirmed before they fled → <strong>Arrest</strong>. ID not confirmed → <strong>Questioning</strong> (name the MELROADS registered owner). The only charge is Failure to Stop; the sentence is 60 weeks. <a href="#" class="js-open-guide" style="color:var(--accent)">Open the Recruit Guide</a> for the full walkthrough.</span></div>
         <div class="hint" style="margin-top:8px"><span>💡</span><span>Date/time, callsign and unit can still auto-fill from MDT paste or your saved template, but you can now edit them here as well.</span></div>
         <details id="reportHeaderMetaDetails" class="header-meta-details">
           <summary>Report header details</summary>
           <div class="header-meta-grid">
             <label><div class="lbl">Date / Time</div><input id="reportDateTime" placeholder="DD/MM/YYYY HH:MM HRS"/></label>
-            <label><div class="lbl">Entered By</div><input id="enteredBy" placeholder="POR 458 | Chris Gray"/></label>
-            <label><div class="lbl">Unit</div><input id="enteredUnit" placeholder="General Duties Division"/></label>
+            <label><div class="lbl">Entered By</div><input id="enteredBy" placeholder="SRF 116 | Stephen Palmes"/></label>
+            <label><div class="lbl">Unit</div><input id="enteredUnit" placeholder="Sheriff's Office"/></label>
           </div>
         </details>
         <button class="now-btn" id="nowBtn" type="button" style="margin-top:10px" title="Fill the date and time fields with the current date and time">Use current date/time</button>
@@ -917,6 +1090,8 @@
       <!-- Charges -->
       <div class="card" id="chargesCard" style="display:none" data-section="charges">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Charges <span id="chargeCount" style="font-weight:400;font-size:12px;color:var(--muted)"></span></h2><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div>
+        <div class="hint" style="margin-bottom:8px"><span>💡</span><span>For a Sheriff Failure to Stop warrant the only standard charge is <strong>Failure to Stop for an Enforcement Vehicle (Non-Police)</strong>. Add it with one click below. Any other offence is for MelPol to add separately.</span></div>
+        <button class="btn" type="button" id="addFtsChargeBtn" title="Add the standard Sheriff Failure to Stop charge" style="margin-bottom:12px;background:rgba(100,200,120,0.18);border-color:rgba(100,200,120,0.4)">➕ Add Failure to Stop charge</button>
         <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:10px; margin-bottom:10px">
           <input id="chargeSearch" placeholder="Search charges" style="margin:0"/>
           <select id="chargeFilter" style="margin:0">
@@ -965,8 +1140,8 @@
             <label><div class="lbl">ID Status</div><select id="swIdStatus"><option value="UNCONFIRMED">UNCONFIRMED</option><option value="CONFIRMED">CONFIRMED</option></select></label>
             <label><div class="lbl">Subject / Warrant Name (override)</div><input id="swWarrantName" placeholder="Leave blank to use Offender Name"/></label>
           </div>
-          <label><div class="lbl">ID Confirmation Basis</div><input id="swIdBasis" placeholder="Required for ID CONFIRMED, e.g. physical ID shown during stop"/></label>
-          <div id="swIdStatusWarn" style="display:none;padding:10px;border-radius:10px;border:1px solid rgba(255,200,100,0.25);background:rgba(255,200,100,0.08);font-size:12px;line-height:1.6;color:var(--warn)">ID confirmed warrants are only for when the person actually showed ID. Add the confirmation basis or this will stay ID unconfirmed.</div>
+          <label><div class="lbl">ID Confirmation Basis</div><input id="swIdBasis" placeholder="Required for ID CONFIRMED — e.g. driver licence shown / government ID shown / fingerprint result confirmed"/></label>
+          <div id="swIdStatusWarn" style="display:none;padding:10px;border-radius:10px;border:1px solid rgba(255,200,100,0.25);background:rgba(255,200,100,0.08);font-size:12px;line-height:1.6;color:var(--warn)">ID CONFIRMED is only for when the person actually showed ID or returned a fingerprint match. State the basis (driver licence shown / government ID shown / fingerprint result confirmed) or this stays ID UNCONFIRMED. A verbal name or visual recognition is not enough (Handbook 3.1).</div>
           <label><div class="lbl">MDT/LEAP Paste (auto-fill)</div><textarea id="swPaste" rows="3" placeholder="Paste profile here"></textarea></label>
           <div class="divider"></div>
           <label><div class="lbl">Interaction Type</div><select id="swInteractionType"><option value="vehicle">Vehicle Stop</option><option value="foot">On Foot / No Vehicle</option></select></label>
@@ -1541,7 +1716,7 @@
 
 
   <!-- SHERIFF LOGS PAGE -->
-  <div id="sheriffLogsPage" class="tool-page active">
+  <div id="sheriffLogsPage" class="tool-page">
   <div style="max-width:860px;margin:0 auto;padding:16px 22px 40px">
     <div style="font-size:18px;font-weight:900;margin-bottom:14px">Sheriff Log Helper</div>
 
@@ -2058,9 +2233,9 @@
   },
   {
     "cat": "Traffic",
-    "name": "Failure to stop for a Enforcement Vehicle (Non-Police)",
+    "name": "Failure to Stop for an Enforcement Vehicle (Non-Police)",
     "cost": "1,000 - 3,000",
-    "notes": "Failure to stop for a sheriff / Vicroads Officer",
+    "notes": "The standard Sheriff charge — failing to stop for a Sheriff / enforcement vehicle",
     "sentenceType": "Indictable",
     "liability": "MR"
   },
@@ -3575,8 +3750,13 @@
 
 
   function getInitialToolPage() {
+    // Returning users land on their last-used tab; brand-new users start on the Recruit Guide.
+    try {
+      const saved = localStorage.getItem('sheriff_tool_page');
+      if (saved && ['guide', 'sherifflogs', 'debt', 'report'].includes(saved)) return saved;
+    } catch (_) {}
     const activeNav = document.querySelector('.tool-nav button.nav-active[data-tool-page]');
-    return activeNav?.dataset?.toolPage || 'sherifflogs';
+    return activeNav?.dataset?.toolPage || 'guide';
   }
 
   function packStoredState(rawState) {
@@ -3874,6 +4054,16 @@
     const textEl = document.getElementById("sentenceSuggestionText");
     if (!textEl) return;
 
+    // Handbook 4.3 — for a Sheriff Failure to Stop warrant the recommended Sheriff outcome
+    // is a fixed PRISON TIME: 60 WEEKS, not a MelPol sentence range. Show that instead.
+    if (state.reportType === "sheriff_arrest" || state.reportType === "sheriff_warrant") {
+      textEl.innerHTML =
+        '<div style="font-size:18px;font-weight:900;color:rgba(100,200,255,0.9);margin-bottom:2px">🔒 PRISON TIME: 60 WEEKS</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Recommended Sheriff outcome for Failure to Stop (Handbook 4.3). Sheriffs do not add a fine — leave any fine to MelPol or the court.</div>'
+        + '<div style="font-size:11px;color:var(--muted)">The 40-week minimum is allowed by the law-book range but is not the recommended outcome. Only a Court Warrant or senior leadership direction changes this.</div>';
+      return;
+    }
+
     if (selectedChargesSet.size === 0) {
       textEl.innerHTML = '<span style="color:var(--muted);font-size:13px">No charges selected</span>';
       return;
@@ -4145,6 +4335,25 @@
     debouncedRenderPreview();
     throttledAutosave();
   }
+
+  // The single standard charge for a Sheriff Failure to Stop warrant (Handbook 4.1).
+  const SHERIFF_FTS_CHARGE = "Failure to Stop for an Enforcement Vehicle (Non-Police)";
+  function addFailureToStopCharge() {
+    if (selectedChargesSet.has(SHERIFF_FTS_CHARGE)) {
+      toast("Failure to Stop charge already added", "warn");
+      return;
+    }
+    selectedChargesSet.add(SHERIFF_FTS_CHARGE);
+    renderSelectedCharges();
+    renderChargeList();
+    updateSentenceSuggestion();
+    updateNarrativeHints();
+    state.chargesList = Array.from(selectedChargesSet).join('\n');
+    debouncedRenderPreview();
+    throttledAutosave();
+    toast("Failure to Stop charge added", "ok");
+  }
+  window.addFailureToStopCharge = addFailureToStopCharge;
 
   function togglePin(pinName) {
     if (selectedPinsSet.has(pinName)) {
@@ -6008,17 +6217,38 @@ function clearDebtTool() {
     return lines;
   }
 
-  // ── Shared handbook-aligned warrant boilerplate (arrest / questioning / court) ──
-  // charge:true adds the "charge with the above offence" line (arrest/questioning only —
-  // a Court Warrant is post-conviction so there is no offence to charge).
-  function sheriffActionNotice(opts = {}) {
-    const lines = [
-      "ACTION NOTICE",
-      "PLEASE DETAIN THE INDIVIDUAL AND CONTACT ANY AVAILABLE SHERIFFS IMMEDIATELY."
-    ];
-    if (opts.charge) lines.push("PLEASE CHARGE WITH THE ABOVE OFFENCE IF ENOUGH EVIDENCE.");
-    lines.push("IF NO SHERIFF IS AVAILABLE, DO NOT CLEAR THE WARRANT - MAKE A NOTE AND ADVISE SHERIFFS IN THE DPS EMAILS.");
-    return lines;
+  // ── Action Notices — Handbook v3.0 Chapter 11 (one approved default per warrant type) ──
+  // Each warrant type carries its own default instruction. The writing Sheriff may still
+  // tailor it via the Instruction Block override (swInstruction). Returns lines incl. header.
+  const SHERIFF_ACTION_NOTICES = {
+    // 11.2 Questioning
+    questioning: [
+      "PLEASE DETAIN THE INDIVIDUAL, COMPLETE THE OUTSTANDING QUESTIONS AND CONTACT AVAILABLE SHERIFFS FOR ANY OUTSTANDING DEBT ENFORCEMENT.",
+      "IF THE OFFENCE IS PROVEN, PROGRESS TO ARREST AND PROCESS THE LISTED CHARGE AND SENTENCE.",
+      "ONCE ACTIONED, CLEAR THE WARRANT AND NOTIFY SHERIFFS THROUGH DPS EMAILS."
+    ],
+    // 11.3 Arrest
+    arrest: [
+      "PLEASE ARREST THE INDIVIDUAL AND PROCESS THE LISTED CHARGE AND SENTENCE.",
+      "CONTACT AVAILABLE SHERIFFS FOR ANY OUTSTANDING DEBT ENFORCEMENT.",
+      "ONCE ACTIONED, CLEAR THE WARRANT AND NOTIFY SHERIFFS THROUGH DPS EMAILS.",
+      "IF MELPOL CANNOT ACTION IT, LEAVE THE WARRANT ACTIVE AND REQUEST A SHERIFF."
+    ],
+    // 11.4 Court
+    court: [
+      "PLEASE ARREST THE INDIVIDUAL AND PROCESS THE COURT-ORDERED OUTCOME LISTED IN THIS WARRANT.",
+      "ONCE ACTIONED, CLEAR THE WARRANT AND NOTIFY SHERIFFS THROUGH DPS EMAILS.",
+      "IF MELPOL CANNOT ACTION IT, LEAVE THE WARRANT ACTIVE AND REQUEST A SHERIFF."
+    ],
+    // 11.5 Debt Enforcement
+    debt: [
+      "PLEASE CONTACT A SHERIFF MEMBER ONCE THE INDIVIDUAL IS IN CUSTODY SO THE SHERIFF'S OFFICE CAN DEAL WITH THE DEBT ENFORCEMENT.",
+      "IF NO SHERIFF IS AVAILABLE, LEAVE THE WARRANT ACTIVE AND PING SHERIFFS IN DPS EMAILS."
+    ]
+  };
+  function sheriffActionNotice(type) {
+    const body = SHERIFF_ACTION_NOTICES[type] || SHERIFF_ACTION_NOTICES.arrest;
+    return ["ACTION NOTICE", ...body];
   }
 
   // Normalises a signature callsign to "SRF ###" form
@@ -6112,7 +6342,8 @@ function clearDebtTool() {
       if (norm(state.sentence)) {
         add(`- ${norm(state.sentence)}`);
       } else if (!mrcWeeks) {
-        add("- NIL");
+        // Handbook 4.3 recommended Sheriff outcome for Failure to Stop.
+        add("- PRISON TIME: 60 WEEKS");
       }
       if (norm(state.sentenceApproval)) add(`- ${norm(state.sentenceApproval)}`);
       add("");
@@ -6134,10 +6365,10 @@ function clearDebtTool() {
       }
       add("");
     }
-    sheriffActionNotice({ charge: true }).forEach(x => add(x));
+    sheriffActionNotice('arrest').forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
-    
+
     return L.join("\n");
   }
 
@@ -6156,7 +6387,7 @@ function clearDebtTool() {
     
     add(`(${++dn}) OUTSTANDING WARRANT FOR QUESTIONING - ${who} (${idLabel})`);
     if (!sectionExcluded("charges")) {
-      add(`(${++dn}) CHARGES:`);
+      add(`(${++dn}) CHARGE IF OFFENCE IS PROVEN:`);
       if (norm(state.chargesList)) {
         ensureLines(state.chargesList).split("\n").forEach(x => {
           const clean = x.trim();
@@ -6207,11 +6438,12 @@ function clearDebtTool() {
     
     if (!sectionExcluded("sentence")) {
       const sentenceNum = ++dn;
-      add(`(${sentenceNum}) Sentence:`);
+      add(`(${sentenceNum}) Sentence If Offence Is Proven:`);
       if (norm(state.sentence)) {
         add(`- ${norm(state.sentence)}`);
       } else {
-        add("- NIL");
+        // Handbook 4.3 recommended Sheriff outcome for Failure to Stop.
+        add("- PRISON TIME: 60 WEEKS");
       }
       if (norm(state.sentenceApproval)) add(`- ${norm(state.sentenceApproval)}`);
       add("");
@@ -6242,10 +6474,10 @@ function clearDebtTool() {
       add("");
     }
 
-    sheriffActionNotice({ charge: true }).forEach(x => add(x));
+    sheriffActionNotice('questioning').forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
-    
+
     return L.join("\n");
   }
 
@@ -6333,7 +6565,7 @@ function clearDebtTool() {
       add("Images available in Sheriff Warrants under the Sheriff Warrants thread.");
     }
     add("");
-    sheriffActionNotice().forEach(x => add(x));
+    sheriffActionNotice('court').forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
 
@@ -6368,7 +6600,10 @@ function clearDebtTool() {
 
     const debtNarrative = s(sw.debtNarrative) || (deadline ? `${who} has breached their payment plan by failing to keep up with their plan. ${who} must have their ${model} with the plate ${rego} impounded. ${who} has until ${deadline} to pay their debt, otherwise the vehicle will belong to Melbourne Sheriffs and be sold.` : `${who} has breached their payment plan by failing to keep up with their plan. ${who} must have their ${model} with the plate ${rego} impounded.`);
     const monitorLine = deadline ? `Sheriffs will monitor their debt and release the vehicle if all debt is cleared before ${deadline}. Failure to pay the debt will result in the vehicle being sold, with the proceeds used to pay all outstanding debt.` : `Sheriffs will monitor their debt and release the vehicle if all debt is cleared before the warrant is actioned. Failure to pay the debt will result in the vehicle being sold, with the proceeds used to pay all outstanding debt.`;
-    const contactInstruction = s(sw.instruction) || "PLEASE CONTACT A SHERIFF MEMBER TO DEAL WITH THIS WARRANT. IF NO ONE IS AVAILABLE, PLEASE LEAVE THE WARRANT ACTIVE AND PING SHERIFFS IN DPS EMAILS.";
+    // Handbook 11.5 default Action Notice; the Instruction Block override replaces the body.
+    const contactInstruction = s(sw.instruction)
+      ? ["ACTION NOTICE", s(sw.instruction)]
+      : sheriffActionNotice('debt');
 
     add(`WARRANT DETAILS: (1) OUTSTANDING DEBT ENFORCEMENT WARRANT - ${who}`);
     add("");
@@ -6396,7 +6631,7 @@ function clearDebtTool() {
       add(`Debt tool note: ${notebookLine}`);
     }
     add("");
-    add(contactInstruction);
+    contactInstruction.forEach(x => add(x));
     add("");
     add(`The vehicle belonging to ${who} is to be impounded by order of the Sheriff's Office of Melbourne.`);
     add("");
@@ -6672,6 +6907,19 @@ function clearDebtTool() {
         const w = parseInt(norm(state.sheriffWarrant.mrcWeeks), 10);
         if (!isNaN(w) && w > 60) warnings.push("MRC remand exceeds the handbook maximum of 60 weeks.");
       }
+      // Handbook 4.4 / 9.3 — a Sheriff Failure to Stop warrant lists ONLY the Failure to Stop charge.
+      const extraCharges = Array.from(selectedChargesSet).filter(c => c !== SHERIFF_FTS_CHARGE);
+      if (extraCharges.length) {
+        warnings.push('Sheriff Failure to Stop warrants list only "Failure to Stop for an Enforcement Vehicle (Non-Police)". These are for MelPol to add separately, not the Sheriff warrant: ' + extraCharges.join(", ") + ".");
+      }
+      // Handbook 9.7 / 13.18 — CCTV is not used on ordinary Sheriff warrants (court only).
+      if (/\bcctv\b/i.test(norm(state.evidence))) {
+        warnings.push("CCTV is only used for Court Warrants — remove it from the evidence list on this warrant.");
+      }
+      // Handbook 3.1 / 9.3 — ID Confirmed must record the basis (licence / government ID / fingerprint result).
+      if (norm(state.sheriffWarrant.idStatus) === "CONFIRMED" && !norm(state.sheriffWarrant.idBasis)) {
+        warnings.push("ID CONFIRMED needs a confirmation basis (e.g. driver licence shown, government ID shown, or fingerprint result confirmed), otherwise the warrant stays ID UNCONFIRMED.");
+      }
     } else if (type === "sheriff_court") {
       if (!hasPrimarySubject()) warnings.push("Missing accused name.");
       if (!norm(state.sheriffWarrant.courtCharges)) warnings.push("No charges before the court listed.");
@@ -6684,7 +6932,19 @@ function clearDebtTool() {
       if (!norm(state.sheriffWarrant.model)) warnings.push("Missing vehicle model.");
       if (!norm(state.sheriffWarrant.impoundTime)) warnings.push("Missing impound time.");
       if (!norm(state.sheriffWarrant.impoundPrice)) warnings.push("Missing impound price.");
-      if (!norm(state.sheriffWarrant.approvedBy)) warnings.push("Missing approval line.");
+      if (!norm(state.sheriffWarrant.approvedBy)) {
+        warnings.push("Missing approval line — every Debt Enforcement Warrant needs senior leadership approval (Regional Manager or above) recorded by rank and name.");
+      } else {
+        // Handbook 8.2 — record the actual senior leader by rank + name, not vague wording.
+        const approver = norm(state.sheriffWarrant.approvedBy);
+        if (/^(my ?self|leadership|sheriff ?leadership|approved|n\/?a|tbc)$/i.test(approver) || !/\s/.test(approver)) {
+          warnings.push('Record the approving senior leader by rank AND name (Regional Manager or above), e.g. "Regional Manager Morgan Vale" — not vague wording like "leadership" or "myself".');
+        }
+      }
+      // Handbook 8.4 / 2.5 — Debt Enforcement Warrants are vehicle-only.
+      if (/\b(house|property|real estate|jewell?ery|boat|savings account|bank account)\b/i.test(norm(state.sheriffWarrant.debtNarrative) + " " + norm(state.summary))) {
+        warnings.push("Debt Enforcement Warrants are vehicle-only — do not list non-vehicle assets (house, property, cash, etc.).");
+      }
       if (!norm(state.offender.phone) && !norm(state.debtTool?.debtorPhone)) warnings.push("Missing debtor phone number.");
       if (!norm(state.sigName)) warnings.push("Missing signature name.");
     }
@@ -9150,6 +9410,11 @@ Is there anything you would like to add at this time?`;
     // END v47 EVENT HANDLERS
     // ============================================================================
     // Charge & PIN Event Listeners
+    const addFtsBtn = document.getElementById("addFtsChargeBtn");
+    if (addFtsBtn) {
+      addFtsBtn.addEventListener("click", addFailureToStopCharge);
+    }
+
     if (el.chargeSearch) {
       el.chargeSearch.addEventListener("input", renderChargeList);
     }
@@ -12149,25 +12414,22 @@ function bindSheriffLogsTool() {
   // ═══════════════════════════════════════════════════════════════════════════
 
   function showToolPage(page) {
-    const targetPage = ['sherifflogs', 'debt', 'report'].includes(page) ? page : getInitialToolPage();
+    const TOOL_PAGE_IDS = { guide: 'guidePage', sherifflogs: 'sheriffLogsPage', debt: 'debtPage', report: 'reportPage' };
+    const targetPage = Object.keys(TOOL_PAGE_IDS).includes(page) ? page : getInitialToolPage();
     document.querySelectorAll('.tool-page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tool-nav button').forEach(b => b.classList.remove('nav-active'));
-    const navBtns = document.querySelectorAll('.tool-nav button');
+    // Select the nav button by data attribute so tab order can change without breaking state.
+    document.querySelector('.tool-nav button[data-tool-page="' + targetPage + '"]')?.classList.add('nav-active');
+    document.getElementById(TOOL_PAGE_IDS[targetPage])?.classList.add('active');
     if (targetPage === 'sherifflogs') {
-      document.getElementById('sheriffLogsPage')?.classList.add('active');
-      navBtns[0]?.classList.add('nav-active');
       renderSheriffLogsTool();
       updateCrossLinkStatus();
     } else if (targetPage === 'debt') {
-      document.getElementById('debtPage')?.classList.add('active');
-      navBtns[1]?.classList.add('nav-active');
       updateDebtTabModeHint();
       updateCrossLinkStatus();
-    } else {
-      document.getElementById('reportPage')?.classList.add('active');
-      navBtns[2]?.classList.add('nav-active');
     }
     updateToolChrome(targetPage);
+    try { localStorage.setItem('sheriff_tool_page', targetPage); } catch (_) {}
   }
   window.showToolPage = showToolPage;
 
@@ -12203,6 +12465,64 @@ function bindSheriffLogsTool() {
       btn.dataset.bound = '1';
       btn.addEventListener('click', () => showToolPage(btn.dataset.toolPage));
     });
+
+    // ── "Open the Recruit Guide" links scattered through the other tools (delegated so
+    //    it also catches links inserted into dynamically-rendered hints) ──
+    if (document.body.dataset.guideLinkBound !== '1') {
+      document.body.dataset.guideLinkBound = '1';
+      document.body.addEventListener('click', (e) => {
+        const link = e.target.closest('.js-open-guide');
+        if (!link) return;
+        e.preventDefault();
+        showToolPage('guide');
+      });
+    }
+
+    // ── Recruit Guide: scenario picker ──
+    const guideBtns = document.getElementById('guideScenarioBtns');
+    if (guideBtns && guideBtns.dataset.bound !== '1') {
+      guideBtns.dataset.bound = '1';
+      guideBtns.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-scenario]');
+        if (!btn) return;
+        const scenario = btn.dataset.scenario;
+        guideBtns.querySelectorAll('button[data-scenario]').forEach(b => b.classList.toggle('guide-active', b === btn));
+        document.querySelectorAll('#guidePage .guide-scenario[data-scenario]').forEach(p => p.classList.toggle('active', p.dataset.scenario === scenario));
+      });
+    }
+
+    // ── Recruit Guide: jump-to-tool buttons (preselect report type / ID status / debt use case) ──
+    const guidePageEl = document.getElementById('guidePage');
+    if (guidePageEl && guidePageEl.dataset.jumpBound !== '1') {
+      guidePageEl.dataset.jumpBound = '1';
+      guidePageEl.addEventListener('click', (e) => {
+        const jb = e.target.closest('[data-guide-jump]');
+        if (!jb) return;
+        const dest = jb.dataset.guideJump;
+        if (dest === 'report') {
+          const rt = jb.dataset.reportType;
+          const idStatus = jb.dataset.idStatus;
+          if (rt && el.reportType) { el.reportType.value = rt; el.reportType.dispatchEvent(new Event('change')); }
+          if (idStatus) {
+            const swEl = document.getElementById('swIdStatus');
+            if (swEl) { swEl.value = idStatus; swEl.dispatchEvent(new Event('change')); }
+          }
+          showToolPage('report');
+          // An Arrest warrant needs the ID basis recorded — point the recruit straight at it.
+          if (idStatus === 'CONFIRMED') {
+            const basisEl = document.getElementById('swIdBasis');
+            if (basisEl) { try { basisEl.focus(); } catch (_) {} }
+          }
+        } else if (dest === 'debt') {
+          const uc = jb.dataset.debtUsecase;
+          const sel = document.getElementById('debtUseCase');
+          if (uc && sel) { sel.value = uc; sel.dispatchEvent(new Event('change')); }
+          showToolPage('debt');
+        } else if (dest === 'sherifflogs') {
+          showToolPage('sherifflogs');
+        }
+      });
+    }
 
     const guidelinesToggle = document.getElementById('guidelinesToggle');
     const guidelinesBody = document.getElementById('guidelinesBody');
@@ -12272,6 +12592,10 @@ function updateDebtTabModeHint() {
   if (useCase === 'foot') {
     hint.innerHTML += ` <span style="color:var(--warn)">On foot mode: no vehicle stop. Use !interact for logs. Request ID, document the debt, and request payment or arrange a follow-up.</span>`;
   }
+  if (useCase === 'warrant') {
+    hint.innerHTML += ` <span style="color:var(--warn)">Enforcement mode: a Debt Enforcement Warrant needs senior-leadership approval (Regional Manager or above) recorded by rank and name, and is vehicle-only.</span>`;
+  }
+  hint.innerHTML += ` <a href="#" class="js-open-guide" style="color:var(--accent)">Open the Recruit Guide</a>`;
   if (switchBtn) switchBtn.style.display = usingDebtWarrant ? 'none' : '';
 }
 
