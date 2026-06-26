@@ -332,7 +332,12 @@
     }
     body.light-mode header{background:linear-gradient(180deg, #002B5C, #001F3F); color:#fff}
     body.light-mode header .title, body.light-mode header .sub{color:#fff}
-    body.light-mode .card{box-shadow:0 2px 8px rgba(0,18,41,0.08)}
+    /* Light mode: cards are white with dark text. The base .card rule hardcodes the dark
+       navy surface; in light mode we override it so card content (which uses var(--text))
+       is readable instead of dark-on-dark. */
+    body.light-mode .card{background:#ffffff;box-shadow:0 2px 8px rgba(0,18,41,0.08)}
+    body.light-mode .card:hover{border-color:rgba(0,18,41,0.22)}
+    body.light-mode pre,body.light-mode #preview{background:#f4f7fb;color:var(--text)}
     body.light-mode select,body.light-mode input,body.light-mode textarea{background:rgba(255,255,255,0.85);color:var(--text)}
     body.light-mode pre{background:rgba(255,255,255,0.8)}
     body.light-mode .ac-drop{background:#fff;border-color:rgba(0,0,0,0.15)}
@@ -3854,7 +3859,7 @@
       btn.textContent = '×';
       btn.setAttribute('aria-label', 'Remove charge');
       btn.dataset.charge = chargeName;
-      btn.style.cssText = "border:none; background:transparent; color:rgba(255,255,255,0.85); cursor:pointer; font-weight:900; padding:0 2px; line-height:1";
+      btn.style.cssText = "border:none; background:transparent; color:var(--muted); cursor:pointer; font-weight:900; padding:0 2px; line-height:1";
 
       tag.appendChild(label);
       tag.appendChild(btn);
@@ -3941,7 +3946,7 @@
       btn.textContent = '×';
       btn.setAttribute('aria-label', 'Remove PIN');
       btn.dataset.pin = pinName;
-      btn.style.cssText = "border:none; background:transparent; color:rgba(255,255,255,0.85); cursor:pointer; font-weight:900; padding:0 2px; line-height:1";
+      btn.style.cssText = "border:none; background:transparent; color:var(--muted); cursor:pointer; font-weight:900; padding:0 2px; line-height:1";
 
       tag.appendChild(label);
       tag.appendChild(btn);
@@ -4133,7 +4138,7 @@
   function _tierRow(label, value, color) {
     return '<div style="display:flex;align-items:baseline;gap:8px;padding:3px 6px;background:rgba(255,255,255,0.03);border-radius:4px">'
       + '<span style="font-size:11px;font-weight:900;color:' + color + ';min-width:120px;flex-shrink:0">' + label + '</span>'
-      + '<span style="font-size:11px;color:rgba(255,255,255,0.7)">' + value + '</span>'
+      + '<span style="font-size:11px;color:var(--text)">' + value + '</span>'
       + '</div>';
   }
 
@@ -10920,7 +10925,7 @@ Is there anything you would like to add at this time?`;
       const btn = document.createElement("button");
       btn.type = "button";
       btn.textContent = "×";
-      btn.style.cssText = "border:none; background:transparent; color:rgba(255,255,255,0.7); cursor:pointer; font-weight:900; padding:0 2px; line-height:1; font-size:14px; flex-shrink:0";
+      btn.style.cssText = "border:none; background:transparent; color:var(--muted); cursor:pointer; font-weight:900; padding:0 2px; line-height:1; font-size:14px; flex-shrink:0";
       btn.addEventListener("click", () => {
         const allLines = ensureLines(state.officersList).split("\n").map(l => l.trim()).filter(Boolean);
         // Clean up callsign assignment for this officer
