@@ -632,12 +632,23 @@
     .guide-branch.no{border-color:rgba(0,191,255,0.45);background:rgba(0,191,255,0.08)}
     .guide-branch h4{margin:0 0 6px;font-size:13px;font-weight:900}
     .guide-branch p{margin:0;font-size:12px;line-height:1.6;color:var(--muted)}
+    .guide-branch[role="button"]{cursor:pointer;transition:transform 0.12s,box-shadow 0.12s,border-color 0.12s}
+    .guide-branch[role="button"]:hover{transform:translateY(-1px)}
+    .guide-branch.yes[role="button"]:hover,.guide-branch.yes[role="button"]:focus-visible{box-shadow:0 0 0 2px rgba(100,200,120,0.5)}
+    .guide-branch.no[role="button"]:hover,.guide-branch.no[role="button"]:focus-visible{box-shadow:0 0 0 2px rgba(0,191,255,0.5)}
+    .guide-branch[role="button"]:focus-visible{outline:none}
+    .guide-branch-cta{margin-top:8px;font-size:12px;font-weight:900}
+    .guide-branch.yes .guide-branch-cta{color:rgba(120,210,140,0.95)}
+    .guide-branch.no .guide-branch-cta{color:rgba(80,200,255,0.95)}
     .guide-jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
     .guide-ref-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
     @media (max-width:600px){.guide-ref-grid{grid-template-columns:1fr}}
     .guide-ref{padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.03);font-size:12px;line-height:1.6}
     .guide-ref strong{color:var(--accent)}
     .guide-callout{padding:10px 12px;border-radius:8px;border:1px solid rgba(255,170,0,0.3);background:rgba(255,170,0,0.08);font-size:12px;line-height:1.6;margin-top:10px}
+    /* Inline link-style button (used by "Open the Recruit Guide" so it's keyboard-native, not an <a href="#">) */
+    .guide-link{background:none;border:none;padding:0;margin:0;font:inherit;color:var(--accent);text-decoration:underline;cursor:pointer}
+    .guide-link:hover{opacity:0.85}
 
     /* ── v47: Template/Preset Modal ──────────────── */
     .preset-modal-overlay{
@@ -825,15 +836,15 @@
   </header>
 
   <!-- Nav Bar -->
-  <nav class="tool-nav" id="toolNav">
-    <button class="nav-active" data-tool-page="guide" title="Step-by-step guide for recruits: stops, fleeing, arrests and impounds">Recruit Guide</button>
-    <button data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
-    <button data-tool-page="debt" title="Process LEAP financial records and calculate overdue debt">Debt Tool</button>
-    <button data-tool-page="report" title="Write formal Sheriff warrant and arrest paperwork">Report Tool</button>
+  <nav class="tool-nav" id="toolNav" role="tablist" aria-label="Tools">
+    <button class="nav-active" role="tab" id="tab-guide" aria-controls="guidePage" aria-selected="true" data-tool-page="guide" title="Step-by-step guide for recruits: stops, fleeing, arrests and impounds">Recruit Guide</button>
+    <button role="tab" id="tab-sherifflogs" aria-controls="sheriffLogsPage" aria-selected="false" data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
+    <button role="tab" id="tab-debt" aria-controls="debtPage" aria-selected="false" data-tool-page="debt" title="Process LEAP financial records and calculate overdue debt">Debt Tool</button>
+    <button role="tab" id="tab-report" aria-controls="reportPage" aria-selected="false" data-tool-page="report" title="Write formal Sheriff warrant and arrest paperwork">Report Tool</button>
   </nav>
 
   <!-- RECRUIT GUIDE PAGE -->
-  <div id="guidePage" class="tool-page active">
+  <div id="guidePage" class="tool-page active" role="tabpanel" aria-labelledby="tab-guide" tabindex="0">
   <main role="main">
     <div style="display:grid; grid-template-columns:minmax(0,1fr); gap:14px; grid-auto-rows:max-content; max-width:1100px; margin:0 auto">
 
@@ -858,11 +869,11 @@
         <div class="muted" style="margin-bottom:12px">Pick a situation on the left — the steps open on the right.</div>
         <div class="guide-md">
         <div class="guide-scenario-btns" id="guideScenarioBtns">
-          <button class="btn guide-active" type="button" data-scenario="roadside">🚓 Roadside stop (debt check)</button>
-          <button class="btn" type="button" data-scenario="foot">🚶 On-foot interaction</button>
-          <button class="btn" type="button" data-scenario="fled">🏃 They fled — Failure to Stop</button>
-          <button class="btn" type="button" data-scenario="impound">🔧 Impound / Debt Enforcement</button>
-          <button class="btn" type="button" data-scenario="court">⚖️ Court warrant</button>
+          <button class="btn guide-active" type="button" aria-pressed="true" data-scenario="roadside">🚓 Roadside stop (debt check)</button>
+          <button class="btn" type="button" aria-pressed="false" data-scenario="foot">🚶 On-foot interaction</button>
+          <button class="btn" type="button" aria-pressed="false" data-scenario="fled">🏃 They fled — Failure to Stop</button>
+          <button class="btn" type="button" aria-pressed="false" data-scenario="impound">🔧 Impound / Debt Enforcement</button>
+          <button class="btn" type="button" aria-pressed="false" data-scenario="court">⚖️ Court warrant</button>
         </div>
         <div class="guide-scenario-panels">
 
@@ -915,21 +926,20 @@
           </ol>
           <div class="guide-q">Which warrant do I write? Ask one question:</div>
           <div class="muted" style="font-size:12px;margin-bottom:2px">Did you <strong>formally confirm the driver's identity</strong> (checked ID/licence or a fingerprint result) <strong>before</strong> they failed to stop?</div>
+          <div class="muted" style="font-size:11px;margin-bottom:6px">Click the matching card to start that warrant:</div>
           <div class="guide-decision">
-            <div class="guide-branch yes">
+            <div class="guide-branch yes" role="button" tabindex="0" data-guide-jump="report" data-report-type="sheriff_arrest" data-id-status="CONFIRMED" aria-label="Start an Arrest Warrant (ID confirmed)">
               <h4>✅ YES → Arrest Warrant</h4>
               <p>Names the confirmed person. ID Confirmed. Record the basis (licence/ID/fingerprint).</p>
+              <div class="guide-branch-cta">→ Start Arrest Warrant</div>
             </div>
-            <div class="guide-branch no">
+            <div class="guide-branch no" role="button" tabindex="0" data-guide-jump="report" data-report-type="sheriff_warrant" data-id-status="UNCONFIRMED" aria-label="Start a Questioning Warrant (ID unconfirmed)">
               <h4>❔ NO → Questioning Warrant</h4>
               <p>Names the <strong>registered owner</strong> from MELROADS (never a verbal name). ID Unconfirmed — MelPol question them to work out who was driving.</p>
+              <div class="guide-branch-cta">→ Start Questioning Warrant</div>
             </div>
           </div>
           <div class="guide-callout">Both warrants: Charge = <strong>Failure to Stop for an Enforcement Vehicle (Non-Police)</strong> · Sentence = <strong>PRISON TIME: 60 WEEKS</strong>. Sheriffs don't add a fine. Then: draft in Warrant Practice → ping an FTO (recruits wait 1 min) → enter in the MDT → put the warrant + evidence in DPS emails.</div>
-          <div class="guide-jump">
-            <button class="btn" type="button" data-guide-jump="report" data-report-type="sheriff_arrest" data-id-status="CONFIRMED" style="background:rgba(100,200,120,0.18);border-color:rgba(100,200,120,0.4)">Start Arrest Warrant</button>
-            <button class="btn" type="button" data-guide-jump="report" data-report-type="sheriff_warrant" data-id-status="UNCONFIRMED" style="background:rgba(0,191,255,0.18);border-color:rgba(0,191,255,0.4)">Start Questioning Warrant</button>
-          </div>
         </div>
 
         <!-- D. Impound / Debt Enforcement -->
@@ -985,7 +995,7 @@
   </div>
 
   <!-- REPORT TOOL PAGE -->
-  <div id="reportPage" class="tool-page">
+  <div id="reportPage" class="tool-page" role="tabpanel" aria-labelledby="tab-report" tabindex="0">
   <main role="main">
     <div style="display:grid; gap:14px; grid-auto-rows:max-content">
 
@@ -998,7 +1008,7 @@
         <div class="guidelines-body" id="reportGuideBody">
           <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
             <ol style="margin:4px 0 0 20px;padding:0">
-              <li><strong>New here? Start on the <a href="#" class="js-open-guide" style="color:var(--accent)">Recruit Guide</a></strong> — it walks you through stops, fleeing, arrests and impounds and sends you to the right place.</li>
+              <li><strong>New here? Start on the <button type="button" class="js-open-guide guide-link">Recruit Guide</button></strong> — it walks you through stops, fleeing, arrests and impounds and sends you to the right place.</li>
               <li><strong>Select report type</strong> — Arrest (ID confirmed before they fled), Questioning (ID unconfirmed → names the registered owner), Court (on court direction), or Debt Enforcement.</li>
               <li><strong>For debt enforcement warrants</strong> — process the debt in the Debt Tool first, then click <strong>Fill Debt Warrant Report</strong> to push all data here automatically.</li>
               <li><strong>For arrest / questioning warrants</strong> — paste a LEAP or MDT profile to auto-fill subject details, or type manually. The only charge is Failure to Stop; the sentence is 60 weeks.</li>
@@ -1020,7 +1030,7 @@
           <option value="sheriff_court">Sheriff Court Warrant</option>
           <option value="sheriff_debt">Sheriff Debt Enforcement Warrant</option>
         </select>
-        <div class="hint" style="margin-top:8px"><span>🧭</span><span><strong>Which warrant?</strong> ID confirmed before they fled → <strong>Arrest</strong>. ID not confirmed → <strong>Questioning</strong> (name the MELROADS registered owner). The only charge is Failure to Stop; the sentence is 60 weeks. <a href="#" class="js-open-guide" style="color:var(--accent)">Open the Recruit Guide</a> for the full walkthrough.</span></div>
+        <div class="hint" style="margin-top:8px"><span>🧭</span><span><strong>Which warrant?</strong> ID confirmed before they fled → <strong>Arrest</strong>. ID not confirmed → <strong>Questioning</strong> (name the MELROADS registered owner). The only charge is Failure to Stop; the sentence is 60 weeks. <button type="button" class="js-open-guide guide-link">Open the Recruit Guide</button> for the full walkthrough.</span></div>
         <div class="hint" style="margin-top:8px"><span>💡</span><span>Date/time, callsign and unit can still auto-fill from MDT paste or your saved template, but you can now edit them here as well.</span></div>
         <details id="reportHeaderMetaDetails" class="header-meta-details">
           <summary>Report header details</summary>
@@ -1092,7 +1102,7 @@
           <span>📷</span>
           <span>Click the box then press <strong>Ctrl+V</strong>, drag & drop an image, or pick a file. OCR will auto-fill NAME, DOB, SEX, ADDRESS, PHONE, VEHICLE info.</span>
         </div>
-        <div id="pasteZone" tabindex="0" style="padding:20px; border:2px dashed var(--border); border-radius:12px; text-align:center; cursor:pointer; margin-top:10px; background:rgba(0,0,0,0.15)">
+        <div id="pasteZone" tabindex="0" role="button" aria-label="Paste a screenshot or text, or drag an image here, to scan with OCR" style="padding:20px; border:2px dashed var(--border); border-radius:12px; text-align:center; cursor:pointer; margin-top:10px; background:rgba(0,0,0,0.15)">
           <div style="font-weight:900; margin-bottom:4px">Paste or drop image here</div>
           <div class="muted">Works best with MDT profiles, licences, VicRoads, fingerprints, pockets, GSR, serials. Images are auto-upscaled &amp; enhanced for better recognition.</div>
         </div>
@@ -1206,7 +1216,12 @@
               <label><div class="lbl">Court Fees</div><input id="swCourtFees" inputmode="numeric" placeholder="e.g. 25,000"/></label>
             </div>
             <label><div class="lbl">Court-Ordered Actions</div><input id="swCourtActions" placeholder="e.g. 15 Actions"/></label>
-            <label><div class="lbl">Sentencing Magistrate</div><input id="swMagistrate" placeholder="e.g. Magistrate Anderson"/></label>
+            <div class="grid2">
+              <label><div class="lbl">Presiding Official Role</div><select id="swPresidingRole"><option value="Magistrate">Magistrate</option><option value="Judge">Judge</option></select></label>
+              <label><div class="lbl">Court Heard In</div><select id="swCourtHeardIn"><option value="Magistrates Courts of Victoria">Magistrates Courts of Victoria</option><option value="District Courts of Victoria">District Courts of Victoria</option></select></label>
+            </div>
+            <label><div class="lbl">Presiding Official Name</div><input id="swMagistrate" placeholder="e.g. Evelyn Hart"/></label>
+            <div class="muted" style="font-size:11px;margin-top:-4px;margin-bottom:6px">Court date &amp; location come from the Preliminary Details (Time / Date / Location) in the Report Narrative section.</div>
             <label><div class="lbl">Evidence Override (optional)</div><textarea id="swCourtEvidence" rows="3" placeholder="Leave blank for default court-records wording"></textarea></label>
           </div>
           <div id="swMrcWeeksWrap" style="display:none">
@@ -1555,7 +1570,7 @@
   </div><!-- end #reportPage -->
 
   <!-- DEBT TOOL PAGE -->
-<div id="debtPage" class="tool-page">
+<div id="debtPage" class="tool-page" role="tabpanel" aria-labelledby="tab-debt" tabindex="0">
 <div style="max-width:980px;margin:0 auto;padding:16px 22px 40px">
   <div style="font-size:18px;font-weight:900;margin-bottom:14px">Sheriff Debt Tool</div>
 
@@ -1737,7 +1752,7 @@
 
 
   <!-- SHERIFF LOGS PAGE -->
-  <div id="sheriffLogsPage" class="tool-page">
+  <div id="sheriffLogsPage" class="tool-page" role="tabpanel" aria-labelledby="tab-sherifflogs" tabindex="0">
   <div style="max-width:860px;margin:0 auto;padding:16px 22px 40px">
     <div style="font-size:18px;font-weight:900;margin-bottom:14px">Sheriff Log Helper</div>
 
@@ -4497,7 +4512,7 @@
       idStatus: "UNCONFIRMED", idBasis: "", warrantName: "", time: "", date: "", location: "",
       details: "", paste: "", interactionType: "vehicle", rego: "", model: "", colour: "", registered: "",
       regoExpires: "", stolen: "NO", suspended: "NO", owner: "", instruction: "", debtDeadline: "", approvedBy: "", impoundTime: "", impoundPrice: "", debtNarrative: "",
-      courtCharges: "", imprisonmentWeeks: "", courtActions: "", courtFees: "", magistrate: "", courtEvidence: "", mrcWeeks: "",
+      courtCharges: "", imprisonmentWeeks: "", courtActions: "", courtFees: "", magistrate: "", presidingRole: "Magistrate", courtHeardIn: "Magistrates Courts of Victoria", courtEvidence: "", mrcWeeks: "",
       sigRank: "Senior Sheriff", sigName: ""
     },
     debtTool: {
@@ -4976,6 +4991,8 @@
     swCourtActions: document.getElementById("swCourtActions"),
     swCourtFees: document.getElementById("swCourtFees"),
     swMagistrate: document.getElementById("swMagistrate"),
+    swPresidingRole: document.getElementById("swPresidingRole"),
+    swCourtHeardIn: document.getElementById("swCourtHeardIn"),
     swCourtEvidence: document.getElementById("swCourtEvidence"),
     swMrcWeeks: document.getElementById("swMrcWeeks"),
     swInstruction: document.getElementById("swInstruction"),
@@ -6549,6 +6566,12 @@ function clearDebtTool() {
     add("No officer, agency, or department has authority to alter, reduce, convert, defer, waive, or remove any part of this warrant.");
     add("The accused must be dealt with strictly in accordance with the terms set out above.");
     add("");
+    add("PRESIDING COURT OFFICIAL");
+    add(`Presiding ${s(sw.presidingRole) || "Magistrate"}: ${s(sw.magistrate) || "NIL"}`);
+    add(`Court Heard In: ${s(sw.courtHeardIn) || "Magistrates Courts of Victoria"}`);
+    add(`Court Date: ${s(state.prelimDate) || "NIL"}`);
+    add(`Court Location: ${s(state.prelimLocation) || "NIL"}`);
+    add("");
     add("(5) OFFICERS INVOLVED");
     const off = lines(state.officersList);
     if (off.length) {
@@ -6567,15 +6590,18 @@ function clearDebtTool() {
     if (s(state.summary)) {
       add(s(state.summary));
     } else {
-      const mag = s(sw.magistrate) || "the presiding Magistrate";
+      const role = s(sw.presidingRole) || "Magistrate";
+      const mag = s(sw.magistrate) ? `${role} ${s(sw.magistrate)}` : `the presiding ${role}`;
       const when = (pd || "[date]") + (pt ? ` at approximately ${pt}` : "");
       add(`On ${when}, ${who} was found guilty before the court for the offences listed above. Sentencing was delivered by ${mag}.`);
     }
     add("This warrant is issued on behalf of the court to locate, arrest, and detain the accused in accordance with the court-ordered outcomes.");
     add("");
     add("(7) APPEAL NOTICE");
-    add("Any appeal or challenge to this matter may only be made through the District Court of Victoria (DCV) or the Supreme Court of Victoria.");
-    add("This warrant remains valid and enforceable unless formally stayed or overturned by one of those courts.");
+    const heardIn = s(sw.courtHeardIn) || "Magistrates Courts of Victoria";
+    const appealCourt = /district/i.test(heardIn) ? "Supreme Courts of Victoria" : "District Courts of Victoria";
+    add(`This matter was heard in the ${heardIn}. Any appeal or challenge may only be made through the ${appealCourt}.`);
+    add("This warrant remains valid and enforceable unless formally stayed or overturned on appeal.");
     add("");
     add("(8) EVIDENCE");
     if (s(sw.courtEvidence)) {
@@ -7092,7 +7118,9 @@ Do you wish to nominate another person as the driver if you were not driving?
 Do you wish to contact a lawyer before answering further questions?
 Is there anything you would like to say regarding the charges?`;
     } else if (type === "sheriff_warrant") {
-      return `Identity:
+      return `Caution:
+Do you understand that false or misleading information may result in charges?
+Identity:
 Can you confirm your full name?
 Do you own or have access to the vehicle registered as [PLATE]?
 Do you regularly use this vehicle?
@@ -8543,7 +8571,7 @@ Is there anything you would like to add at this time?`;
       'swIdStatus', 'swIdBasis', 'swWarrantName',
       'swPaste', 'swInteractionType', 'swRego', 'swModel', 'swColour', 'swRegistered', 'swRegoExpires',
       'swStolen', 'swSuspended', 'swOwner', 'swDebtDeadline', 'swApprovedBy', 'swImpoundTime', 'swImpoundPrice', 'swDebtNarrative', 'swInstruction',
-      'swCourtCharges', 'swImprisonmentWeeks', 'swCourtActions', 'swCourtFees', 'swMagistrate', 'swCourtEvidence', 'swMrcWeeks'
+      'swCourtCharges', 'swImprisonmentWeeks', 'swCourtActions', 'swCourtFees', 'swMagistrate', 'swPresidingRole', 'swCourtHeardIn', 'swCourtEvidence', 'swMrcWeeks'
     ];
     swFields.forEach(field => {
       if (el[field]) {
@@ -9643,6 +9671,8 @@ Is there anything you would like to add at this time?`;
       if (el.swCourtActions) el.swCourtActions.value = sw.courtActions || "";
       if (el.swCourtFees) el.swCourtFees.value = sw.courtFees || "";
       if (el.swMagistrate) el.swMagistrate.value = sw.magistrate || "";
+      if (el.swPresidingRole) el.swPresidingRole.value = sw.presidingRole || "Magistrate";
+      if (el.swCourtHeardIn) el.swCourtHeardIn.value = sw.courtHeardIn || "Magistrates Courts of Victoria";
       if (el.swCourtEvidence) el.swCourtEvidence.value = sw.courtEvidence || "";
       if (el.swMrcWeeks) el.swMrcWeeks.value = sw.mrcWeeks || "";
       if (el.swInstruction) el.swInstruction.value = sw.instruction || "";
@@ -12438,9 +12468,10 @@ function bindSheriffLogsTool() {
     const TOOL_PAGE_IDS = { guide: 'guidePage', sherifflogs: 'sheriffLogsPage', debt: 'debtPage', report: 'reportPage' };
     const targetPage = Object.keys(TOOL_PAGE_IDS).includes(page) ? page : getInitialToolPage();
     document.querySelectorAll('.tool-page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tool-nav button').forEach(b => b.classList.remove('nav-active'));
+    document.querySelectorAll('.tool-nav button').forEach(b => { b.classList.remove('nav-active'); b.setAttribute('aria-selected', 'false'); });
     // Select the nav button by data attribute so tab order can change without breaking state.
-    document.querySelector('.tool-nav button[data-tool-page="' + targetPage + '"]')?.classList.add('nav-active');
+    const activeBtn = document.querySelector('.tool-nav button[data-tool-page="' + targetPage + '"]');
+    if (activeBtn) { activeBtn.classList.add('nav-active'); activeBtn.setAttribute('aria-selected', 'true'); }
     document.getElementById(TOOL_PAGE_IDS[targetPage])?.classList.add('active');
     if (targetPage === 'sherifflogs') {
       renderSheriffLogsTool();
@@ -12487,6 +12518,27 @@ function bindSheriffLogsTool() {
       btn.addEventListener('click', () => showToolPage(btn.dataset.toolPage));
     });
 
+    // Tablist arrow-key navigation (Left/Right/Home/End) for accessibility.
+    const toolNav = document.getElementById('toolNav');
+    if (toolNav && toolNav.dataset.keysBound !== '1') {
+      toolNav.dataset.keysBound = '1';
+      toolNav.addEventListener('keydown', (e) => {
+        if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return;
+        const tabs = Array.from(toolNav.querySelectorAll('button[data-tool-page]'));
+        const cur = tabs.indexOf(document.activeElement);
+        if (cur === -1) return;
+        e.preventDefault();
+        let next = cur;
+        if (e.key === 'ArrowRight') next = (cur + 1) % tabs.length;
+        else if (e.key === 'ArrowLeft') next = (cur - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') next = 0;
+        else if (e.key === 'End') next = tabs.length - 1;
+        const target = tabs[next];
+        showToolPage(target.dataset.toolPage);
+        target.focus();
+      });
+    }
+
     // ── "Open the Recruit Guide" links scattered through the other tools (delegated so
     //    it also catches links inserted into dynamically-rendered hints) ──
     if (document.body.dataset.guideLinkBound !== '1') {
@@ -12507,7 +12559,11 @@ function bindSheriffLogsTool() {
         const btn = e.target.closest('button[data-scenario]');
         if (!btn) return;
         const scenario = btn.dataset.scenario;
-        guideBtns.querySelectorAll('button[data-scenario]').forEach(b => b.classList.toggle('guide-active', b === btn));
+        guideBtns.querySelectorAll('button[data-scenario]').forEach(b => {
+          const on = b === btn;
+          b.classList.toggle('guide-active', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
         document.querySelectorAll('#guidePage .guide-scenario[data-scenario]').forEach(p => p.classList.toggle('active', p.dataset.scenario === scenario));
       });
     }
@@ -12516,9 +12572,7 @@ function bindSheriffLogsTool() {
     const guidePageEl = document.getElementById('guidePage');
     if (guidePageEl && guidePageEl.dataset.jumpBound !== '1') {
       guidePageEl.dataset.jumpBound = '1';
-      guidePageEl.addEventListener('click', (e) => {
-        const jb = e.target.closest('[data-guide-jump]');
-        if (!jb) return;
+      const handleGuideJump = (jb) => {
         const dest = jb.dataset.guideJump;
         if (dest === 'report') {
           const rt = jb.dataset.reportType;
@@ -12534,6 +12588,11 @@ function bindSheriffLogsTool() {
             const basisEl = document.getElementById('swIdBasis');
             if (basisEl) { try { basisEl.focus(); } catch (_) {} }
           }
+          // Next-step nudge so the recruit knows what to do on arrival.
+          if (rt === 'sheriff_arrest') toast('Arrest warrant — record the ID confirmation basis (licence / ID / fingerprint).', 'ok');
+          else if (rt === 'sheriff_warrant') toast('Questioning warrant — list the MELROADS registered owner, not a verbal name.', 'ok');
+          else if (rt === 'sheriff_court') toast('Court warrant — enter the presiding official and court-ordered outcome exactly.', 'ok');
+          else if (rt === 'sheriff_debt') toast('Debt Enforcement — needs senior-leadership approval (Regional Manager or above).', 'ok');
         } else if (dest === 'debt') {
           const uc = jb.dataset.debtUsecase;
           const sel = document.getElementById('debtUseCase');
@@ -12542,6 +12601,18 @@ function bindSheriffLogsTool() {
         } else if (dest === 'sherifflogs') {
           showToolPage('sherifflogs');
         }
+      };
+      guidePageEl.addEventListener('click', (e) => {
+        const jb = e.target.closest('[data-guide-jump]');
+        if (jb) handleGuideJump(jb);
+      });
+      // Keyboard activation for the clickable decision cards (role="button" divs).
+      guidePageEl.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        const jb = e.target.closest('[data-guide-jump][role="button"]');
+        if (!jb) return;
+        e.preventDefault();
+        handleGuideJump(jb);
       });
     }
 
@@ -12616,7 +12687,7 @@ function updateDebtTabModeHint() {
   if (useCase === 'warrant') {
     hint.innerHTML += ` <span style="color:var(--warn)">Enforcement mode: a Debt Enforcement Warrant needs senior-leadership approval (Regional Manager or above) recorded by rank and name, and is vehicle-only.</span>`;
   }
-  hint.innerHTML += ` <a href="#" class="js-open-guide" style="color:var(--accent)">Open the Recruit Guide</a>`;
+  hint.innerHTML += ` <button type="button" class="js-open-guide guide-link">Open the Recruit Guide</button>`;
   if (switchBtn) switchBtn.style.display = usingDebtWarrant ? 'none' : '';
 }
 
