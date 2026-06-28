@@ -861,6 +861,7 @@
           <li><strong>No force, no pursuit.</strong> You may signal with lights and a brief siren blip, but never chase a fleeing vehicle. Keep following the road rules.</li>
           <li><strong>Confidentiality.</strong> Never tell a person they have a warrant. The only exception is when it shows up on a paid criminal-history check.</li>
           <li><strong>Debt checks have limits.</strong> On patrol you may only run a debt check during a <strong>traffic stop</strong> (they're driving), at the <strong>station when they request one</strong>, or during <strong>MRC checks</strong> — never on people just walking the street.</li>
+          <li><strong>Government fees only.</strong> Check the <strong>Financial records</strong> tab for outstanding government fees (licences, fines, fees). Sheriffs do <strong>not</strong> collect debt for private entities.</li>
           <li><strong>ANPR is a guide only</strong> — it can be wrong. Confirm debt through LEAP / MELROADS.</li>
           <li><strong>One incident = one warrant.</strong> Don't create a second warrant for something already actioned.</li>
           <li><strong>If unsure, ask.</strong> An FTO or a Sheriff ranked above you first, then Sheriff Leadership.</li>
@@ -878,6 +879,7 @@
           <button class="btn" type="button" aria-pressed="false" data-scenario="fled">🏃 They fled — Failure to Stop</button>
           <button class="btn" type="button" aria-pressed="false" data-scenario="impound">🔧 Impound / Debt Enforcement</button>
           <button class="btn" type="button" aria-pressed="false" data-scenario="court">⚖️ Court warrant</button>
+          <button class="btn" type="button" aria-pressed="false" data-scenario="record">📄 Criminal record search</button>
         </div>
         <div class="guide-scenario-panels">
 
@@ -888,9 +890,9 @@
           <ol class="guide-steps">
             <li><strong>Start your bodycam</strong> before you light them up (if you can run one).</li>
             <li><strong>Signal them to stop</strong> with emergency lights and a brief siren blip. <em>Do not pursue</em> if they don't stop.</li>
-            <li><strong>Approach and explain</strong> you're a Sheriff conducting a debt / fine check.</li>
+            <li><strong>Introduce yourself</strong> — "Hi, I'm Sheriff's Officer ___ from the DOJ, Sheriff's Office" — be polite and explain you're doing a debt / fine check.</li>
             <li><strong>Request ID / driver licence.</strong> You may request fingerprints if needed. <strong>No force</strong> — if they refuse both, request MelPol.</li>
-            <li><strong>Run the checks</strong> — MELROADS for the vehicle, LEAP for debt. ANPR is only a guide.</li>
+            <li><strong>Run the checks</strong> — MELROADS for the vehicle, LEAP for debt (Financial records tab). <strong>Government fees only</strong> (licences/fines/fees) — not private debts. ANPR is only a guide.</li>
             <li><strong>If debt is owed,</strong> explain the options for their debt tier (pay now / payment plan / forfeiture). The Debt Tool works this out for you.</li>
             <li><strong>Log the interaction</strong> in Sheriff Logs so there's a record.</li>
             <li>If they comply and it's dealt with → <strong>no warrant required.</strong></li>
@@ -908,8 +910,8 @@
           <ol class="guide-steps">
             <li><strong>Confirm it's a permitted context</strong> — they're at the station and asked for a check, or you're doing MRC checks. If not, stop here.</li>
             <li><strong>Start your bodycam</strong> if you can run one.</li>
-            <li><strong>Request ID / driver licence</strong> (fingerprints if needed). <strong>No force</strong> — refusal → request MelPol.</li>
-            <li><strong>Run LEAP</strong> to confirm any outstanding debt. ANPR / a verbal name is not proof.</li>
+            <li><strong>Introduce yourself and request ID</strong> — "Hi, I'm Sheriff's Officer ___ from the DOJ, Sheriff's Office." (Fingerprints if needed.) <strong>No force</strong> — refusal → request MelPol.</li>
+            <li><strong>Run LEAP</strong> (Financial records tab) to confirm any outstanding debt — <strong>government fees only</strong>. ANPR / a verbal name is not proof.</li>
             <li><strong>If debt is owed,</strong> explain the tier options and deal with it.</li>
             <li><strong>Log the interaction</strong> in Sheriff Logs.</li>
           </ol>
@@ -976,6 +978,27 @@
             <button class="btn" type="button" data-guide-jump="report" data-report-type="sheriff_court">Start Court Warrant</button>
           </div>
         </div>
+
+        <!-- F. Criminal record search -->
+        <div class="guide-scenario" data-scenario="record">
+          <h3 style="margin:0 0 4px">Criminal record search</h3>
+          <div class="muted" style="margin-bottom:4px">A person or business can request a criminal-record / history check of themselves or a prospective employee. This is a station service, not a warrant.</div>
+          <ol class="guide-steps">
+            <li><strong>They attend the station</strong> (or, for courts / lawyers / registered businesses with their own Discord channel, they can request it there).</li>
+            <li><strong>Check consent.</strong> If the check is <strong>not</strong> for themselves, the person must be present to give permission, or provide a <strong>signed permission document</strong>.</li>
+            <li><strong>Take the fee first</strong> — payment is collected <em>before</em> you run the look-up (see the fee schedule below).</li>
+            <li><strong>Run the MDT search,</strong> copy all of the person's charges, and email them to the address of their choice.</li>
+            <li>Only ever use LEAP appropriately — all searches are logged (Privacy Act).</li>
+          </ol>
+          <div class="guide-q">Fee schedule</div>
+          <div class="guide-ref-grid" style="margin-top:4px">
+            <div class="guide-ref"><strong>Office of Legal Defence rep</strong><br>$250</div>
+            <div class="guide-ref"><strong>Individual</strong><br>$500</div>
+            <div class="guide-ref"><strong>Business</strong><br>$1000 per employee (incl. a lawyer representing a client)</div>
+            <div class="guide-ref"><strong>Courts / Government agency</strong><br>AV, CFA, VICPOL, DPS, IBAC or OPP — $0</div>
+          </div>
+          <div class="guide-callout">This is the <strong>one time</strong> a Sheriff may disclose an active warrant — when it appears as part of a paid criminal-history check (Warrant Handbook 1.4).</div>
+        </div>
         </div><!-- /guide-scenario-panels -->
         </div><!-- /guide-md -->
       </div>
@@ -991,6 +1014,27 @@
           <div class="guide-ref"><strong>Evidence</strong><br>Bodycam from before the lights until you're clear, or still images if you can't run one. Submit the warrant + evidence in DPS emails. CCTV is court-only.</div>
           <div class="guide-ref"><strong>Enforcement powers</strong><br>Debt enforcement can still include <strong>licence suspension</strong>, vehicle impound or stronger action where properly approved (Handbook 8.7). Suspend a licence where needed, following handbook protocol.</div>
           <div class="guide-ref"><strong>If unsure</strong><br>Ask an FTO or a Sheriff ranked above you first; escalate to Sheriff Leadership only if it can't be resolved.</div>
+        </div>
+      </div>
+
+      <!-- Callsigns & radio codes (Out & About handbook) -->
+      <div class="card">
+        <h2 style="margin:0 0 10px">📻 Callsigns &amp; radio codes</h2>
+        <div class="guide-callout" style="border-color:rgba(0,191,255,0.3);background:rgba(0,191,255,0.07);margin-top:0">Your MDT callsign is <strong>SRF [DUTY][BADGE]</strong> — e.g. <strong>SRF 116</strong> = Duty 1, Badge 16. Service numbers run 0–97 (99 = Sheriff, 98 = Deputy Sheriff).</div>
+        <div class="guide-ref-grid" style="margin-top:10px">
+          <div class="guide-ref"><strong>Duty numbers</strong><br>
+            <strong>0</strong> — Court duties<br>
+            <strong>1</strong> — Non-court / patrol / with VICPOL<br>
+            <strong>2</strong> — Operation or two-up with VICPOL<br>
+            <strong>3</strong> — Manning the station
+          </div>
+          <div class="guide-ref"><strong>Radio codes</strong><br>
+            <strong>Code 1</strong> — On patrol / driving<br>
+            <strong>Code 2</strong> — Arrived at Sheriff 900<br>
+            <strong>Code 4</strong> — Traffic stop<br>
+            <strong>Code 6</strong> — Unavailable / busy<br>
+            <strong>Code 9</strong> — Officer under duress
+          </div>
         </div>
       </div>
 
