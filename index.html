@@ -1019,7 +1019,7 @@
 
       <!-- Callsigns & radio codes (Out & About handbook) -->
       <div class="card">
-        <h2 style="margin:0 0 10px">📻 Callsigns &amp; radio codes</h2>
+        <h2 style="margin:0 0 10px">📻 Callsigns, ranks &amp; radio codes</h2>
         <div class="guide-callout" style="border-color:rgba(0,191,255,0.3);background:rgba(0,191,255,0.07);margin-top:0">Your MDT callsign is <strong>SRF [DUTY][BADGE]</strong> — e.g. <strong>SRF 116</strong> = Duty 1, Badge 16. Service numbers run 0–97 (99 = Sheriff, 98 = Deputy Sheriff).</div>
         <div class="guide-ref-grid" style="margin-top:10px">
           <div class="guide-ref"><strong>Duty numbers</strong><br>
@@ -1034,6 +1034,17 @@
             <strong>Code 4</strong> — Traffic stop<br>
             <strong>Code 6</strong> — Unavailable / busy<br>
             <strong>Code 9</strong> — Officer under duress
+          </div>
+          <div class="guide-ref"><strong>Rank structure</strong> <span style="color:var(--muted)">(senior → junior)</span><br>
+            <strong>Sheriff</strong> — head of the office (callsign 99)<br>
+            Superintendent<br>
+            Deputy Sheriff<br>
+            Regional Manager<br>
+            Sheriff Sergeant<br>
+            Senior Sheriff<br>
+            Sheriff FTO<br>
+            Sheriff Officer<br>
+            Sheriff Recruit
           </div>
         </div>
       </div>
@@ -1310,13 +1321,15 @@
             </select></label>
             <label><div class="lbl">Badge #</div><input id="offSrfBadge" inputmode="numeric" placeholder="16" style="margin:0"/></label>
             <label><div class="lbl">Rank</div><select id="offSrfRank" style="margin:0">
-              <option>Sheriff Officer</option>
+              <option selected>Sheriff Officer</option>
+              <option>Sheriff Recruit</option>
+              <option>Sheriff FTO</option>
               <option>Senior Sheriff</option>
               <option>Sheriff Sergeant</option>
-              <option>Sheriff Inspector</option>
               <option>Regional Manager</option>
               <option>Deputy Sheriff</option>
-              <option>Recruit</option>
+              <option>Superintendent</option>
+              <option>Sheriff</option>
             </select></label>
             <label><div class="lbl">Name</div><input id="offSrfName" placeholder="Stephen Palmes" style="margin:0"/></label>
             <button class="btn" id="addSrfOfficerBtn" type="button" style="margin:0;background:rgba(100,200,120,0.18);border-color:rgba(100,200,120,0.4)" title="Add Sheriff officer">+ Sheriff</button>
@@ -1513,7 +1526,7 @@
           <div class="grid2">
             <label><div class="lbl">Rank</div>
               <div class="ac-wrap" style="position:relative">
-                <input id="sigRank" autocomplete="off" placeholder="e.g. Senior Constable"/>
+                <input id="sigRank" autocomplete="off" placeholder="e.g. Sheriff Sergeant"/>
                 <div id="acSigRank" class="ac-drop" style="display:none"></div>
               </div>
             </label>
@@ -9819,8 +9832,8 @@ Is there anything you would like to add at this time?`;
     "Sergeant","Senior Sergeant","Inspector","Superintendent"
   ];
   const SHERIFF_RANKS = [
-    "Sheriff Recruit","Sheriff Officer","Senior Sheriff","Sheriff Sergeant",
-    "Regional Manager","Deputy Sheriff","Sheriff Inspector"
+    "Sheriff Recruit","Sheriff Officer","Sheriff FTO","Senior Sheriff","Sheriff Sergeant",
+    "Regional Manager","Deputy Sheriff","Superintendent","Sheriff"
   ];
   const ALL_RANKS = [...VICPOL_RANKS, ...SHERIFF_RANKS];
   const SIG_PROFILES_KEY = "sheriff_report_signature_profiles";
