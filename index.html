@@ -1163,7 +1163,7 @@
         </div>
         <div id="pasteZone" tabindex="0" role="button" aria-label="Paste a screenshot or text, or drag an image here, to scan with OCR" style="padding:20px; border:2px dashed var(--border); border-radius:12px; text-align:center; cursor:pointer; margin-top:10px; background:rgba(0,0,0,0.15)">
           <div style="font-weight:900; margin-bottom:4px">Paste or drop image here</div>
-          <div class="muted">Works best with MDT profiles, licences, VicRoads, fingerprints, pockets, GSR, serials. Images are auto-upscaled &amp; enhanced for better recognition.</div>
+          <div class="muted">Works best with MDT profiles, licences, VicRoads, fingerprints, serials. Images are auto-upscaled &amp; enhanced for better recognition.</div>
         </div>
         <input id="imgFile" type="file" accept="image/*" style="margin-top:10px"/>
         <div class="row" style="margin-top:10px">
@@ -1391,7 +1391,7 @@
                   <li><strong>No police codes</strong> — Say "traffic stop" not "Code 4". Say "traffic collision" not "Code 12". Say "officer in distress" not "Code 9". Say "silent alarm activation" not "Code 15". Location codes (VIN 900, PC 384) and station codes (MEL 900, MEL 258) are acceptable.</li>
                   <li><strong>No informal language</strong> — Say "incapacitated the suspect" not "laced him". Say "discharged their firearm" not "shot him". Say "rendered first aid" not "did medical". The report is a legal document.</li>
                   <li><strong>Scene on arrival</strong> — What did you see, hear, or observe upon arriving? Number of individuals, vehicles present, weapons visible, injuries already sustained.</li>
-                  <li><strong>Identification method</strong> — State exactly how the suspect was identified: driver's licence, fingerprint scanner, MDT profile, DNA match, or verbal confirmation. Include on every report.</li>
+                  <li><strong>Identification method</strong> — State exactly how the suspect was identified: driver's licence, fingerprint scanner, MDT profile, or verbal confirmation. Include on every report.</li>
                   <li><strong>Force justification</strong> — Always state the threat BEFORE the response. "The suspect produced a firearm and aimed at officers — [CALLSIGN] discharged their service weapon, incapacitating the suspect." Never just state force was used without the reason.</li>
                   <li><strong>Medical &amp; transport</strong> — Who rendered first aid? Was MAS/AV called and did they attend? Was the suspect transported to hospital before processing? Which station was the suspect processed at (VIN 900, MEL 900, FKN station)?</li>
                   <li><strong>Pursuit specifics</strong> — Approximate duration, route/direction, how it ended (vehicle breakdown, boxed in, voluntary stop, crash, abandoned). Note any vehicle swaps, dangerous driving, or speeds reached.</li>
@@ -5521,11 +5521,8 @@ function clearDebtTool() {
       }
     }
 
-    // Murder/shooting → needs GSR and victim details
+    // Murder/shooting → needs victim details
     if (/murder|manslaughter|discharge|shots?\s*fired/i.test(charges)) {
-      if (!/GSR/i.test(allText)) {
-        hints.push("Shooting/discharge charges — consider adding: GSR test result for suspect");
-      }
       if (!/victim|deceased|injur.*party|ambulance|MAS|paramedic/i.test(summary)) {
         hints.push("Shooting/discharge charges — consider adding: victim details and medical response");
       }
