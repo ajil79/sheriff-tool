@@ -1444,26 +1444,19 @@
               <button type="button" class="btn quick-evidence" data-ev="BWC / Vehicle Mounted Camera" style="font-size:11px;padding:3px 9px">📷 BWC</button>
               <button type="button" class="btn quick-evidence" data-ev="Photo of ID" style="font-size:11px;padding:3px 9px">🪪 ID</button>
               <button type="button" class="btn quick-evidence" data-ev="Fingerprints taken" style="font-size:11px;padding:3px 9px">🖐 Fingerprints</button>
-              <button type="button" class="btn quick-evidence" data-ev="Mental image of pockets" style="font-size:11px;padding:3px 9px">📦 Pockets</button>
-              <button type="button" class="btn quick-evidence" data-ev="Positive GSR test" style="font-size:11px;padding:3px 9px">🔬 GSR Positive</button>
-              <button type="button" class="btn quick-evidence" data-ev="Negative GSR test" style="font-size:11px;padding:3px 9px">🔬 GSR Negative</button>
-              <button type="button" class="btn quick-evidence" data-ev="Positive NIK kit drug test result" style="font-size:11px;padding:3px 9px">🧪 NIK Positive</button>
               <button type="button" class="btn quick-evidence" data-ev="MDT / MELROADS profile" style="font-size:11px;padding:3px 9px">💻 MDT</button>
               <button type="button" class="btn quick-evidence" data-ev="Plate reader / Registration hit" style="font-size:11px;padding:3px 9px">🚗 Plate Reader</button>
-              <button type="button" class="btn quick-evidence" data-ev="Fixed Vehicle Mounted Radar" style="font-size:11px;padding:3px 9px">📡 Radar</button>
               <button type="button" class="btn quick-evidence" data-ev="Officer statement" style="font-size:11px;padding:3px 9px">📝 Officer Statement</button>
-              <button type="button" class="btn quick-evidence" data-ev="Photo of weapon" style="font-size:11px;padding:3px 9px">🔫 Weapon photo</button>
               <button type="button" class="btn quick-evidence" data-ev="CCTV footage secured" style="font-size:11px;padding:3px 9px">📹 CCTV</button>
-              <button type="button" class="btn quick-evidence" data-ev="DNA match confirmed" style="font-size:11px;padding:3px 9px">🧬 DNA Match</button>
               <button type="button" class="btn quick-evidence" data-ev="Bodycam available on request" style="font-size:11px;padding:3px 9px">📼 BWC on request</button>
             </div>
             <div class="hint" style="margin-bottom:10px">
               <span>📦</span>
-              <span>Common: BWC on request, Photo of ID, Fingerprints taken, Mental image of pockets, Positive GSR, MDT / MELROADS profile, Plate reader, Officer statement, Fixed Vehicle Mounted Radar, Bodycam on request</span>
+              <span>Common: BWC on request, Photo of ID, Fingerprints taken, MDT / MELROADS profile, Plate reader, Officer statement, Bodycam on request</span>
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px">
               <input type="number" id="evidenceQty" min="1" max="50000" value="1" style="width:80px; flex-shrink:0" placeholder="Qty"/>
-              <input type="text" id="evidenceItem" style="flex:1; min-width:150px" placeholder="e.g. BWC on request, Mental image of pockets, Positive GSR, MDT profile, Plate reader"/>
+              <input type="text" id="evidenceItem" style="flex:1; min-width:150px" placeholder="e.g. BWC on request, Photo of ID, MDT profile, Plate reader, Officer statement"/>
               <button class="btn" id="addEvidenceBtn" style="flex-shrink:0" title="Add the typed evidence item to the evidence list">Add Item</button>
             </div>
             <div id="evidenceList" style="display:grid; gap:6px; margin-bottom:10px; max-height:200px; overflow-y:auto"></div>
@@ -7283,18 +7276,7 @@ Is there anything you would like to add at this time?`;
 
       // Arrest types
       if (["arrest","sheriff_arrest_legacy","sheriff_warrant_legacy","sheriff_arrest"].includes(type)) {
-        if (!has("pocket")) missing.push("Pockets");
         if (!has("fingerprint")) missing.push("Fingerprints");
-      }
-
-      // If weapons confiscated, suggest weapon photo
-      if (norm(state.itemsList) && /pistol|rifle|smg|shotgun|launcher|knife|machete/i.test(state.itemsList)) {
-        if (!has("weapon") && !has("firearm")) missing.push("Weapon photo");
-      }
-
-      // If charges include discharge/murder, suggest GSR
-      if (norm(state.chargesList) && /discharge|murder|shots fired/i.test(state.chargesList)) {
-        if (!has("GSR")) missing.push("GSR test");
       }
 
       if (missing.length > 0 && evidenceItems.length > 0) {
