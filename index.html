@@ -1142,30 +1142,6 @@
         <div id="chargeList" style="display:none; max-height:300px; overflow-y:auto; gap:6px"></div>
       </div>
 
-      <!-- PINs -->
-      <div class="card" id="pinsCard" style="display:none" data-section="pins">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">PINs (Penalty Infringement Notices) <span id="pinCount" style="font-weight:400;font-size:12px;color:var(--muted)"></span></h2><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:10px; margin-bottom:10px">
-          <input id="pinSearch" placeholder="Search PINs" style="margin:0"/>
-          <select id="pinFilter" style="margin:0">
-            <option value="all">All categories</option>
-          </select>
-          <button class="btn" id="clearPinsBtn" title="Remove all PINs from the list">Clear All</button>
-        </div>
-        <div id="selectedPins" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; min-height:32px; padding:8px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid var(--border)"></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.15); border:1px solid var(--border); border-radius:10px">
-          <label><div class="lbl">Subject's Current Demerit Points <span style="font-weight:400;color:var(--ok)">(auto-fills from LEAP/OCR)</span></div><input id="currentDemeritPoints" type="number" min="0" max="50" value="0" placeholder="0" style="margin:0"/></label>
-          <div style="align-self:end;font-size:12px;color:var(--muted);padding:10px 0">12+ pts in 7 days = mandatory suspension</div>
-        </div>
-        <div id="pinList" style="max-height:300px; overflow-y:auto; display:grid; gap:6px"></div>
-      </div>
-
-      <!-- Licence Suspension Warning -->
-      <div id="licenseWarning" style="display:none; margin:20px 0; padding:16px; border-radius:12px; border:2px solid var(--warn); background:rgba(255,150,0,0.1)">
-        <div style="font-size:18px; font-weight:bold; margin-bottom:8px">⚠️ LICENCE SUSPENSION WARNING</div>
-        <div id="licenseWarningText" style="font-size:14px; line-height:1.6"></div>
-      </div>
-
       <!-- Sheriff Warrant -->
       <div class="card" id="sheriffWarrantCard" style="display:none">
         <h2 id="sharedWarrantCardTitle">Subject / Vehicle Details</h2>
@@ -1236,27 +1212,6 @@
         </div>
       </div>
 
-      <!-- Vehicle Defects & Modifications Reference -->
-      <div class="card" id="defectsRefCard" data-section="defects">
-        <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" id="defectsToggle">
-          <h2 style="margin:0">🔧 Vehicle Defects &amp; Modifications Reference</h2>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button>
-            <span id="defectsToggleIcon" style="font-size:12px;color:var(--muted)">▶ Show</span>
-          </div>
-        </div>
-        <div id="defectsPanel" style="display:none;margin-top:10px">
-          <div class="hint" style="margin-bottom:8px"><span>💡</span><span>Click any defect to add it to your report as a separate <strong>Vehicle Defects</strong> section. On <strong>Traffic Warrants</strong> it also fills Reason &amp; Legislation Notes.</span></div>
-          <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:8px">
-            <input id="defectSearch" placeholder="Search defects..." style="margin:0;font-size:12px;padding:8px 10px"/>
-            <button class="btn" id="defectClearLast" style="font-size:11px;padding:6px 10px" title="Remove the most recently added defect">Undo Last</button>
-            <button class="btn danger" id="defectClearAll" style="font-size:11px;padding:6px 10px" title="Remove all defects from the list">Clear All</button>
-          </div>
-          <div id="defectsList" style="max-height:350px;overflow-y:auto;display:grid;gap:4px"></div>
-          <div id="selectedDefectsChips" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>
-        </div>
-      </div>
-
       <!-- Sheriff Reference -->
       <div class="card" id="sheriffRefCard" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" id="sheriffRefToggle">
@@ -1278,43 +1233,6 @@
 
         </div>
       </div>
-      <!-- Items -->
-      <div class="card" id="itemsCard" style="display:none" data-section="items">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Confiscated Items</h2><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div>
-
-        <!-- Searchable Item Picker -->
-        <div style="padding:10px; background:rgba(0,0,0,0.15); border:1px solid var(--border); border-radius:10px; margin-bottom:10px">
-          <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px">
-            <div style="position:relative; flex:1">
-              <input id="itemSearchInput" type="text" placeholder="Search items... (e.g. pistol, meth, vest)" autocomplete="off" style="width:100%; margin:0; padding-right:28px"/>
-              <span id="itemSearchClear" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:14px; color:var(--muted); display:none">&times;</span>
-            </div>
-            <select id="itemCategoryFilter" style="width:140px; margin:0; font-size:12px; flex-shrink:0">
-              <option value="all">All Categories</option>
-              <option value="firearms">Firearms</option>
-              <option value="melee">Melee & Explosives</option>
-              <option value="ammo">Ammo & Attachments</option>
-              <option value="drugs">Drugs</option>
-              <option value="gear">Gear & Other</option>
-            </select>
-          </div>
-          <div id="itemSearchResults" style="max-height:200px; overflow-y:auto; display:flex; flex-wrap:wrap; gap:5px; padding:2px 0">
-            <span style="font-size:11px; color:var(--muted)">Type to search or pick a category...</span>
-          </div>
-        </div>
-
-        <!-- Add row: qty + serial + add -->
-        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:6px">
-          <input id="itemQtyInput" type="number" min="1" value="1" style="width:60px; margin:0; flex-shrink:0" placeholder="Qty"/>
-          <input id="itemText" placeholder="Item name (auto-filled or type custom)" style="flex:1; min-width:150px; margin:0"/>
-          <input id="itemSerialInput" placeholder="Serial # (if applicable)" style="width:160px; min-width:120px; margin:0; flex-shrink:0"/>
-          <button class="btn" id="addItemBtn" style="flex-shrink:0" title="Add the typed item to the confiscated items list">Add</button>
-        </div>
-        <div class="hint" style="margin-bottom:8px"><span>💡</span><span>Click an item above to fill — set qty &amp; serial, then hit Add. Or type a custom item directly.</span></div>
-
-        <textarea id="itemsList" rows="5" style="margin-top:4px" placeholder="Items appear here"></textarea>
-      </div>
-
       <!-- Officers -->
       <div class="card" id="officersCard" style="display:none;position:relative;z-index:20" data-section="officers">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
