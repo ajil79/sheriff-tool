@@ -2628,114 +2628,13 @@
   // Maps charge name patterns to contextual writing reminders
   const NARRATIVE_HINT_RULES = [
     {
-      match: /evade|fail.*stop|pursuit/i,
+      match: /fail.*stop|enforcement.*vehicle|evade|pursuit/i,
       hints: [
-        "Pursuit duration (approx. start/end times)",
-        "Route taken / direction of travel",
-        "How the pursuit ended (voluntary stop, crash, boxed in, vehicle breakdown, abandoned)",
-        "Speeds reached and zones driven through",
-        "Any vehicle swaps or dangerous driving observed",
-        "Was a pursuit authorisation obtained? From whom?"
-      ]
-    },
-    {
-      match: /murder|manslaughter|attempt.*murder|shots?\s*fired|discharge/i,
-      hints: [
-        "Weapon type, serial number, and ammo count for every weapon",
-        "Who discharged their weapon and how many rounds",
-        "GSR test result (positive/negative) for suspect and officers",
-        "Exact threat that justified use of lethal force — state BEFORE the response",
-        "Victims: names, injuries sustained, medical response",
-        "Scene preservation — who secured the scene, when"
-      ]
-    },
-    {
-      match: /assault|injur|violence|battery|wound/i,
-      hints: [
-        "Force justification — what threat did the suspect pose?",
-        "Injuries sustained by all parties (suspect, officers, victims)",
-        "Was MAS/AV called? Did they attend? Who rendered first aid?",
-        "Victim details: name, injuries, statement taken?",
-        "Photographs of injuries taken?"
-      ]
-    },
-    {
-      match: /robbery|armed|steal|theft|burglary|break.*enter/i,
-      hints: [
-        "Property stolen / recovered — descriptions and values",
-        "Victim(s) details and statements",
-        "Weapon used during offence (if applicable)",
-        "CCTV footage secured from scene?",
-        "How suspect was identified (witness, CCTV, plates, forensics)"
-      ]
-    },
-    {
-      match: /drug|narcotic|substance|possess.*controlled|manufacture|traffic.*drug/i,
-      hints: [
-        "Type and quantity of substance found",
-        "NIK kit test result (positive/negative) and substance identified",
-        "Location where substance was found (on person, in vehicle, in premises)",
-        "Packaging — consistent with personal use or supply/trafficking?",
-        "Cash or paraphernalia found alongside?"
-      ]
-    },
-    {
-      match: /weapon|firearm|pistol|rifle|knife|prohibited|carry.*weapon|possess.*weapon/i,
-      hints: [
-        "Weapon type, make/model, and serial number",
-        "Ammunition type and count",
-        "Where was the weapon located (on person, in vehicle, at premises)?",
-        "Does the suspect hold a valid weapons licence?",
-        "Photo of weapon taken and logged as evidence?"
-      ]
-    },
-    {
-      match: /speed|dangerous.*driv|reckless.*driv|DUI|drink.*driv|impaired|exceed.*limit/i,
-      hints: [
-        "Speed recorded vs. speed limit of the zone",
-        "Method of speed detection (radar, lidar, pacing, estimated)",
-        "Road and weather conditions at the time",
-        "Breath/drug test result if applicable",
-        "Was the driver's licence suspended on the spot?"
-      ]
-    },
-    {
-      match: /resist|obstruct|hinder|fail.*comply|refuse.*direction/i,
-      hints: [
-        "What lawful direction was given and by whom?",
-        "How did the suspect resist or obstruct? (verbal, physical, passive)",
-        "Was reasonable force used to effect arrest? Describe.",
-        "Any injuries to officers during the arrest?"
-      ]
-    },
-    {
-      match: /kidnap|hostage|false.*imprison|deprivation.*liberty/i,
-      hints: [
-        "Victim(s) — names, how they were taken, duration held",
-        "Demands made by suspect (if any)",
-        "How were victims released or recovered?",
-        "Any injuries or threats made to victims?",
-        "Negotiation details if applicable"
-      ]
-    },
-    {
-      match: /bail|breach.*bail/i,
-      hints: [
-        "Original bail conditions that were breached",
-        "Specifics of the breach — what the suspect did",
-        "Original case reference / court date"
-      ]
-    },
-    {
-      match: /fail.*stop.*enforcement|enforcement.*vehicle/i,
-      hints: [
-        "Outstanding debt amount and type (government fines, charges, licences)",
-        "Was the traffic stop initiated by ANPR flag or manual LEAP check?",
-        "Vehicle details — rego, make, model, colour from MELROADS",
-        "Did the individual flee the scene? Note direction and circumstances",
-        "Was the individual given opportunity to pay or arrange a plan?",
-        "Debt threshold — under $10k (immediate), $10k-60k (3 weeks), $60k-100k (4 weeks), over $100k (no plan)",
-        "Was a Sheriff arrest warrant raised for debt recovery?"
+        "Was the individual the driver of the vehicle at the time of the stop?",
+        "How was the driver identified? (ANPR / plate-reader hit, manual LEAP/MDT check, ID shown)",
+        "Vehicle details from MELROADS — rego, make, model, colour, registered owner",
+        "Did the individual fail to stop / flee when directed? Note direction and circumstances",
+        "How did the stop end? (voluntary stop, vehicle abandoned, lost sight, etc.)"
       ]
     }
   ];
@@ -2765,34 +2664,16 @@
       }
     });
 
-    // Always show universal reminders for arrest-type reports
+    // Sheriff universal reminders (shown when no charge-specific hint matched)
     const type = state.reportType;
-    if (["arrest","sheriff_arrest","sheriff_arrest_legacy"].includes(type) && matchedHints.length === 0) {
-      matchedHints.push(
-        "How was the suspect identified? (licence, MDT, fingerprints, verbal)",
-        "Was caution read? Did suspect acknowledge?",
-        "Where was the suspect processed and sentenced?"
-      );
-    }
-
-    // Sheriff-specific universal reminders
     if (["sheriff_arrest","sheriff_warrant","sheriff_debt"].includes(type) && matchedHints.length === 0) {
       matchedHints.push(
-        "Outstanding debt amount and source (government fines, charges, licence fees)",
+        ...(type === "sheriff_debt" ? ["Outstanding debt amount and source (government fines, charges, licence fees)"] : []),
         "How was the individual identified? (ID shown, LEAP/MDT, ANPR)",
         "Was the Sheriff custody caution read to the individual?",
         "Did the individual comply or refuse? What actions were taken?",
         ...(state.sheriffWarrant?.interactionType !== "foot" ? ["MELROADS vehicle details if applicable (rego, make, colour, owner)"] : []),
         "Was backup requested? Outcome?"
-      );
-    }
-
-    if (type === "field_contact" && matchedHints.length === 0) {
-      matchedHints.push(
-        "Document reason for the approach (outstanding debt, suspicious behaviour, call for service)",
-        "Was the person cooperative or resistant?",
-        "What information was gathered or verified? (ID, phone, debt acknowledgement)",
-        "Were any actions taken? (payment arranged, warning issued, further steps)"
       );
     }
 
@@ -5458,11 +5339,9 @@ function clearDebtTool() {
     const hints = [];
     const type = state.reportType;
     const summary = (state.summary || "").toLowerCase();
-    const allText = (summary + " " + (state.evidence || "") + " " + (state.interviewQs || "")).toLowerCase();
-    const charges = Array.from(selectedChargesSet).join(" ").toLowerCase();
 
     // Only run quality hints on report types that have narratives
-    if (!["arrest","sheriff_arrest","sheriff_warrant","sheriff_court","sheriff_arrest_legacy","sheriff_warrant_legacy","traffic_warrant"].includes(type)) return hints;
+    if (!["sheriff_arrest","sheriff_warrant","sheriff_court"].includes(type)) return hints;
     
     // Don't nag if no summary written yet (missing summary is already a warning)
     if (!norm(state.summary)) return hints;
@@ -5470,75 +5349,21 @@ function clearDebtTool() {
     // ── Universal checks (any arrest/warrant report) ──────────────────
     
     // Identification method
-    if (!/identif|licence|license|MDT|fingerprint|DNA|verbal.*confirm|photo.*ID|recognised|recognized/i.test(summary)) {
+    if (!/identif|licence|license|MDT|fingerprint|verbal.*confirm|photo.*ID|recognised|recognized/i.test(summary)) {
       hints.push("Consider adding: how the suspect was identified (licence, MDT profile, fingerprints, verbal confirmation)");
     }
 
     // Caution read
-    if (["arrest","sheriff_arrest","sheriff_arrest_legacy"].includes(type)) {
+    if (type === "sheriff_arrest") {
       if (!/caution|rights?\s*(were|was)?\s*read|miranda|informed.*rights|read.*rights|cautioned/i.test(summary)) {
         hints.push("Consider adding: was caution read to the suspect? Did they acknowledge?");
       }
     }
 
     // Processing location
-    if (["arrest","sheriff_arrest","sheriff_arrest_legacy"].includes(type)) {
+    if (type === "sheriff_arrest") {
       if (!/process|station|VIN\s*900|MEL\s*900|FKN|bolingbroke|MRC|remand/i.test(summary)) {
         hints.push("Consider adding: where was the suspect processed? (station name or code)");
-      }
-    }
-
-    // ── Charge-specific quality checks ────────────────────────────────
-
-    // Force charges → needs force justification
-    if (/assault|injur|force|shoot|discharg|lethal|taser|baton|ois/i.test(charges)) {
-      if (!/threat|produced.*weapon|aimed|lunged|attacked|swung|brandish|pointed|fired.*at|charged.*at/i.test(summary)) {
-        hints.push("Force charges selected — consider adding: what threat justified the force used (state the threat BEFORE the response)");
-      }
-    }
-
-    // Pursuit charges → needs pursuit details
-    if (/evade|pursuit|fail.*stop/i.test(charges)) {
-      if (!/pursuit.*end|boxed|spike|crash|broke.*off|abandon|voluntar|pulled.*over|came.*stop/i.test(summary)) {
-        hints.push("Pursuit charges selected — consider adding: how the pursuit ended");
-      }
-      if (!/speed|km\/?h|mph|zone/i.test(summary)) {
-        hints.push("Pursuit charges selected — consider adding: speeds reached and speed zones");
-      }
-    }
-
-    // Weapon charges → needs weapon details
-    if (/weapon|firearm|pistol|rifle|knife|prohibited.*weapon|carry.*weapon/i.test(charges)) {
-      if (!/serial|S\/N|SN:|SER\.|weapon.*type|make.*model/i.test(summary) && !/serial|S\/N/i.test(state.itemsList || "")) {
-        hints.push("Weapon charges selected — consider adding: weapon type and serial number in narrative or confiscated items");
-      }
-    }
-
-    // Drug charges → needs substance details
-    if (/drug|narcotic|substance|possess.*controlled/i.test(charges)) {
-      if (!/NIK|test.*positive|test.*negative|substance.*identif|gram|bag|quantity/i.test(allText)) {
-        hints.push("Drug charges selected — consider adding: substance type, quantity, and test result");
-      }
-    }
-
-    // Murder/shooting → needs victim details
-    if (/murder|manslaughter|discharge|shots?\s*fired/i.test(charges)) {
-      if (!/victim|deceased|injur.*party|ambulance|MAS|paramedic/i.test(summary)) {
-        hints.push("Shooting/discharge charges — consider adding: victim details and medical response");
-      }
-    }
-
-    // DUI/traffic → needs test results
-    if (/DUI|drink.*driv|impair|intoxicat|alcohol/i.test(charges)) {
-      if (!/breath|blood.*alcohol|BAC|PBT|roadside.*test|drug.*test|impairment.*assess/i.test(summary)) {
-        hints.push("Impaired driving charges — consider adding: breath/drug test result");
-      }
-    }
-
-    // Robbery/theft → needs victim and property
-    if (/robbery|armed.*robbery|steal|theft|burgl/i.test(charges)) {
-      if (!/victim|complainant|property.*stolen|taken|recover/i.test(summary)) {
-        hints.push("Robbery/theft charges — consider adding: victim details and property stolen/recovered");
       }
     }
 
@@ -5558,13 +5383,12 @@ function clearDebtTool() {
     if (type === "sheriff_arrest") {
       return `Can you confirm your full name and date of birth?
 Do you understand why you have been detained by the Sheriff's Office?
-Are you aware of your outstanding debt to the State of Victoria?
-Do you have the means to settle this debt immediately?
 Are you the registered owner of the vehicle you were driving?
-Were you the driver of [VEHICLE] at the time of the traffic stop?
+Were you the driver of [VEHICLE] at the time of the stop?
+Can you explain why the vehicle did not stop when directed?
 Do you wish to nominate another person as the driver if you were not driving?
 Do you wish to contact a lawyer before answering further questions?
-Is there anything you would like to say regarding the charges?`;
+Is there anything you would like to say regarding the Failure to Stop charge?`;
     } else if (type === "sheriff_warrant") {
       return `Caution:
 Do you understand that false or misleading information may result in charges?
@@ -5594,57 +5418,6 @@ Can you explain why your vehicle was identified during this incident?
 Is there any reason your vehicle would have been present at that location?`;
     } else if (type === "sheriff_debt") {
       return "";
-    } else if (type === "sheriff_arrest_legacy") {
-      return `Can you confirm your full name and date of birth?
-Can you confirm your current address and contact details?
-Do you understand why you are being arrested?
-Do you understand the charges that have been read to you?
-Do you wish to say anything in response to these charges?
-Were there any other individuals involved in this incident?
-Are you the registered owner of the vehicle you were in?
-Do you wish to contact a lawyer before answering further questions?
-Is there anything you would like to add at this time?`;
-    } else if (type === "sheriff_warrant_legacy") {
-      return `Can you confirm your full name and date of birth?
-Can you confirm your current address and contact details?
-Do you understand the nature of this warrant for questioning?
-Where were you on [DATE] at [TIME]?
-Can you provide an account of your activities during the relevant time period?
-Do you have any witnesses or evidence that can support your account?
-Are you willing to participate in a formal interview under caution?
-Do you wish to have legal representation present?
-Is there anything you would like to add at this time?`;
-    } else if (type === "traffic_warrant") {
-      return `Can you confirm you are the registered owner of vehicle [REGO]?
-Were you the driver of [VEHICLE MODEL] on [DATE] at [TIME]?
-Can you explain your reason for the excessive speed?
-Are you aware of the speed limit in that area?
-Do you have any medical conditions or emergencies that caused this driving?
-Were there any passengers in the vehicle at the time?
-Do you consent to a roadside breath test?
-Do you wish to nominate another driver if you were not driving?`;
-    } else if (type === "field_contact") {
-      return `Can you provide your full name and date of birth?
-What is your current address?
-What brings you to this location today?
-Have you been in contact with any individuals of interest?
-Do you have any information relevant to our investigation?
-Are you willing to answer questions voluntarily?
-Do you have any concerns you wish to share?`;
-    } else if (type === "arrest") {
-      return `Can you confirm your full name and date of birth?
-Do you understand the charges that have been read to you?
-Do you wish to say anything in response to these charges?
-Do you wish to contact a lawyer before answering further questions?
-Were there any other individuals involved in this incident?
-Is there anything you would like to add at this time?`;
-    } else if (type === "search_seizure") {
-      return `Can you confirm your full name and date of birth?
-Do you understand why a search of your person / vehicle / premises is being conducted?
-Do you consent to the search, or do you wish the legal authority to be read to you?
-Are there any items on your person or in the vicinity that you wish to declare?
-Do you have a licence for any weapons or controlled substances located?
-Do you wish to contact a lawyer before answering further questions?`;
     }
     
     // Generic fallback used for all warrant types
