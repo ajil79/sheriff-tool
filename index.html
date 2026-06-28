@@ -1019,7 +1019,7 @@
 
       <!-- Callsigns & radio codes (Out & About handbook) -->
       <div class="card">
-        <h2 style="margin:0 0 10px">📻 Callsigns &amp; radio codes</h2>
+        <h2 style="margin:0 0 10px">📻 Callsigns, ranks &amp; radio codes</h2>
         <div class="guide-callout" style="border-color:rgba(0,191,255,0.3);background:rgba(0,191,255,0.07);margin-top:0">Your MDT callsign is <strong>SRF [DUTY][BADGE]</strong> — e.g. <strong>SRF 116</strong> = Duty 1, Badge 16. Service numbers run 0–97 (99 = Sheriff, 98 = Deputy Sheriff).</div>
         <div class="guide-ref-grid" style="margin-top:10px">
           <div class="guide-ref"><strong>Duty numbers</strong><br>
@@ -1034,6 +1034,17 @@
             <strong>Code 4</strong> — Traffic stop<br>
             <strong>Code 6</strong> — Unavailable / busy<br>
             <strong>Code 9</strong> — Officer under duress
+          </div>
+          <div class="guide-ref"><strong>Rank structure</strong> <span style="color:var(--muted)">(senior → junior)</span><br>
+            <strong>Sheriff</strong> — head of the office (callsign 99)<br>
+            Superintendent<br>
+            Deputy Sheriff<br>
+            Regional Manager<br>
+            Sheriff Sergeant<br>
+            Senior Sheriff<br>
+            Sheriff FTO<br>
+            Sheriff Officer<br>
+            Sheriff Recruit
           </div>
         </div>
       </div>
@@ -1298,14 +1309,49 @@
             <button class="btn" id="manageSavedOfficersBtn" style="font-size:11px;padding:6px 10px" title="View and manage saved officers">&#x1F46E; Saved</button>
           </div>
         </div>
+        <!-- Structured quick-add: Sheriff + (optional) VICPOL -->
+        <div style="padding:10px; background:rgba(0,0,0,0.15); border:1px solid var(--border); border-radius:10px; margin-bottom:10px">
+          <div class="lbl" style="font-weight:900;color:var(--accent);margin-bottom:6px">Sheriff officer</div>
+          <div style="display:grid; grid-template-columns:100px 84px 1fr 1fr auto; gap:8px; align-items:end">
+            <label><div class="lbl">Duty</div><select id="offSrfDuty" style="margin:0">
+              <option value="1">1 · Patrol</option>
+              <option value="0">0 · Court</option>
+              <option value="2">2 · Operation</option>
+              <option value="3">3 · Station</option>
+            </select></label>
+            <label><div class="lbl">Badge #</div><input id="offSrfBadge" inputmode="numeric" placeholder="16" style="margin:0"/></label>
+            <label><div class="lbl">Rank</div><select id="offSrfRank" style="margin:0">
+              <option selected>Sheriff Officer</option>
+              <option>Sheriff Recruit</option>
+              <option>Sheriff FTO</option>
+              <option>Senior Sheriff</option>
+              <option>Sheriff Sergeant</option>
+              <option>Regional Manager</option>
+              <option>Deputy Sheriff</option>
+              <option>Superintendent</option>
+              <option>Sheriff</option>
+            </select></label>
+            <label><div class="lbl">Name</div><input id="offSrfName" placeholder="Stephen Palmes" style="margin:0"/></label>
+            <button class="btn" id="addSrfOfficerBtn" type="button" style="margin:0;background:rgba(100,200,120,0.18);border-color:rgba(100,200,120,0.4)" title="Add Sheriff officer">+ Sheriff</button>
+          </div>
+          <div class="muted" style="font-size:11px;margin-top:6px">Callsign builds as <strong>SRF [duty][badge]</strong> — e.g. duty 1 + badge 16 → <strong>SRF 116</strong>.</div>
+          <div class="divider" style="margin:12px 0"></div>
+          <div class="lbl" style="font-weight:900;color:rgba(120,160,255,0.95);margin-bottom:6px">VICPOL officer <span style="font-weight:400;color:var(--muted)">— optional, if a police unit attended</span></div>
+          <div style="display:grid; grid-template-columns:110px 90px 1fr auto; gap:8px; align-items:end">
+            <label><div class="lbl">Callsign</div><input id="offVpCallsign" placeholder="POR 431" style="margin:0"/></label>
+            <label><div class="lbl">Rank</div><input id="offVpRank" placeholder="SC" style="margin:0"/></label>
+            <label><div class="lbl">Name</div><input id="offVpName" placeholder="Joseph O'Connelley" style="margin:0"/></label>
+            <button class="btn" id="addVpOfficerBtn" type="button" style="margin:0;background:rgba(108,138,255,0.18);border-color:rgba(108,138,255,0.4)" title="Add VICPOL officer">+ VICPOL</button>
+          </div>
+        </div>
         <div style="display:grid; grid-template-columns:1fr 110px; gap:10px; align-items:start; position:relative">
           <div class="ac-wrap" style="position:relative">
-            <input id="officerText" autocomplete="off" placeholder="Start typing callsign or name..."/>
+            <input id="officerText" autocomplete="off" placeholder="Or type a full line: callsign + name..."/>
             <div id="acOfficer" class="ac-drop" style="display:none"></div>
           </div>
           <button class="btn" id="addOfficerBtn" style="margin-top:0" title="Add the officer to the attending officers list">Add</button>
         </div>
-        <div class="hint"><span>💡</span><span>Format: <strong>POR 431 SC Joseph O'Connelley</strong> or <strong>SHP 607 | Luigi Johnson-Cow</strong> — callsign auto-saved</span></div>
+        <div class="hint"><span>💡</span><span>Or type a full line: <strong>SRF 116 Sheriff Sergeant Stephen Palmes</strong> or <strong>POR 431 SC Joseph O'Connelley</strong> — callsign auto-saved</span></div>
         <div id="officerTags" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; min-height:52px; padding:10px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid var(--border); position:relative; overflow:visible"></div>
         <!-- Callsign Pool Panel (collapsible) -->
         <div id="savedCallsignsPanel" style="display:none;margin-top:10px; padding:10px; background:rgba(0,0,0,0.15); border:1px solid var(--border); border-radius:10px; position:relative; z-index:1">
@@ -1480,7 +1526,7 @@
           <div class="grid2">
             <label><div class="lbl">Rank</div>
               <div class="ac-wrap" style="position:relative">
-                <input id="sigRank" autocomplete="off" placeholder="e.g. Senior Constable"/>
+                <input id="sigRank" autocomplete="off" placeholder="e.g. Sheriff Sergeant"/>
                 <div id="acSigRank" class="ac-drop" style="display:none"></div>
               </div>
             </label>
@@ -4711,7 +4757,9 @@ function clearDebtTool() {
   // Builds the handbook signature block lines shared by all sheriff warrants
   function buildSheriffSignatureLines() {
     const rank = norm(state.sigRank) || "Senior Sheriff";
-    const rankLine = /^sheriff\b/i.test(rank) ? rank : "Sheriff " + rank;
+    // Prefix "Sheriff" only if the rank doesn't already include it (so "Senior Sheriff"
+    // and "Deputy Sheriff" don't become "Sheriff Senior Sheriff").
+    const rankLine = /\bsheriff\b/i.test(rank) ? rank : "Sheriff " + rank;
     const name = norm(state.sigName) || "NIL";
     const cs = formatSheriffCallsign(state.sigCallsign);
     const nameLine = cs ? `${name} - ${cs}` : name;
@@ -7409,6 +7457,55 @@ Is there anything you would like to add at this time?`;
       });
     }
 
+    // Structured Sheriff officer quick-add (Duty + Badge -> SRF [DUTY][BADGE])
+    const addSrfBtn = document.getElementById("addSrfOfficerBtn");
+    if (addSrfBtn && !addSrfBtn.dataset.bound) {
+      addSrfBtn.dataset.bound = "1";
+      const addSrf = () => {
+        const duty = (document.getElementById("offSrfDuty")?.value || "1").trim();
+        const badge = (document.getElementById("offSrfBadge")?.value || "").replace(/\D/g, "");
+        const rank = (document.getElementById("offSrfRank")?.value || "").trim();
+        const name = (document.getElementById("offSrfName")?.value || "").trim();
+        if (!badge) { toast("Enter a badge number", "warn"); return; }
+        if (!name) { toast("Enter the officer's name", "warn"); return; }
+        const line = `SRF ${duty}${badge} ${rank} ${name}`.replace(/\s+/g, " ").trim();
+        if (addOfficerLineToList(line, { exact: true }) !== false) {
+          const b = document.getElementById("offSrfBadge"); if (b) b.value = "";
+          const n = document.getElementById("offSrfName"); if (n) { n.value = ""; n.focus(); }
+          toast("Sheriff officer added", "ok");
+        }
+      };
+      addSrfBtn.addEventListener("click", addSrf);
+      ["offSrfBadge", "offSrfName"].forEach(id => {
+        const elx = document.getElementById(id);
+        if (elx) elx.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); addSrf(); } });
+      });
+    }
+
+    // Structured VICPOL officer quick-add (kept separate; no "Sheriff" prefix)
+    const addVpBtn = document.getElementById("addVpOfficerBtn");
+    if (addVpBtn && !addVpBtn.dataset.bound) {
+      addVpBtn.dataset.bound = "1";
+      const addVp = () => {
+        const cs = (document.getElementById("offVpCallsign")?.value || "").trim();
+        const rank = (document.getElementById("offVpRank")?.value || "").trim();
+        const name = (document.getElementById("offVpName")?.value || "").trim();
+        if (!cs) { toast("Enter the VICPOL callsign", "warn"); return; }
+        if (!name) { toast("Enter the officer's name", "warn"); return; }
+        const line = `${cs} ${rank} ${name}`.replace(/\s+/g, " ").trim();
+        if (addOfficerLineToList(line, { exact: true }) !== false) {
+          ["offVpCallsign", "offVpRank", "offVpName"].forEach(id => { const e2 = document.getElementById(id); if (e2) e2.value = ""; });
+          const c = document.getElementById("offVpCallsign"); if (c) c.focus();
+          toast("VICPOL officer added", "ok");
+        }
+      };
+      addVpBtn.addEventListener("click", addVp);
+      ["offVpCallsign", "offVpRank", "offVpName"].forEach(id => {
+        const elx = document.getElementById(id);
+        if (elx) elx.addEventListener("keypress", (e) => { if (e.key === "Enter") { e.preventDefault(); addVp(); } });
+      });
+    }
+
     // Add callsign button
     if (el.addCallsignBtn && el.newCallsignInput) {
       el.addCallsignBtn.addEventListener("click", () => {
@@ -9209,9 +9306,39 @@ Is there anything you would like to add at this time?`;
   function getOfficerLineForPreview(line) {
     const cs = getAssignedCallsign(line);
     const nameOnly = stripCallsignFromLine(line) || line.trim();
-    const namePart = /^sheriff\b/i.test(nameOnly) ? nameOnly : "Sheriff " + nameOnly;
+    // Lines added via the structured Sheriff/VICPOL pickers carry their full rank
+    // title already, so they are flagged "exact" and must not get a "Sheriff" prefix.
+    // (This keeps VICPOL officers correct and full Sheriff ranks like "Senior Sheriff".)
+    const exact = !!(state.officerExact && state.officerExact[officerKey(line)]);
+    const namePart = (!exact && !/\bsheriff\b/i.test(nameOnly)) ? "Sheriff " + nameOnly : nameOnly;
     if (cs) return cs + " - " + namePart;
     return namePart;
+  }
+
+  // Append a fully-formed officer line to the list (shared by the structured
+  // Sheriff/VICPOL pickers). opts.exact marks the line so the preview keeps its
+  // rank title verbatim (no "Sheriff" auto-prefix).
+  function addOfficerLineToList(line, opts = {}) {
+    if (!el.officersList) return false;
+    line = (line || "").replace(/\s+/g, " ").trim();
+    if (!line) return false;
+    const existing = (el.officersList.value || "").split("\n").map(l => l.trim().toUpperCase());
+    if (existing.includes(line.toUpperCase())) { toast("Officer already added", "warn"); return false; }
+    const current = (el.officersList.value || "").trimEnd();
+    el.officersList.value = current ? current + "\n" + line : line;
+    state.officersList = el.officersList.value;
+    if (opts.exact) {
+      if (!state.officerExact) state.officerExact = {};
+      state.officerExact[officerKey(line)] = true;
+    }
+    const parsed = parseOfficerLine(line);
+    if (parsed) upsertOfficer(parsed);
+    const cs = extractCallsignFromLine(line);
+    if (cs) addCallsignToPool(cs);
+    renderOfficerTags();
+    debouncedRenderPreview();
+    throttledAutosave();
+    return true;
   }
 
   function closeAllCsPickers() {
@@ -9705,8 +9832,8 @@ Is there anything you would like to add at this time?`;
     "Sergeant","Senior Sergeant","Inspector","Superintendent"
   ];
   const SHERIFF_RANKS = [
-    "Sheriff Recruit","Sheriff Officer","Senior Sheriff","Sheriff Sergeant",
-    "Regional Manager","Deputy Sheriff","Sheriff Inspector"
+    "Sheriff Recruit","Sheriff Officer","Sheriff FTO","Senior Sheriff","Sheriff Sergeant",
+    "Regional Manager","Deputy Sheriff","Superintendent","Sheriff"
   ];
   const ALL_RANKS = [...VICPOL_RANKS, ...SHERIFF_RANKS];
   const SIG_PROFILES_KEY = "sheriff_report_signature_profiles";
