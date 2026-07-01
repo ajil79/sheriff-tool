@@ -840,14 +840,16 @@
 
   <!-- Nav Bar -->
   <nav class="tool-nav" id="toolNav" role="tablist" aria-label="Tools">
+    <!-- Recruit Guide tab temporarily removed while it's being reworked
     <button class="nav-active" role="tab" id="tab-guide" aria-controls="guidePage" aria-selected="true" data-tool-page="guide" title="Step-by-step guide for recruits: stops, fleeing, arrests and impounds">Recruit Guide</button>
-    <button role="tab" id="tab-sherifflogs" aria-controls="sheriffLogsPage" aria-selected="false" data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
+    -->
+    <button class="nav-active" role="tab" id="tab-sherifflogs" aria-controls="sheriffLogsPage" aria-selected="true" data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
     <button role="tab" id="tab-debt" aria-controls="debtPage" aria-selected="false" data-tool-page="debt" title="Process LEAP financial records and calculate overdue debt">Debt Tool</button>
     <button role="tab" id="tab-report" aria-controls="reportPage" aria-selected="false" data-tool-page="report" title="Write formal Sheriff warrant and arrest paperwork">Report Tool</button>
   </nav>
 
   <!-- RECRUIT GUIDE PAGE -->
-  <div id="guidePage" class="tool-page active" role="tabpanel" aria-labelledby="tab-guide" tabindex="0">
+  <div id="guidePage" class="tool-page" role="tabpanel" aria-labelledby="tab-guide" tabindex="0">
   <main role="main">
     <div style="display:grid; grid-template-columns:minmax(0,1fr); gap:14px; grid-auto-rows:max-content; max-width:1100px; margin:0 auto">
 
@@ -1067,7 +1069,6 @@
         <div class="guidelines-body" id="reportGuideBody">
           <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
             <ol style="margin:4px 0 0 20px;padding:0">
-              <li><strong>New here? Start on the <button type="button" class="js-open-guide guide-link">Recruit Guide</button></strong> — it walks you through stops, fleeing, arrests and impounds and sends you to the right place.</li>
               <li><strong>Select report type</strong> — Arrest (ID confirmed before they fled), Questioning (ID unconfirmed → names the registered owner), Court (on court direction), or Debt Enforcement.</li>
               <li><strong>For debt enforcement warrants</strong> — process the debt in the Debt Tool first, then click <strong>Fill Debt Warrant Report</strong> to push all data here automatically.</li>
               <li><strong>For arrest / questioning warrants</strong> — paste a LEAP or MDT profile to auto-fill subject details, or type manually. The only charge is Failure to Stop; the sentence is 60 weeks.</li>
@@ -1089,7 +1090,7 @@
           <option value="sheriff_court">Sheriff Court Warrant</option>
           <option value="sheriff_debt">Sheriff Debt Enforcement Warrant</option>
         </select>
-        <div class="hint" style="margin-top:8px"><span>🧭</span><span><strong>Which warrant?</strong> ID confirmed before they fled → <strong>Arrest</strong>. ID not confirmed → <strong>Questioning</strong> (name the MELROADS registered owner). The only charge is Failure to Stop; the sentence is 60 weeks. <button type="button" class="js-open-guide guide-link">Open the Recruit Guide</button> for the full walkthrough.</span></div>
+        <div class="hint" style="margin-top:8px"><span>🧭</span><span><strong>Which warrant?</strong> ID confirmed before they fled → <strong>Arrest</strong>. ID not confirmed → <strong>Questioning</strong> (name the MELROADS registered owner). The only charge is Failure to Stop; the sentence is 60 weeks.</span></div>
         <div class="hint" style="margin-top:8px"><span>💡</span><span>Date/time, callsign and unit can still auto-fill from MDT paste or your saved template, but you can now edit them here as well.</span></div>
         <details id="reportHeaderMetaDetails" class="header-meta-details">
           <summary>Report header details</summary>
@@ -1766,7 +1767,7 @@
 
 
   <!-- SHERIFF LOGS PAGE -->
-  <div id="sheriffLogsPage" class="tool-page" role="tabpanel" aria-labelledby="tab-sherifflogs" tabindex="0">
+  <div id="sheriffLogsPage" class="tool-page active" role="tabpanel" aria-labelledby="tab-sherifflogs" tabindex="0">
   <div style="max-width:860px;margin:0 auto;padding:16px 22px 40px">
     <div style="font-size:18px;font-weight:900;margin-bottom:14px">Sheriff Log Helper</div>
 
@@ -2231,13 +2232,14 @@
 
 
   function getInitialToolPage() {
-    // Returning users land on their last-used tab; brand-new users start on the Recruit Guide.
+    // Returning users land on their last-used tab; brand-new users start on Sheriff Logs.
+    // ('guide' is intentionally excluded — the Recruit Guide tab is temporarily removed.)
     try {
       const saved = localStorage.getItem('sheriff_tool_page');
-      if (saved && ['guide', 'sherifflogs', 'debt', 'report'].includes(saved)) return saved;
+      if (saved && ['sherifflogs', 'debt', 'report'].includes(saved)) return saved;
     } catch (_) {}
     const activeNav = document.querySelector('.tool-nav button.nav-active[data-tool-page]');
-    return activeNav?.dataset?.toolPage || 'guide';
+    return activeNav?.dataset?.toolPage || 'sherifflogs';
   }
 
   function packStoredState(rawState) {
@@ -10977,7 +10979,6 @@ function updateDebtTabModeHint() {
   if (useCase === 'warrant') {
     hint.innerHTML += ` <span style="color:var(--warn)">Enforcement mode: a Debt Enforcement Warrant needs senior-leadership approval (Regional Manager or above) recorded by rank and name, and is vehicle-only.</span>`;
   }
-  hint.innerHTML += ` <button type="button" class="js-open-guide guide-link">Open the Recruit Guide</button>`;
   if (switchBtn) switchBtn.style.display = usingDebtWarrant ? 'none' : '';
 }
 
