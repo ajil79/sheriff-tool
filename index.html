@@ -840,16 +840,14 @@
 
   <!-- Nav Bar -->
   <nav class="tool-nav" id="toolNav" role="tablist" aria-label="Tools">
-    <!-- Recruit Guide tab temporarily removed while it's being reworked
     <button class="nav-active" role="tab" id="tab-guide" aria-controls="guidePage" aria-selected="true" data-tool-page="guide" title="Step-by-step guide for recruits: stops, fleeing, arrests and impounds">Recruit Guide</button>
-    -->
-    <button class="nav-active" role="tab" id="tab-sherifflogs" aria-controls="sheriffLogsPage" aria-selected="true" data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
+    <button role="tab" id="tab-sherifflogs" aria-controls="sheriffLogsPage" aria-selected="false" data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
     <button role="tab" id="tab-debt" aria-controls="debtPage" aria-selected="false" data-tool-page="debt" title="Process LEAP financial records and calculate overdue debt">Debt Tool</button>
     <button role="tab" id="tab-report" aria-controls="reportPage" aria-selected="false" data-tool-page="report" title="Write formal Sheriff warrant and arrest paperwork">Report Tool</button>
   </nav>
 
   <!-- RECRUIT GUIDE PAGE -->
-  <div id="guidePage" class="tool-page" role="tabpanel" aria-labelledby="tab-guide" tabindex="0">
+  <div id="guidePage" class="tool-page active" role="tabpanel" aria-labelledby="tab-guide" tabindex="0">
   <main role="main">
     <div style="display:grid; grid-template-columns:minmax(0,1fr); gap:14px; grid-auto-rows:max-content; max-width:1100px; margin:0 auto">
 
@@ -1069,6 +1067,7 @@
         <div class="guidelines-body" id="reportGuideBody">
           <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
             <ol style="margin:4px 0 0 20px;padding:0">
+              <li><strong>New here? Start on the <button type="button" class="js-open-guide guide-link">Recruit Guide</button></strong> — it walks you through stops, fleeing, arrests and impounds and sends you to the right place.</li>
               <li><strong>Select report type</strong> — Arrest (ID confirmed before they fled), Questioning (ID unconfirmed → names the registered owner), Court (on court direction), or Debt Enforcement.</li>
               <li><strong>For debt enforcement warrants</strong> — process the debt in the Debt Tool first, then click <strong>Fill Debt Warrant Report</strong> to push all data here automatically.</li>
               <li><strong>For arrest / questioning warrants</strong> — paste a LEAP or MDT profile to auto-fill subject details, or type manually. The only charge is Failure to Stop; the sentence is 60 weeks.</li>
@@ -1090,7 +1089,7 @@
           <option value="sheriff_court">Sheriff Court Warrant</option>
           <option value="sheriff_debt">Sheriff Debt Enforcement Warrant</option>
         </select>
-        <div class="hint" style="margin-top:8px"><span>🧭</span><span><strong>Which warrant?</strong> ID confirmed before they fled → <strong>Arrest</strong>. ID not confirmed → <strong>Questioning</strong> (name the MELROADS registered owner). The only charge is Failure to Stop; the sentence is 60 weeks.</span></div>
+        <div class="hint" style="margin-top:8px"><span>🧭</span><span><strong>Which warrant?</strong> ID confirmed before they fled → <strong>Arrest</strong>. ID not confirmed → <strong>Questioning</strong> (name the MELROADS registered owner). The only charge is Failure to Stop; the sentence is 60 weeks. <button type="button" class="js-open-guide guide-link">Open the Recruit Guide</button> for the full walkthrough.</span></div>
         <div class="hint" style="margin-top:8px"><span>💡</span><span>Date/time, callsign and unit can still auto-fill from MDT paste or your saved template, but you can now edit them here as well.</span></div>
         <details id="reportHeaderMetaDetails" class="header-meta-details">
           <summary>Report header details</summary>
@@ -1164,7 +1163,7 @@
         </div>
         <div id="pasteZone" tabindex="0" role="button" aria-label="Paste a screenshot or text, or drag an image here, to scan with OCR" style="padding:20px; border:2px dashed var(--border); border-radius:12px; text-align:center; cursor:pointer; margin-top:10px; background:rgba(0,0,0,0.15)">
           <div style="font-weight:900; margin-bottom:4px">Paste or drop image here</div>
-          <div class="muted">Works best with MDT profiles, licences, VicRoads, fingerprints, serials. Images are auto-upscaled &amp; enhanced for better recognition.</div>
+          <div class="muted">Works best with MDT profiles, licences, VicRoads, fingerprints, pockets, GSR, serials. Images are auto-upscaled &amp; enhanced for better recognition.</div>
         </div>
         <input id="imgFile" type="file" accept="image/*" style="margin-top:10px"/>
         <div class="row" style="margin-top:10px">
@@ -1273,9 +1272,9 @@
       <div class="card" id="sheriffRefCard" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" id="sheriffRefToggle">
           <h2 style="margin:0">🛡 Sheriff's Office Reference</h2>
-          <span id="sheriffRefToggleIcon" style="font-size:12px;color:var(--muted)">▼ Hide</span>
+          <span id="sheriffRefToggleIcon" style="font-size:12px;color:var(--muted)">▶ Show</span>
         </div>
-        <div id="sheriffRefPanel" style="display:block;margin-top:10px">
+        <div id="sheriffRefPanel" style="display:none;margin-top:10px">
 
           <!-- Debt Thresholds -->
           <div style="margin-bottom:14px">
@@ -1392,7 +1391,7 @@
                   <li><strong>No police codes</strong> — Say "traffic stop" not "Code 4". Say "traffic collision" not "Code 12". Say "officer in distress" not "Code 9". Say "silent alarm activation" not "Code 15". Location codes (VIN 900, PC 384) and station codes (MEL 900, MEL 258) are acceptable.</li>
                   <li><strong>No informal language</strong> — Say "incapacitated the suspect" not "laced him". Say "discharged their firearm" not "shot him". Say "rendered first aid" not "did medical". The report is a legal document.</li>
                   <li><strong>Scene on arrival</strong> — What did you see, hear, or observe upon arriving? Number of individuals, vehicles present, weapons visible, injuries already sustained.</li>
-                  <li><strong>Identification method</strong> — State exactly how the suspect was identified: driver's licence, fingerprint scanner, MDT profile, or verbal confirmation. Include on every report.</li>
+                  <li><strong>Identification method</strong> — State exactly how the suspect was identified: driver's licence, fingerprint scanner, MDT profile, DNA match, or verbal confirmation. Include on every report.</li>
                   <li><strong>Force justification</strong> — Always state the threat BEFORE the response. "The suspect produced a firearm and aimed at officers — [CALLSIGN] discharged their service weapon, incapacitating the suspect." Never just state force was used without the reason.</li>
                   <li><strong>Medical &amp; transport</strong> — Who rendered first aid? Was MAS/AV called and did they attend? Was the suspect transported to hospital before processing? Which station was the suspect processed at (VIN 900, MEL 900, FKN station)?</li>
                   <li><strong>Pursuit specifics</strong> — Approximate duration, route/direction, how it ended (vehicle breakdown, boxed in, voluntary stop, crash, abandoned). Note any vehicle swaps, dangerous driving, or speeds reached.</li>
@@ -1445,19 +1444,26 @@
               <button type="button" class="btn quick-evidence" data-ev="BWC / Vehicle Mounted Camera" style="font-size:11px;padding:3px 9px">📷 BWC</button>
               <button type="button" class="btn quick-evidence" data-ev="Photo of ID" style="font-size:11px;padding:3px 9px">🪪 ID</button>
               <button type="button" class="btn quick-evidence" data-ev="Fingerprints taken" style="font-size:11px;padding:3px 9px">🖐 Fingerprints</button>
+              <button type="button" class="btn quick-evidence" data-ev="Mental image of pockets" style="font-size:11px;padding:3px 9px">📦 Pockets</button>
+              <button type="button" class="btn quick-evidence" data-ev="Positive GSR test" style="font-size:11px;padding:3px 9px">🔬 GSR Positive</button>
+              <button type="button" class="btn quick-evidence" data-ev="Negative GSR test" style="font-size:11px;padding:3px 9px">🔬 GSR Negative</button>
+              <button type="button" class="btn quick-evidence" data-ev="Positive NIK kit drug test result" style="font-size:11px;padding:3px 9px">🧪 NIK Positive</button>
               <button type="button" class="btn quick-evidence" data-ev="MDT / MELROADS profile" style="font-size:11px;padding:3px 9px">💻 MDT</button>
               <button type="button" class="btn quick-evidence" data-ev="Plate reader / Registration hit" style="font-size:11px;padding:3px 9px">🚗 Plate Reader</button>
+              <button type="button" class="btn quick-evidence" data-ev="Fixed Vehicle Mounted Radar" style="font-size:11px;padding:3px 9px">📡 Radar</button>
               <button type="button" class="btn quick-evidence" data-ev="Officer statement" style="font-size:11px;padding:3px 9px">📝 Officer Statement</button>
+              <button type="button" class="btn quick-evidence" data-ev="Photo of weapon" style="font-size:11px;padding:3px 9px">🔫 Weapon photo</button>
               <button type="button" class="btn quick-evidence" data-ev="CCTV footage secured" style="font-size:11px;padding:3px 9px">📹 CCTV</button>
+              <button type="button" class="btn quick-evidence" data-ev="DNA match confirmed" style="font-size:11px;padding:3px 9px">🧬 DNA Match</button>
               <button type="button" class="btn quick-evidence" data-ev="Bodycam available on request" style="font-size:11px;padding:3px 9px">📼 BWC on request</button>
             </div>
             <div class="hint" style="margin-bottom:10px">
               <span>📦</span>
-              <span>Common: BWC on request, Photo of ID, Fingerprints taken, MDT / MELROADS profile, Plate reader, Officer statement, Bodycam on request</span>
+              <span>Common: BWC on request, Photo of ID, Fingerprints taken, Mental image of pockets, Positive GSR, MDT / MELROADS profile, Plate reader, Officer statement, Fixed Vehicle Mounted Radar, Bodycam on request</span>
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px">
               <input type="number" id="evidenceQty" min="1" max="50000" value="1" style="width:80px; flex-shrink:0" placeholder="Qty"/>
-              <input type="text" id="evidenceItem" style="flex:1; min-width:150px" placeholder="e.g. BWC on request, Photo of ID, MDT profile, Plate reader, Officer statement"/>
+              <input type="text" id="evidenceItem" style="flex:1; min-width:150px" placeholder="e.g. BWC on request, Mental image of pockets, Positive GSR, MDT profile, Plate reader"/>
               <button class="btn" id="addEvidenceBtn" style="flex-shrink:0" title="Add the typed evidence item to the evidence list">Add Item</button>
             </div>
             <div id="evidenceList" style="display:grid; gap:6px; margin-bottom:10px; max-height:200px; overflow-y:auto"></div>
@@ -1767,7 +1773,7 @@
 
 
   <!-- SHERIFF LOGS PAGE -->
-  <div id="sheriffLogsPage" class="tool-page active" role="tabpanel" aria-labelledby="tab-sherifflogs" tabindex="0">
+  <div id="sheriffLogsPage" class="tool-page" role="tabpanel" aria-labelledby="tab-sherifflogs" tabindex="0">
   <div style="max-width:860px;margin:0 auto;padding:16px 22px 40px">
     <div style="font-size:18px;font-weight:900;margin-bottom:14px">Sheriff Log Helper</div>
 
@@ -2232,14 +2238,13 @@
 
 
   function getInitialToolPage() {
-    // Returning users land on their last-used tab; brand-new users start on Sheriff Logs.
-    // ('guide' is intentionally excluded — the Recruit Guide tab is temporarily removed.)
+    // Returning users land on their last-used tab; brand-new users start on the Recruit Guide.
     try {
       const saved = localStorage.getItem('sheriff_tool_page');
-      if (saved && ['sherifflogs', 'debt', 'report'].includes(saved)) return saved;
+      if (saved && ['guide', 'sherifflogs', 'debt', 'report'].includes(saved)) return saved;
     } catch (_) {}
     const activeNav = document.querySelector('.tool-nav button.nav-active[data-tool-page]');
-    return activeNav?.dataset?.toolPage || 'sherifflogs';
+    return activeNav?.dataset?.toolPage || 'guide';
   }
 
   function packStoredState(rawState) {
@@ -2630,14 +2635,114 @@
   // Maps charge name patterns to contextual writing reminders
   const NARRATIVE_HINT_RULES = [
     {
-      match: /fail.*stop|enforcement.*vehicle|evade|pursuit/i,
+      match: /evade|fail.*stop|pursuit/i,
       hints: [
-        "Was the individual the driver of the vehicle at the time of the stop?",
-        "How was the driver identified? (ANPR / plate-reader hit, manual LEAP/MDT check, ID shown)",
-        "Vehicle details from MELROADS — rego, make, model, colour, registered owner",
-        "Did the individual fail to stop / flee when directed? Note direction and circumstances",
-        "How did the stop end? (voluntary stop, vehicle abandoned, lost sight, etc.)",
-        "If they fled and ID is confirmed — suspend the licence where appropriate and follow warrant protocols (Handbook 8.7)"
+        "Pursuit duration (approx. start/end times)",
+        "Route taken / direction of travel",
+        "How the pursuit ended (voluntary stop, crash, boxed in, vehicle breakdown, abandoned)",
+        "Speeds reached and zones driven through",
+        "Any vehicle swaps or dangerous driving observed",
+        "Was a pursuit authorisation obtained? From whom?"
+      ]
+    },
+    {
+      match: /murder|manslaughter|attempt.*murder|shots?\s*fired|discharge/i,
+      hints: [
+        "Weapon type, serial number, and ammo count for every weapon",
+        "Who discharged their weapon and how many rounds",
+        "GSR test result (positive/negative) for suspect and officers",
+        "Exact threat that justified use of lethal force — state BEFORE the response",
+        "Victims: names, injuries sustained, medical response",
+        "Scene preservation — who secured the scene, when"
+      ]
+    },
+    {
+      match: /assault|injur|violence|battery|wound/i,
+      hints: [
+        "Force justification — what threat did the suspect pose?",
+        "Injuries sustained by all parties (suspect, officers, victims)",
+        "Was MAS/AV called? Did they attend? Who rendered first aid?",
+        "Victim details: name, injuries, statement taken?",
+        "Photographs of injuries taken?"
+      ]
+    },
+    {
+      match: /robbery|armed|steal|theft|burglary|break.*enter/i,
+      hints: [
+        "Property stolen / recovered — descriptions and values",
+        "Victim(s) details and statements",
+        "Weapon used during offence (if applicable)",
+        "CCTV footage secured from scene?",
+        "How suspect was identified (witness, CCTV, plates, forensics)"
+      ]
+    },
+    {
+      match: /drug|narcotic|substance|possess.*controlled|manufacture|traffic.*drug/i,
+      hints: [
+        "Type and quantity of substance found",
+        "NIK kit test result (positive/negative) and substance identified",
+        "Location where substance was found (on person, in vehicle, in premises)",
+        "Packaging — consistent with personal use or supply/trafficking?",
+        "Cash or paraphernalia found alongside?"
+      ]
+    },
+    {
+      match: /weapon|firearm|pistol|rifle|knife|prohibited|carry.*weapon|possess.*weapon/i,
+      hints: [
+        "Weapon type, make/model, and serial number",
+        "Ammunition type and count",
+        "Where was the weapon located (on person, in vehicle, at premises)?",
+        "Does the suspect hold a valid weapons licence?",
+        "Photo of weapon taken and logged as evidence?"
+      ]
+    },
+    {
+      match: /speed|dangerous.*driv|reckless.*driv|DUI|drink.*driv|impaired|exceed.*limit/i,
+      hints: [
+        "Speed recorded vs. speed limit of the zone",
+        "Method of speed detection (radar, lidar, pacing, estimated)",
+        "Road and weather conditions at the time",
+        "Breath/drug test result if applicable",
+        "Was the driver's licence suspended on the spot?"
+      ]
+    },
+    {
+      match: /resist|obstruct|hinder|fail.*comply|refuse.*direction/i,
+      hints: [
+        "What lawful direction was given and by whom?",
+        "How did the suspect resist or obstruct? (verbal, physical, passive)",
+        "Was reasonable force used to effect arrest? Describe.",
+        "Any injuries to officers during the arrest?"
+      ]
+    },
+    {
+      match: /kidnap|hostage|false.*imprison|deprivation.*liberty/i,
+      hints: [
+        "Victim(s) — names, how they were taken, duration held",
+        "Demands made by suspect (if any)",
+        "How were victims released or recovered?",
+        "Any injuries or threats made to victims?",
+        "Negotiation details if applicable"
+      ]
+    },
+    {
+      match: /bail|breach.*bail/i,
+      hints: [
+        "Original bail conditions that were breached",
+        "Specifics of the breach — what the suspect did",
+        "Original case reference / court date"
+      ]
+    },
+    {
+      match: /fail.*stop.*enforcement|enforcement.*vehicle/i,
+      hints: [
+        "Outstanding debt amount and type (government fines, charges, licences)",
+        "Was the traffic stop initiated by ANPR flag or manual LEAP check?",
+        "Vehicle details — rego, make, model, colour from MELROADS",
+        "Did the individual flee the scene? Note direction and circumstances",
+        "Was the individual given opportunity to pay or arrange a plan?",
+        "Debt threshold — under $10k (immediate), $10k-60k (3 weeks), $60k-100k (4 weeks), over $100k (no plan)",
+        "Was a Sheriff arrest warrant raised for debt recovery?"
       ]
     }
   ];
@@ -2667,16 +2772,34 @@
       }
     });
 
-    // Sheriff universal reminders (shown when no charge-specific hint matched)
+    // Always show universal reminders for arrest-type reports
     const type = state.reportType;
+    if (["arrest","sheriff_arrest","sheriff_arrest_legacy"].includes(type) && matchedHints.length === 0) {
+      matchedHints.push(
+        "How was the suspect identified? (licence, MDT, fingerprints, verbal)",
+        "Was caution read? Did suspect acknowledge?",
+        "Where was the suspect processed and sentenced?"
+      );
+    }
+
+    // Sheriff-specific universal reminders
     if (["sheriff_arrest","sheriff_warrant","sheriff_debt"].includes(type) && matchedHints.length === 0) {
       matchedHints.push(
-        ...(type === "sheriff_debt" ? ["Outstanding debt amount and source (government fines, charges, licence fees)"] : []),
+        "Outstanding debt amount and source (government fines, charges, licence fees)",
         "How was the individual identified? (ID shown, LEAP/MDT, ANPR)",
         "Was the Sheriff custody caution read to the individual?",
         "Did the individual comply or refuse? What actions were taken?",
         ...(state.sheriffWarrant?.interactionType !== "foot" ? ["MELROADS vehicle details if applicable (rego, make, colour, owner)"] : []),
         "Was backup requested? Outcome?"
+      );
+    }
+
+    if (type === "field_contact" && matchedHints.length === 0) {
+      matchedHints.push(
+        "Document reason for the approach (outstanding debt, suspicious behaviour, call for service)",
+        "Was the person cooperative or resistant?",
+        "What information was gathered or verified? (ID, phone, debt acknowledgement)",
+        "Were any actions taken? (payment arranged, warning issued, further steps)"
       );
     }
 
@@ -5342,9 +5465,11 @@ function clearDebtTool() {
     const hints = [];
     const type = state.reportType;
     const summary = (state.summary || "").toLowerCase();
+    const allText = (summary + " " + (state.evidence || "") + " " + (state.interviewQs || "")).toLowerCase();
+    const charges = Array.from(selectedChargesSet).join(" ").toLowerCase();
 
     // Only run quality hints on report types that have narratives
-    if (!["sheriff_arrest","sheriff_warrant","sheriff_court"].includes(type)) return hints;
+    if (!["arrest","sheriff_arrest","sheriff_warrant","sheriff_court","sheriff_arrest_legacy","sheriff_warrant_legacy","traffic_warrant"].includes(type)) return hints;
     
     // Don't nag if no summary written yet (missing summary is already a warning)
     if (!norm(state.summary)) return hints;
@@ -5352,21 +5477,78 @@ function clearDebtTool() {
     // ── Universal checks (any arrest/warrant report) ──────────────────
     
     // Identification method
-    if (!/identif|licence|license|MDT|fingerprint|verbal.*confirm|photo.*ID|recognised|recognized/i.test(summary)) {
+    if (!/identif|licence|license|MDT|fingerprint|DNA|verbal.*confirm|photo.*ID|recognised|recognized/i.test(summary)) {
       hints.push("Consider adding: how the suspect was identified (licence, MDT profile, fingerprints, verbal confirmation)");
     }
 
     // Caution read
-    if (type === "sheriff_arrest") {
+    if (["arrest","sheriff_arrest","sheriff_arrest_legacy"].includes(type)) {
       if (!/caution|rights?\s*(were|was)?\s*read|miranda|informed.*rights|read.*rights|cautioned/i.test(summary)) {
         hints.push("Consider adding: was caution read to the suspect? Did they acknowledge?");
       }
     }
 
     // Processing location
-    if (type === "sheriff_arrest") {
+    if (["arrest","sheriff_arrest","sheriff_arrest_legacy"].includes(type)) {
       if (!/process|station|VIN\s*900|MEL\s*900|FKN|bolingbroke|MRC|remand/i.test(summary)) {
         hints.push("Consider adding: where was the suspect processed? (station name or code)");
+      }
+    }
+
+    // ── Charge-specific quality checks ────────────────────────────────
+
+    // Force charges → needs force justification
+    if (/assault|injur|force|shoot|discharg|lethal|taser|baton|ois/i.test(charges)) {
+      if (!/threat|produced.*weapon|aimed|lunged|attacked|swung|brandish|pointed|fired.*at|charged.*at/i.test(summary)) {
+        hints.push("Force charges selected — consider adding: what threat justified the force used (state the threat BEFORE the response)");
+      }
+    }
+
+    // Pursuit charges → needs pursuit details
+    if (/evade|pursuit|fail.*stop/i.test(charges)) {
+      if (!/pursuit.*end|boxed|spike|crash|broke.*off|abandon|voluntar|pulled.*over|came.*stop/i.test(summary)) {
+        hints.push("Pursuit charges selected — consider adding: how the pursuit ended");
+      }
+      if (!/speed|km\/?h|mph|zone/i.test(summary)) {
+        hints.push("Pursuit charges selected — consider adding: speeds reached and speed zones");
+      }
+    }
+
+    // Weapon charges → needs weapon details
+    if (/weapon|firearm|pistol|rifle|knife|prohibited.*weapon|carry.*weapon/i.test(charges)) {
+      if (!/serial|S\/N|SN:|SER\.|weapon.*type|make.*model/i.test(summary) && !/serial|S\/N/i.test(state.itemsList || "")) {
+        hints.push("Weapon charges selected — consider adding: weapon type and serial number in narrative or confiscated items");
+      }
+    }
+
+    // Drug charges → needs substance details
+    if (/drug|narcotic|substance|possess.*controlled/i.test(charges)) {
+      if (!/NIK|test.*positive|test.*negative|substance.*identif|gram|bag|quantity/i.test(allText)) {
+        hints.push("Drug charges selected — consider adding: substance type, quantity, and test result");
+      }
+    }
+
+    // Murder/shooting → needs GSR and victim details
+    if (/murder|manslaughter|discharge|shots?\s*fired/i.test(charges)) {
+      if (!/GSR/i.test(allText)) {
+        hints.push("Shooting/discharge charges — consider adding: GSR test result for suspect");
+      }
+      if (!/victim|deceased|injur.*party|ambulance|MAS|paramedic/i.test(summary)) {
+        hints.push("Shooting/discharge charges — consider adding: victim details and medical response");
+      }
+    }
+
+    // DUI/traffic → needs test results
+    if (/DUI|drink.*driv|impair|intoxicat|alcohol/i.test(charges)) {
+      if (!/breath|blood.*alcohol|BAC|PBT|roadside.*test|drug.*test|impairment.*assess/i.test(summary)) {
+        hints.push("Impaired driving charges — consider adding: breath/drug test result");
+      }
+    }
+
+    // Robbery/theft → needs victim and property
+    if (/robbery|armed.*robbery|steal|theft|burgl/i.test(charges)) {
+      if (!/victim|complainant|property.*stolen|taken|recover/i.test(summary)) {
+        hints.push("Robbery/theft charges — consider adding: victim details and property stolen/recovered");
       }
     }
 
@@ -5386,12 +5568,13 @@ function clearDebtTool() {
     if (type === "sheriff_arrest") {
       return `Can you confirm your full name and date of birth?
 Do you understand why you have been detained by the Sheriff's Office?
+Are you aware of your outstanding debt to the State of Victoria?
+Do you have the means to settle this debt immediately?
 Are you the registered owner of the vehicle you were driving?
-Were you the driver of [VEHICLE] at the time of the stop?
-Can you explain why the vehicle did not stop when directed?
+Were you the driver of [VEHICLE] at the time of the traffic stop?
 Do you wish to nominate another person as the driver if you were not driving?
 Do you wish to contact a lawyer before answering further questions?
-Is there anything you would like to say regarding the Failure to Stop charge?`;
+Is there anything you would like to say regarding the charges?`;
     } else if (type === "sheriff_warrant") {
       return `Caution:
 Do you understand that false or misleading information may result in charges?
@@ -5421,6 +5604,57 @@ Can you explain why your vehicle was identified during this incident?
 Is there any reason your vehicle would have been present at that location?`;
     } else if (type === "sheriff_debt") {
       return "";
+    } else if (type === "sheriff_arrest_legacy") {
+      return `Can you confirm your full name and date of birth?
+Can you confirm your current address and contact details?
+Do you understand why you are being arrested?
+Do you understand the charges that have been read to you?
+Do you wish to say anything in response to these charges?
+Were there any other individuals involved in this incident?
+Are you the registered owner of the vehicle you were in?
+Do you wish to contact a lawyer before answering further questions?
+Is there anything you would like to add at this time?`;
+    } else if (type === "sheriff_warrant_legacy") {
+      return `Can you confirm your full name and date of birth?
+Can you confirm your current address and contact details?
+Do you understand the nature of this warrant for questioning?
+Where were you on [DATE] at [TIME]?
+Can you provide an account of your activities during the relevant time period?
+Do you have any witnesses or evidence that can support your account?
+Are you willing to participate in a formal interview under caution?
+Do you wish to have legal representation present?
+Is there anything you would like to add at this time?`;
+    } else if (type === "traffic_warrant") {
+      return `Can you confirm you are the registered owner of vehicle [REGO]?
+Were you the driver of [VEHICLE MODEL] on [DATE] at [TIME]?
+Can you explain your reason for the excessive speed?
+Are you aware of the speed limit in that area?
+Do you have any medical conditions or emergencies that caused this driving?
+Were there any passengers in the vehicle at the time?
+Do you consent to a roadside breath test?
+Do you wish to nominate another driver if you were not driving?`;
+    } else if (type === "field_contact") {
+      return `Can you provide your full name and date of birth?
+What is your current address?
+What brings you to this location today?
+Have you been in contact with any individuals of interest?
+Do you have any information relevant to our investigation?
+Are you willing to answer questions voluntarily?
+Do you have any concerns you wish to share?`;
+    } else if (type === "arrest") {
+      return `Can you confirm your full name and date of birth?
+Do you understand the charges that have been read to you?
+Do you wish to say anything in response to these charges?
+Do you wish to contact a lawyer before answering further questions?
+Were there any other individuals involved in this incident?
+Is there anything you would like to add at this time?`;
+    } else if (type === "search_seizure") {
+      return `Can you confirm your full name and date of birth?
+Do you understand why a search of your person / vehicle / premises is being conducted?
+Do you consent to the search, or do you wish the legal authority to be read to you?
+Are there any items on your person or in the vicinity that you wish to declare?
+Do you have a licence for any weapons or controlled substances located?
+Do you wish to contact a lawyer before answering further questions?`;
     }
     
     // Generic fallback used for all warrant types
@@ -7049,7 +7283,18 @@ Is there anything you would like to add at this time?`;
 
       // Arrest types
       if (["arrest","sheriff_arrest_legacy","sheriff_warrant_legacy","sheriff_arrest"].includes(type)) {
+        if (!has("pocket")) missing.push("Pockets");
         if (!has("fingerprint")) missing.push("Fingerprints");
+      }
+
+      // If weapons confiscated, suggest weapon photo
+      if (norm(state.itemsList) && /pistol|rifle|smg|shotgun|launcher|knife|machete/i.test(state.itemsList)) {
+        if (!has("weapon") && !has("firearm")) missing.push("Weapon photo");
+      }
+
+      // If charges include discharge/murder, suggest GSR
+      if (norm(state.chargesList) && /discharge|murder|shots fired/i.test(state.chargesList)) {
+        if (!has("GSR")) missing.push("GSR test");
       }
 
       if (missing.length > 0 && evidenceItems.length > 0) {
@@ -10979,6 +11224,7 @@ function updateDebtTabModeHint() {
   if (useCase === 'warrant') {
     hint.innerHTML += ` <span style="color:var(--warn)">Enforcement mode: a Debt Enforcement Warrant needs senior-leadership approval (Regional Manager or above) recorded by rank and name, and is vehicle-only.</span>`;
   }
+  hint.innerHTML += ` <button type="button" class="js-open-guide guide-link">Open the Recruit Guide</button>`;
   if (switchBtn) switchBtn.style.display = usingDebtWarrant ? 'none' : '';
 }
 
