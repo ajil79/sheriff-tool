@@ -1640,7 +1640,17 @@
         <div style="font-size:13px;color:var(--text);line-height:1.5">Use this for roadside stops as well as follow-up debt enforcement. Keep the debtor details here so the result can feed logs, reports, and warrants cleanly.</div><div id="debtLinkStatus" style="margin-top:8px;font-size:12px;color:var(--muted)">Waiting for linked report details.</div>
       </div>
     </div>
-    <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— auto-fills name, phone &amp; vehicle below</span></div><textarea id="debtLeapPaste" rows="3" placeholder="Paste LEAP profile here to auto-fill debtor details"></textarea></label>
+    <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— paste text or a screenshot to auto-fill name, phone &amp; vehicle below</span></div><textarea id="debtLeapPaste" rows="3" placeholder="Paste a LEAP profile — text or a screenshot — to auto-fill debtor details"></textarea></label>
+    <div style="margin:-2px 0 12px">
+      <div id="debtPasteZone" tabindex="0" role="button" aria-label="Paste or drop a LEAP/MDT screenshot to scan with OCR" style="padding:12px 14px; border:2px dashed var(--border); border-radius:10px; text-align:center; cursor:pointer; background:rgba(0,0,0,0.15)">
+        <div style="font-weight:700;font-size:12px">📷 Scan a screenshot instead</div>
+        <div class="muted" style="font-size:11px;margin-top:2px">Click, then Ctrl+V · drag &amp; drop an image · or pick a file. Reads the debtor fields below — you review the results before they apply.</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <input id="debtImgFile" type="file" accept="image/*" style="flex:1;min-width:140px"/>
+        <input id="debtOcrStatus" readonly value="OCR idle" style="flex:1;min-width:140px;background:rgba(0,0,0,0.3);font-size:11px"/>
+      </div>
+    </div>
     <div class="grid2" style="margin-bottom:10px">
       <label><div class="lbl">Debtor First Name</div><input id="debtDebtorFirstName" placeholder="James"/></label>
       <label><div class="lbl">Debtor Last Name</div><input id="debtDebtorLastName" placeholder="Brown"/></label>
@@ -1804,7 +1814,17 @@
           <button class="btn" id="slClearBtn" type="button" title="Clear all Sheriff log fields and start fresh">Clear Sheriff Logs</button>
         </div>
       </div>
-      <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— auto-fills name &amp; phone below</span></div><textarea id="slLeapPaste" rows="3" placeholder="Paste LEAP profile here to auto-fill debtor details"></textarea></label>
+      <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— paste text or a screenshot to auto-fill name &amp; phone below</span></div><textarea id="slLeapPaste" rows="3" placeholder="Paste a LEAP profile — text or a screenshot — to auto-fill debtor details"></textarea></label>
+      <div style="margin:-2px 0 12px">
+        <div id="slPasteZone" tabindex="0" role="button" aria-label="Paste or drop a LEAP/MDT screenshot to scan with OCR" style="padding:12px 14px; border:2px dashed var(--border); border-radius:10px; text-align:center; cursor:pointer; background:rgba(0,0,0,0.15)">
+          <div style="font-weight:700;font-size:12px">📷 Scan a screenshot instead</div>
+          <div class="muted" style="font-size:11px;margin-top:2px">Click, then Ctrl+V · drag &amp; drop an image · or pick a file. Reads the debtor name &amp; phone — you review the results before they apply.</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <input id="slImgFile" type="file" accept="image/*" style="flex:1;min-width:140px"/>
+          <input id="slOcrStatus" readonly value="OCR idle" style="flex:1;min-width:140px;background:rgba(0,0,0,0.3);font-size:11px"/>
+        </div>
+      </div>
       <div class="grid2" style="margin-bottom:10px">
         <label><div class="lbl">Debtor First Name</div><input id="slFirstName" placeholder="James"/></label>
         <label><div class="lbl">Debtor Last Name</div><input id="slLastName" placeholder="Brown"/></label>
@@ -6369,40 +6389,47 @@ Is there anything you would like to add at this time?`;
   }
 
   let _ocrBusy = false;
-  async function runOCR(blob) {
-    if (!blob) return;
+  // Shared image → OCR text pipeline. Used by the Report Tool OCR zone and the
+  // Debt Tool / Sheriff Logs scan zones. Writes progress to the passed-in status
+  // element (falls back to the Report Tool's #ocrStatus) and returns the best
+  // OCR text plus its parsed bundle, or null when OCR is busy/unavailable/failed.
+  async function ocrImageToText(blob, statusEl) {
+    if (!blob) return null;
+    const status = statusEl || el.ocrStatus || null;
+    const setStatus = (msg, color) => {
+      if (!status) return;
+      if (color !== undefined) status.style.color = color;
+      status.value = msg;
+    };
     if (_ocrBusy) {
       toast("OCR already running — please wait", "warn");
-      return;
+      return null;
     }
     _ocrBusy = true;
 
     if (!window.Tesseract || typeof window.Tesseract.recognize !== "function") {
-      if (el.ocrStatus) el.ocrStatus.value = "Loading OCR library (optional)...";
+      setStatus("Loading OCR library (optional)...", "");
       const ok = await ensureTesseract();
       if (!ok || !window.Tesseract || typeof window.Tesseract.recognize !== "function") {
-        if (el.ocrStatus) el.ocrStatus.value = "OCR unavailable offline. Charges, PINs, preview and copy still work offline.";
+        setStatus("OCR unavailable offline. Charges, PINs, preview and copy still work offline.");
         toast("OCR unavailable offline", "warn");
         _ocrBusy = false;
-        return;
+        return null;
       }
     }
-    if (el.ocrStatus) {
-      el.ocrStatus.style.color = "";
-      el.ocrStatus.value = "Preprocessing image...";
-    }
+    setStatus("Preprocessing image...", "");
 
     let worker = null;
 
     try {
       const processedBlob = await preprocessImage(blob);
-      if (el.ocrStatus) el.ocrStatus.value = "Starting OCR engine...";
+      setStatus("Starting OCR engine...");
 
       worker = await createOCRWorker((m) => {
-        if (!el.ocrStatus) return;
-        if (m.status === "recognizing text") el.ocrStatus.value = `OCR: ${Math.round((m.progress || 0) * 100)}%`;
-        else if (m.status === "loading language traineddata") el.ocrStatus.value = `Loading language data: ${Math.round((m.progress || 0) * 100)}%`;
-        else if (m.status === "initializing tesseract") el.ocrStatus.value = "Initializing OCR...";
+        if (!status) return;
+        if (m.status === "recognizing text") status.value = `OCR: ${Math.round((m.progress || 0) * 100)}%`;
+        else if (m.status === "loading language traineddata") status.value = `Loading language data: ${Math.round((m.progress || 0) * 100)}%`;
+        else if (m.status === "initializing tesseract") status.value = "Initializing OCR...";
       });
 
       // General OCR on full image / processed image
@@ -6413,7 +6440,7 @@ Is there anything you would like to add at this time?`;
 
       // Full-screen screenshot helper: scan likely UI regions when the initial pass is weak
       if (bestScore < 7) {
-        if (el.ocrStatus) el.ocrStatus.value = "Scanning full-screen screenshot regions...";
+        setStatus("Scanning full-screen screenshot regions...");
         const regional = await runRegionalOCRPasses(worker, blob);
         if (regional && regional.parsed) {
           const regionalScore = regional.score || scoreParsedOCRBundle(regional.parsed);
@@ -6426,7 +6453,7 @@ Is there anything you would like to add at this time?`;
       }
 
       // Left-zone detection for FiveM licences held mid-left
-      if (el.ocrStatus) el.ocrStatus.value = "Scanning left-side licence zones...";
+      setStatus("Scanning left-side licence zones...");
       const licenceResult = await detectAndParseLicenceFromImage(worker, blob);
       if (licenceResult && licenceResult.parsed && licenceResult.parsed.score >= 3) {
         p = mergeParsedOCR(p, licenceResult.parsed);
@@ -6436,7 +6463,7 @@ Is there anything you would like to add at this time?`;
 
       // Retry raw image if OCR is still weak
       if (bestScore < 7 && blob.size > 0) {
-        if (el.ocrStatus) el.ocrStatus.value = "Retrying OCR with raw screenshot...";
+        setStatus("Retrying OCR with raw screenshot...");
         const retry = await recognizeWithWorker(worker, blob, "3");
         const retryText = postProcessOCR(retry.text || "");
         const p2 = parseOCR(retryText);
@@ -6453,97 +6480,76 @@ Is there anything you would like to add at this time?`;
         worker = null;
       }
 
-      if (el.ocrStatus) el.ocrStatus.value = "OCR complete";
-      if (el.ocrText) el.ocrText.value = ocrText;
-
-      // Vehicle apply — v47: uses syncVehicleFields helper
-      if (p.vehicle) {
-        const v = p.vehicle;
-        if (state.sheriffWarrant) syncVehicleFields(v, state.sheriffWarrant, "sw");
-        if (state.trafficWarrant) syncVehicleFields(v, state.trafficWarrant, "tw");
-      }
-
-      // Offender apply
-      const ocrOffender = {
-        name: p.offender.name || state.offender.name,
-        dob: p.offender.dob || state.offender.dob,
-        sex: p.offender.sex || state.offender.sex,
-        address: p.offender.address || state.offender.address,
-        phone: p.offender.phone || state.offender.phone
-      };
-      fillOffenderFields(ocrOffender);
-      if (ocrOffender.name) upsertPerson(ocrOffender);
-
-      // License info apply
-      if (p.license) {
-        state.currentDemeritPoints = p.license.demeritPoints || 0;
-        state.licenseStatus = p.license.licenseStatus || "";
-        state.licenseClass = p.license.licenseClass || "";
-        const demeritInput = document.getElementById("currentDemeritPoints");
-        if (demeritInput) demeritInput.value = state.currentDemeritPoints;
-        updateLicenseWarning();
-      }
-
-      if (p.meta.enteredBy && !norm(state.enteredBy)) state.enteredBy = p.meta.enteredBy;
-      if (p.meta.unit && !norm(state.enteredUnit)) state.enteredUnit = p.meta.unit;
-
-      if (p.officerNames && p.officerNames.length) {
-        const existing = ensureLines(state.officersList).split("\n").map(x => x.trim()).filter(Boolean);
-        const set = new Set(existing.map(x => x.toUpperCase()));
-        for (const name of p.officerNames) {
-          const key = name.trim().toUpperCase();
-          if (key && !set.has(key)) { existing.push(name.trim()); set.add(key); }
-        }
-        state.officersList = existing.join("\n");
-        existing.forEach(line => {
-          const parsed = parseOfficerLine(line);
-          if (parsed && (parsed.callsign || parsed.name.length >= 2)) upsertOfficer(parsed);
-          const cs = extractCallsignFromLine(line);
-          if (cs) addCallsignToPool(cs);
-        });
-      }
-
-      if (p.itemLines && p.itemLines.length) {
-        if (state.ocrWeaponsOnly) {
-          const cleanLines = buildWeaponsEvidenceLines(p.itemLines);
-          if (cleanLines.length) state.itemsList = mergeEvidenceAppend(state.itemsList, cleanLines);
-        } else {
-          const existing = ensureLines(state.itemsList).split("\n").map(x => x.trim()).filter(Boolean);
-          const set = new Set(existing.map(x => x.toUpperCase()));
-          for (const line of p.itemLines) {
-            const t = String(line || "").trim();
-            const key = t.toUpperCase();
-            if (t && !set.has(key)) { existing.push(t); set.add(key); }
-          }
-          state.itemsList = existing.join("\n");
-        }
-      }
-
-      // Evidence serial detection
-      const serialEvidence = parseEvidenceSerials(ocrText);
-      if (serialEvidence.length) {
-        const existingEv = ensureLines(state.evidence).split("\n").map(x => x.trim()).filter(Boolean);
-        const evSet = new Set(existingEv.map(x => x.toUpperCase()));
-        for (const line of serialEvidence) {
-          if (!evSet.has(line.toUpperCase())) { existingEv.push(line); evSet.add(line.toUpperCase()); }
-        }
-        state.evidence = existingEv.join("\n");
-      }
-
-      renderAll();
-      toast("OCR fields applied", "ok");
+      setStatus("OCR complete");
+      return { text: ocrText, parsed: p, score: bestScore };
     } catch (e) {
       console.error(e);
       if (worker && typeof worker.terminate === "function") {
         try { await worker.terminate(); } catch (_) {}
       }
-      if (el.ocrStatus) {
-        el.ocrStatus.value = "OCR failed";
-        el.ocrStatus.style.color = "rgba(255,120,120,0.95)";
-      }
+      setStatus("OCR failed", "rgba(255,120,120,0.95)");
       toast("OCR error: " + e.message, "err");
+      return null;
     } finally {
       _ocrBusy = false;
+    }
+  }
+
+  // Wire a compact image-scan control (drop zone + file input + optional textarea)
+  // so a pasted/dropped/picked screenshot is handed to `onImage(blob)`. Idempotent.
+  function bindImageScanZone({ zoneId, fileId, textareaId, onImage }) {
+    const zone = zoneId ? document.getElementById(zoneId) : null;
+    const fileInput = fileId ? document.getElementById(fileId) : null;
+    const textarea = textareaId ? document.getElementById(textareaId) : null;
+    const firstClipboardImage = (items) => {
+      const item = [...(items || [])].find(i => i.type && i.type.startsWith("image/"));
+      return item && item.getAsFile ? item.getAsFile() : null;
+    };
+    const firstDroppedImage = (files) => [...(files || [])].find(f => f.type && f.type.startsWith("image/")) || null;
+
+    if (zone && !zone.dataset.scanBound) {
+      zone.dataset.scanBound = "1";
+      zone.addEventListener("click", () => zone.focus());
+      zone.addEventListener("paste", (e) => {
+        const img = firstClipboardImage(e.clipboardData && e.clipboardData.items);
+        if (img) { e.preventDefault(); onImage(img); }
+      });
+      zone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        zone.style.outline = "2px dashed rgba(255,255,255,0.35)";
+        zone.style.outlineOffset = "4px";
+      });
+      zone.addEventListener("dragleave", () => {
+        zone.style.outline = "none";
+        zone.style.outlineOffset = "0";
+      });
+      zone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        zone.style.outline = "none";
+        zone.style.outlineOffset = "0";
+        const file = firstDroppedImage(e.dataTransfer && e.dataTransfer.files);
+        if (file) onImage(file);
+      });
+    }
+
+    if (fileInput && !fileInput.dataset.scanBound) {
+      fileInput.dataset.scanBound = "1";
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files && fileInput.files[0]) onImage(fileInput.files[0]);
+      });
+    }
+
+    // Also let a screenshot be pasted/dropped straight onto the text box.
+    if (textarea && !textarea.dataset.scanBound) {
+      textarea.dataset.scanBound = "1";
+      textarea.addEventListener("paste", (e) => {
+        const img = firstClipboardImage(e.clipboardData && e.clipboardData.items);
+        if (img) { e.preventDefault(); onImage(img); }
+      });
+      textarea.addEventListener("drop", (e) => {
+        const file = firstDroppedImage(e.dataTransfer && e.dataTransfer.files);
+        if (file) { e.preventDefault(); onImage(file); }
+      });
     }
   }
 
@@ -6875,6 +6881,51 @@ Is there anything you would like to add at this time?`;
       };
       debtLeapPaste.addEventListener("input", applyDebtLeapPaste);
       debtLeapPaste.addEventListener("paste", () => setTimeout(applyDebtLeapPaste, 0));
+
+      // Screenshot → OCR → review-and-confirm → fill the debtor fields
+      const scanImageIntoDebt = async (blob) => {
+        const statusEl = document.getElementById("debtOcrStatus");
+        const result = await ocrImageToText(blob, statusEl);
+        if (!result) return;
+        const offender = (result.parsed && result.parsed.offender) || {};
+        const vehicle = (result.parsed && result.parsed.vehicle) || {};
+        let fn = "", ln = "";
+        if (offender.name) {
+          const parts = offender.name.trim().split(/\s+/);
+          fn = parts[0] || "";
+          ln = parts.slice(1).join(" ");
+        }
+        const proposed = {
+          debtorFirstName: fn,
+          debtorLastName: ln,
+          debtorPhone: offender.phone || "",
+          debtorAddress: offender.address || "",
+          vehicleRego: vehicle.rego || "",
+          vehicleModel: vehicle.model || ""
+        };
+        const labelMap = {
+          debtorFirstName: "First name",
+          debtorLastName: "Last name",
+          debtorPhone: "Phone",
+          debtorAddress: "Address",
+          vehicleRego: "Vehicle rego",
+          vehicleModel: "Vehicle model"
+        };
+        const changes = buildObjectChangeList(state.debtTool, proposed, labelMap, false, "Debt Tool");
+        if (!changes.length) {
+          if (statusEl) statusEl.value = offender.name ? "Scan read — fields already filled" : "No debtor details found in image";
+          toast(offender.name ? "Those fields are already filled — clear them to re-apply" : "No debtor details found in the screenshot", "warn");
+          return;
+        }
+        const applied = await openChangeReviewModal("Review debtor scan", changes, () => {
+          applyObjectFields(state.debtTool, proposed, false);
+          renderDebtToolUI();
+          throttledAutosave();
+          toast("Debtor details filled from screenshot", "ok");
+        }, { summary: "OCR read these debtor details from the screenshot. Review the before and after values before applying them." });
+        if (statusEl) statusEl.value = applied ? "Scan applied" : "Scan read — review cancelled";
+      };
+      bindImageScanZone({ zoneId: "debtPasteZone", fileId: "debtImgFile", textareaId: "debtLeapPaste", onImage: scanImageIntoDebt });
     }
 
     [
@@ -10712,6 +10763,37 @@ function bindSheriffLogsTool() {
     };
     slLeapPaste.addEventListener('input', applySlLeapPaste);
     slLeapPaste.addEventListener('paste', () => setTimeout(applySlLeapPaste, 0));
+
+    // Screenshot → OCR → review-and-confirm → fill the debtor name & phone
+    const scanImageIntoSheriffLogs = async (blob) => {
+      const statusEl = document.getElementById('slOcrStatus');
+      const result = await ocrImageToText(blob, statusEl);
+      if (!result) return;
+      const offender = (result.parsed && result.parsed.offender) || {};
+      const vehicle = (result.parsed && result.parsed.vehicle) || {};
+      const split = offender.name ? splitFullNameForSheriffLogs(offender.name) : { firstName: '', lastName: '' };
+      const proposed = {
+        firstName: split.firstName || '',
+        lastName: split.lastName || '',
+        phone: offender.phone || '',
+        vehicle: [vehicle.model, vehicle.rego].filter(Boolean).join(' ')
+      };
+      const labelMap = { firstName: 'First name', lastName: 'Last name', phone: 'Phone', vehicle: 'Vehicle' };
+      const changes = buildObjectChangeList(state.sheriffLogs, proposed, labelMap, false, 'Sheriff Logs');
+      if (!changes.length) {
+        if (statusEl) statusEl.value = offender.name ? 'Scan read — fields already filled' : 'No debtor details found in image';
+        toast(offender.name ? 'Those fields are already filled — clear them to re-apply' : 'No debtor details found in the screenshot', 'warn');
+        return;
+      }
+      const applied = await openChangeReviewModal('Review debtor scan', changes, () => {
+        applyObjectFields(state.sheriffLogs, proposed, false);
+        renderSheriffLogsTool();
+        throttledAutosave();
+        toast('Debtor details filled from screenshot', 'ok');
+      }, { summary: 'OCR read these debtor details from the screenshot. Review the before and after values before applying them.' });
+      if (statusEl) statusEl.value = applied ? 'Scan applied' : 'Scan read — review cancelled';
+    };
+    bindImageScanZone({ zoneId: 'slPasteZone', fileId: 'slImgFile', textareaId: 'slLeapPaste', onImage: scanImageIntoSheriffLogs });
   }
 
   const pullBtn = document.getElementById('slPullFromReportBtn');
@@ -12061,115 +12143,26 @@ function updateDebtTabModeHint() {
     }, { summary: overwrite ? "These linked values will overwrite the Sheriff Logs fields." : "These linked values will fill the empty Sheriff Logs fields." });
   };
 
-  const _baseRunOCR = runOCR;
-  runOCR = async function(blob) {
-    if (_ocrBusy) {
-      toast("OCR is already running", "warn");
-      return;
-    }
+  // Report Tool OCR: extract text via the shared pipeline, then route the parsed
+  // result through the review-and-confirm modal before applying to the form.
+  async function runOCR(blob) {
+    if (!blob) return;
+    const result = await ocrImageToText(blob, el.ocrStatus);
+    if (!result) return;
+    const { text: ocrText, parsed: p } = result;
+    if (el.ocrText) el.ocrText.value = ocrText;
+    state.ocrText = ocrText;
 
-    if (el.ocrStatus) {
-      el.ocrStatus.style.color = "";
-      el.ocrStatus.value = "Loading OCR library (optional)...";
-    }
-
-    const ready = await ensureTesseract();
-    if (!ready) {
-      if (el.ocrStatus) el.ocrStatus.value = "OCR unavailable offline. Charges, PINs, preview and copy still work offline.";
-      toast("OCR library could not be loaded", "warn");
-      return;
-    }
-
-    _ocrBusy = true;
-    let worker = null;
-
-    try {
-      const processedBlob = await preprocessImage(blob);
-      if (el.ocrStatus) {
-        el.ocrStatus.style.color = "";
-        el.ocrStatus.value = "Preprocessing image...";
-      }
-
-      if (el.ocrStatus) el.ocrStatus.value = "Starting OCR engine...";
-
-      worker = await createOCRWorker((m) => {
-        if (!el.ocrStatus) return;
-        if (m.status === "recognizing text") el.ocrStatus.value = `OCR: ${Math.round((m.progress || 0) * 100)}%`;
-        else if (m.status === "loading language traineddata") el.ocrStatus.value = `Loading language data: ${Math.round((m.progress || 0) * 100)}%`;
-        else if (m.status === "initializing tesseract") el.ocrStatus.value = "Initializing OCR...";
+    const ocrChanges = buildOcrReviewChanges(p, ocrText);
+    if (ocrChanges.length) {
+      const applied = await openChangeReviewModal("Review OCR autofill", ocrChanges, () => applyParsedOcrResult(p, ocrText), {
+        summary: "OCR found new data. Review the before and after values before applying them to the form."
       });
-
-      const general = await recognizeWithWorker(worker, processedBlob, "6");
-      let ocrText = postProcessOCR(general.text || "");
-      let p = parseOCR(ocrText);
-      let bestScore = scoreParsedOCRBundle(p) + ((general.confidence || 0) / 100);
-
-      if (bestScore < 7) {
-        if (el.ocrStatus) el.ocrStatus.value = "Scanning full-screen screenshot regions...";
-        const regional = await runRegionalOCRPasses(worker, blob);
-        if (regional && regional.parsed) {
-          const regionalScore = regional.score || scoreParsedOCRBundle(regional.parsed);
-          if (regionalScore > bestScore) {
-            p = mergeParsedOCR(p, regional.parsed);
-            bestScore = regionalScore;
-            ocrText = [ocrText, "", `--- ${regional.label} OCR ---`, regional.text].filter(Boolean).join("\n");
-          }
-        }
-      }
-
-      if (el.ocrStatus) el.ocrStatus.value = "Scanning left-side licence zones...";
-      const licenceResult = await detectAndParseLicenceFromImage(worker, blob);
-      if (licenceResult && licenceResult.parsed && licenceResult.parsed.score >= 3) {
-        p = mergeParsedOCR(p, licenceResult.parsed);
-        bestScore = Math.max(bestScore, licenceResult.parsed.score || 0);
-        ocrText = [ocrText, "", "--- LICENCE ZONE OCR ---", licenceResult.text].filter(Boolean).join("\n");
-      }
-
-      if (bestScore < 7 && blob.size > 0) {
-        if (el.ocrStatus) el.ocrStatus.value = "Retrying OCR with raw screenshot...";
-        const retry = await recognizeWithWorker(worker, blob, "3");
-        const retryText = postProcessOCR(retry.text || "");
-        const p2 = parseOCR(retryText);
-        const score2 = scoreParsedOCRBundle(p2) + ((retry.confidence || 0) / 100);
-        if (score2 > bestScore) {
-          p = mergeParsedOCR(p, p2);
-          bestScore = score2;
-          ocrText = [ocrText, "", "--- RAW SCREENSHOT OCR ---", retryText].filter(Boolean).join("\n");
-        }
-      }
-
-      if (worker && typeof worker.terminate === "function") {
-        await worker.terminate();
-        worker = null;
-      }
-
-      if (el.ocrStatus) el.ocrStatus.value = "OCR complete";
-      if (el.ocrText) el.ocrText.value = ocrText;
-      state.ocrText = ocrText;
-
-      const ocrChanges = buildOcrReviewChanges(p, ocrText);
-      if (ocrChanges.length) {
-        const applied = await openChangeReviewModal("Review OCR autofill", ocrChanges, () => applyParsedOcrResult(p, ocrText), {
-          summary: "OCR found new data. Review the before and after values before applying them to the form."
-        });
-        if (!applied && el.ocrStatus) el.ocrStatus.value = "OCR complete - review cancelled";
-      } else {
-        toast("OCR complete, no new fields to apply", "warn");
-      }
-    } catch (e) {
-      console.error(e);
-      if (worker && typeof worker.terminate === "function") {
-        try { await worker.terminate(); } catch (_) {}
-      }
-      if (el.ocrStatus) {
-        el.ocrStatus.value = "OCR failed";
-        el.ocrStatus.style.color = "rgba(255,120,120,0.95)";
-      }
-      toast("OCR error: " + e.message, "err");
-    } finally {
-      _ocrBusy = false;
+      if (!applied && el.ocrStatus) el.ocrStatus.value = "OCR complete - review cancelled";
+    } else {
+      toast("OCR complete, no new fields to apply", "warn");
     }
-  };
+  }
 
   function initSheriffUpgradeLayer() {
     state.reportType = sheriffGuardType(state.reportType);
