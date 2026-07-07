@@ -873,6 +873,23 @@
         </ul>
       </div>
 
+      <!-- Required logs + induction (leadership update) -->
+      <div class="card" style="border-color:rgba(0,191,255,0.3)">
+        <h2 style="margin:0 0 6px">📋 Which logs do I actually need?</h2>
+        <div class="muted" style="margin-bottom:10px">To cut paperwork, you only log an interaction when the person has debt. Traffic stops and phone calls go in as interactions now — there are no separate <strong>!tstop</strong> or <strong>!call</strong> logs.</div>
+        <div class="guide-ref-grid" style="margin-top:2px">
+          <div class="guide-ref"><strong>The only required logs</strong><br>
+            <strong>!interact</strong> — your traffic stops and calls (only when they have debt)<br>
+            <strong>!adddebt</strong> — register the debt<br>
+            <strong>!cleardebt</strong> — debt paid off<br>
+            <strong>!addplan</strong> — payment plan agreed
+          </div>
+          <div class="guide-ref"><strong>New recruits — 2-up first</strong><br>
+            Once inducted, you must complete a single <strong>2-up</strong> with an <strong>FTO or a full Sheriff Officer</strong> before you're cleared to patrol solo. (Trial change from Sheriff Leadership.)
+          </div>
+        </div>
+      </div>
+
       <!-- Scenario picker -->
       <div class="card">
         <h2 style="margin:0 0 4px">Pick your situation</h2>
@@ -1029,7 +1046,7 @@
         <div class="guide-ref-grid" style="margin-top:10px">
           <div class="guide-ref"><strong>Duty numbers</strong><br>
             <strong>0</strong> — Court duties<br>
-            <strong>1</strong> — Non-court / patrol / with VICPOL<br>
+            <strong>1</strong> — Non-court / patrol<br>
             <strong>2</strong> — Operation or two-up with VICPOL<br>
             <strong>3</strong> — Manning the station
           </div>
@@ -1042,7 +1059,6 @@
           </div>
           <div class="guide-ref"><strong>Rank structure</strong> <span style="color:var(--muted)">(senior → junior)</span><br>
             <strong>Sheriff</strong> — head of the office (callsign 99)<br>
-            Superintendent<br>
             Deputy Sheriff<br>
             Regional Manager<br>
             Sheriff Sergeant<br>
@@ -1333,7 +1349,6 @@
               <option>Sheriff Sergeant</option>
               <option>Regional Manager</option>
               <option>Deputy Sheriff</option>
-              <option>Superintendent</option>
               <option>Sheriff</option>
             </select></label>
             <label><div class="lbl">Name</div><input id="offSrfName" placeholder="Stephen Palmes" style="margin:0"/></label>
@@ -1607,7 +1622,7 @@
           <li><strong>Click Process Debt</strong> — the tool totals qualifying unpaid government entries older than 14 days.</li>
           <li><strong>Read the summary</strong> — check the tier badge, recommended action and suggested next steps.</li>
           <li><strong>Choose a preset</strong> — pick the wording preset that matches the outcome (e.g. Roadside stop note).</li>
-          <li><strong>Click Fill Sheriff Logs</strong> — sends all data across so the bot commands are ready to copy.</li>
+          <li><strong>Click Open in Sheriff Logs</strong> — debtor details link across automatically; this adds the suggested wording and shows the ready-to-copy bot commands.</li>
           <li><strong>For debt warrants</strong> — click <strong>Fill Debt Warrant Report</strong> to push the data into the Report Tool and generate the warrant.</li>
         </ol>
       </div>
@@ -1642,7 +1657,7 @@
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px">
       <div>
         <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:6px">IDENTITY & STOP CHECK</div>
-        <div style="font-size:13px;color:var(--text);line-height:1.5">Use this for roadside stops as well as follow-up debt enforcement. Keep the debtor details here so the result can feed logs, reports, and warrants cleanly.</div><div id="debtLinkStatus" style="margin-top:8px;font-size:12px;color:var(--muted)">Waiting for linked report details.</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.5">This is the one place debtor details live — for roadside stops (code 4) as well as follow-up debt enforcement. Everything here flows live into the Sheriff Logs commands, reports and warrants.</div><div id="debtLinkStatus" style="margin-top:8px;font-size:12px;color:var(--muted)">Waiting for linked report details.</div>
       </div>
     </div>
     <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— paste text or a screenshot to auto-fill name, phone &amp; vehicle below</span></div><textarea id="debtLeapPaste" rows="3" placeholder="Paste a LEAP profile — text or a screenshot — to auto-fill debtor details"></textarea></label>
@@ -1678,7 +1693,11 @@
       <label><div class="lbl">Vehicle Rego</div><input id="debtVehicleRego" placeholder="AXN 741"/></label>
       <label><div class="lbl">Vehicle Model</div><input id="debtVehicleModel" placeholder="PFISTER COMET S2"/></label>
     </div>
-    <label><div class="lbl">Stop / Interaction Location</div><input id="debtStopLocation" placeholder="Mirror Park, PC 409"/></label>
+    <div class="grid2">
+      <label><div class="lbl">Stop / Interaction Location</div><input id="debtStopLocation" placeholder="Mirror Park, PC 409"/></label>
+      <label><div class="lbl">Amount Owed / Paid</div><input id="debtAmountOwedPaid" inputmode="numeric" placeholder="30000"/><div class="muted" style="font-size:11px;margin-top:6px">Auto-fills when you Process Debt. Owed amount for add/apply commands, paid amount for clear commands.</div></label>
+    </div>
+    <div id="debtLicenceNotice" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.3);font-size:12px;line-height:1.55;color:var(--warn)"></div>
   </div>
 
   <!-- Hidden stubs for removed Sheriff Ops Helper (keeps JS happy) -->
@@ -1701,7 +1720,7 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="debtProcessBtn" type="button" title="Parse the financial records, total unpaid government debt older than 14 days, and calculate the tier and recommended action">Process Debt</button>
         <button class="btn" id="debtApplyBtn" type="button" title="Send processed debt data into the Sheriff Debt Warrant report fields">Fill Debt Warrant Report</button>
-        <button class="btn" id="debtFillLogsBtn" type="button" title="Send debtor details and debt data to the Sheriff Logs helper">Fill Sheriff Logs</button>
+        <button class="btn" id="debtFillLogsBtn" type="button" title="Debtor details link across automatically — this adds the suggested wording and opens the Sheriff Logs commands">Open in Sheriff Logs</button>
         <button class="btn" id="debtApplySummaryBtn" type="button" title="Append a debt summary note to the Report Tool narrative">Add Debt Note to Report</button>
         <button class="btn" id="debtCopyPrimaryBtn" type="button" title="Copy the main Sheriff bot command for this scenario to clipboard">Copy Primary Command</button>
         <button class="btn" id="debtCopyImpoundBtn" type="button" title="Copy the vehicle impound request text to clipboard">Copy Impound Request</button>
@@ -1730,7 +1749,7 @@
         <div style="display:grid;gap:8px;font-size:11px;line-height:1.6">
           <div style="padding:8px 10px;background:rgba(100,255,150,0.06);border:1px solid rgba(100,255,150,0.18);border-radius:4px">
             <strong style="color:var(--ok)">Under $10,000 — Immediate Payment</strong>
-            <div style="margin-top:4px;color:var(--text)">Full payment required on the spot. No payment plans allowed. Non-compliance: suspend licence + impound vehicle ($250 fee, 1 month). Use <code>!tstop</code> for roadside stops. Consider <code>!adddebt</code> to register the debt first.</div>
+            <div style="margin-top:4px;color:var(--text)">Full payment required on the spot. No payment plans allowed. Non-compliance: suspend licence + impound vehicle ($250 fee, 1 month). Log the stop with <code>!interact</code>. Consider <code>!adddebt</code> to register the debt first.</div>
           </div>
           <div style="padding:8px 10px;background:rgba(255,200,100,0.06);border:1px solid rgba(255,200,100,0.18);border-radius:4px">
             <strong style="color:var(--warn)">$10,000 – $60,000 — 3 Week Deadline</strong>
@@ -1793,10 +1812,10 @@
       <div class="guidelines-body" id="slGuideBody">
         <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
           <ol style="margin:4px 0 0 20px;padding:0">
-            <li><strong>Start in the Debt Tool</strong> — process the debt there first, then click <strong>Fill Sheriff Logs</strong> to push all details here automatically.</li>
-            <li><strong>Check the details</strong> — confirm debtor first name, last name, phone and amount owed are correct. Edit manually if needed.</li>
+            <li><strong>Start in the Debt Tool</strong> — enter or scan the debtor there (LEAP paste, screenshot OCR, or by hand) and process the debt. Everything links here automatically.</li>
+            <li><strong>Check the linked details</strong> — the summary below shows the debtor exactly as the commands will use them. Click <strong>Edit in Debt Tool</strong> to correct anything.</li>
             <li><strong>Choose a preset</strong> — pick the wording preset that matches what happened (e.g. Roadside stop note, Payment plan arranged).</li>
-            <li><strong>Review the generated commands</strong> — each command in the list below is ready to copy.</li>
+            <li><strong>Review the generated commands</strong> — each command in the list below is ready to copy. Only <strong>!interact</strong>, <strong>!adddebt</strong>, <strong>!cleardebt</strong> and <strong>!addplan</strong> are required logs.</li>
             <li><strong>Copy the right command</strong> — read the note under each command for when to use it.</li>
             <li><strong>Paste into Discord / Sheriff logs</strong> — all commands start with <strong>!</strong> so they run immediately.</li>
           </ol>
@@ -1812,40 +1831,17 @@
     <div class="card" style="padding:16px;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px">
         <div>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:6px">COMMON DETAILS</div>
-          <div style="font-size:13px;color:var(--text);line-height:1.5">Use one debtor profile here, then copy whichever command you need below.</div><div id="slLinkStatus" style="margin-top:8px;font-size:12px;color:var(--muted)">Waiting for linked debtor details.</div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:6px">LINKED DEBTOR — FROM DEBT TOOL</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.5">Debtor details are entered once in the <strong>Debt Tool</strong> (LEAP paste, screenshot scan, or by hand) and flow into every command below automatically.</div><div id="slLinkStatus" style="margin-top:8px;font-size:12px;color:var(--muted)">Waiting for linked debtor details.</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" id="slClearBtn" type="button" title="Clear all Sheriff log fields and start fresh">Clear Sheriff Logs</button>
+          <button class="btn" id="slEditInDebtBtn" type="button" title="Switch to the Debt Tool tab to edit the debtor details">✎ Edit in Debt Tool</button>
+          <button class="btn" id="slClearBtn" type="button" title="Clear the Details and Outcome notes below (debtor details are cleared in the Debt Tool)">Clear Notes</button>
         </div>
       </div>
-      <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— paste text or a screenshot to auto-fill name &amp; phone below</span></div><textarea id="slLeapPaste" rows="3" placeholder="Paste a LEAP profile — text or a screenshot — to auto-fill debtor details"></textarea></label>
-      <div style="margin:-2px 0 12px">
-        <div id="slPasteZone" tabindex="0" role="button" aria-label="Paste or drop a LEAP/MDT screenshot to scan with OCR" style="padding:12px 14px; border:2px dashed var(--border); border-radius:10px; text-align:center; cursor:pointer; background:rgba(0,0,0,0.15)">
-          <div style="font-weight:700;font-size:12px">📷 Scan a screenshot instead</div>
-          <div class="muted" style="font-size:11px;margin-top:2px">Click, then Ctrl+V · drag &amp; drop an image · or pick a file. Reads the debtor name &amp; phone — you review the results before they apply.</div>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-          <input id="slImgFile" type="file" accept="image/*" style="flex:1;min-width:140px"/>
-          <input id="slOcrStatus" readonly value="OCR idle" style="flex:1;min-width:140px;background:rgba(0,0,0,0.3);font-size:11px"/>
-        </div>
-      </div>
-      <div class="grid2" style="margin-bottom:10px">
-        <label><div class="lbl">Debtor First Name</div><input id="slFirstName" placeholder="James"/></label>
-        <label><div class="lbl">Debtor Last Name</div><input id="slLastName" placeholder="Brown"/></label>
-      </div>
-      <div class="grid2" style="margin-bottom:10px">
-        <label><div class="lbl">Phone Number</div><input id="slPhone" placeholder="123456"/></label>
-        <label><div class="lbl">Amount Owed / Paid</div><input id="slAmount" placeholder="30000"/><div class="muted" style="font-size:11px;margin-top:6px">Use owed amount for add/apply commands, paid amount for clear commands.</div></label>
-      </div>
-      <div class="hint" style="margin:0 0 10px 0"><span>💡</span><span>First and last names stay manually editable here, so you can correct the debtor split at any time without changing the linked report.</span></div>
-      <div class="grid2" style="margin-bottom:10px">
-        <label><div class="lbl">Location</div><input id="slLocation" placeholder="Mirror Park, PC 409"/></label>
-        <label><div class="lbl">Linked Vehicle</div><input id="slVehicle" placeholder="PFISTER COMET S2 AXN 741"/></label>
-      </div>
-      <label style="display:block;margin-bottom:10px"><div class="lbl">Handling Officer</div><input id="slHandlingOfficer" placeholder="Senior Sheriff Chris Gray"/></label>
+      <div id="slLinkedSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:12px"></div>
       <label style="display:block;margin-bottom:10px"><div class="lbl">Details</div><textarea id="slDetails" rows="4" placeholder="Mr Brown will be paying 15000 a week for 2 weeks."></textarea></label>
-      <label style="display:block"><div class="lbl" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>Outcome / Result</span><button class="btn" id="slOutcomeNaBtn" type="button" style="padding:5px 9px;font-size:10px" title="Set the Outcome field to N/A — use when logging a !call where the debtor did not answer">Set N/A for !call</button></div><textarea id="slOutcome" rows="4" placeholder="Mr Brown came down to the station and paid all his fines off in one go"></textarea></label>
+      <label style="display:block"><div class="lbl" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>Outcome / Result</span><button class="btn" id="slOutcomeNaBtn" type="button" style="padding:5px 9px;font-size:10px" title="Set the Outcome field to N/A — use when logging a phone call as !interact where the debtor did not answer">Set N/A (no answer)</button></div><textarea id="slOutcome" rows="4" placeholder="Mr Brown came down to the station and paid all his fines off in one go"></textarea></label>
     </div>
 
     <div id="slNameWarning" class="card" style="display:none;padding:12px;margin-bottom:14px;border-color:rgba(255,190,120,0.35);background:rgba(255,190,120,0.08)"></div>
@@ -1875,7 +1871,7 @@
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn" id="slExportTxtBtn" type="button" title="Download all generated bot commands as a .txt file">Export TXT</button>
-          <button class="btn" id="slCopyAllBtn" type="button" title="Copy all 8 bot commands to clipboard at once">Copy All Commands</button>
+          <button class="btn" id="slCopyAllBtn" type="button" title="Copy all bot commands to clipboard at once">Copy All Commands</button>
         </div>
       </div>
       <div id="slCommandList" style="display:grid;gap:10px"></div>
@@ -1884,15 +1880,14 @@
     <div class="card" style="padding:16px">
       <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px">COMMAND REFERENCE</div>
       <div style="display:grid;gap:8px;font-size:12px;line-height:1.6">
+        <div><strong>!interact</strong> First-name Last-name Phone Outcome <span style="color:var(--muted)">— covers traffic stops and phone calls; only required when the person has debt</span></div>
         <div><strong>!adddebt</strong> First-name Second-name Phone-number Amount-owed</div>
         <div><strong>!cleardebt</strong> First-name Second-name Amount-paid Outcome</div>
         <div><strong>!addplan</strong> First-name Second-name Phone-number Amount-owed Details</div>
-        <div><strong>!clearcourtfee</strong> First-name Second-name Amount-paid</div>
         <div><strong>!applycourt</strong> First-name Second-name Number Amount-Owed Details</div>
-        <div><strong>!call</strong> First-name Second-name Result of call</div>
-        <div><strong>!tstop</strong> First-name Last-name Phone Outcome</div>
-        <div><strong>!interact</strong> First-name Last-name Phone Outcome</div>
+        <div><strong>!clearcourtfee</strong> First-name Second-name Amount-paid</div>
       </div>
+      <div class="hint" style="margin-top:10px"><span>📋</span><span>Required logs are <strong>!interact</strong>, <strong>!adddebt</strong>, <strong>!cleardebt</strong> and <strong>!addplan</strong>. Separate <strong>!tstop</strong> and <strong>!call</strong> logs are no longer used — enter stops and calls as interactions.</span></div>
     </div>
   </div>
   </div><!-- end #sheriffLogsPage -->
@@ -2157,7 +2152,7 @@
     if (slStatus) {
       const debtSeed = getLinkedReportSeed('sheriffLogs');
       const sheriffBits = [getDebtToolName() !== 'UNKNOWN' ? getDebtToolName() : debtSeed.name, norm(state.debtTool?.vehicleRego) || debtSeed.rego, norm(state.debtTool?.total) ? `$${Number(state.debtTool.total).toLocaleString()}` : ''].filter(Boolean);
-      slStatus.textContent = sheriffBits.length ? `Linked debtor details available: ${sheriffBits.join(' • ')}` : 'Waiting for linked debtor details.';
+      slStatus.textContent = sheriffBits.length ? `Live from Debt Tool: ${sheriffBits.join(' • ')}` : 'Waiting for debtor details — add them in the Debt Tool.';
     }
   }
 
@@ -2277,9 +2272,28 @@
   function unpackStoredState(raw) {
     if (!raw || typeof raw !== 'object') return JSON.parse(JSON.stringify(INITIAL_STATE));
     if (raw.__type === 'sheriff_report_state' && raw.state && typeof raw.state === 'object') {
-      return deepMerge(JSON.parse(JSON.stringify(INITIAL_STATE)), raw.state);
+      return migrateSheriffLogsIdentity(deepMerge(JSON.parse(JSON.stringify(INITIAL_STATE)), raw.state));
     }
-    return deepMerge(JSON.parse(JSON.stringify(INITIAL_STATE)), raw);
+    return migrateSheriffLogsIdentity(deepMerge(JSON.parse(JSON.stringify(INITIAL_STATE)), raw));
+  }
+
+  // Debtor identity used to be edited on the Sheriff Logs tab; it is owned by
+  // the Debt Tool now. Copy identity from old saves across so nothing is lost.
+  function migrateSheriffLogsIdentity(s) {
+    const sl = s?.sheriffLogs;
+    const dt = s?.debtTool;
+    if (!sl || !dt) return s;
+    const val = v => String(v || '').trim();
+    if (!val(dt.debtorFirstName) && !val(dt.debtorLastName) && (val(sl.firstName) || val(sl.lastName))) {
+      dt.debtorFirstName = val(sl.firstName);
+      dt.debtorLastName = val(sl.lastName);
+    }
+    if (!val(dt.debtorPhone) && val(sl.phone)) dt.debtorPhone = val(sl.phone);
+    if (!val(dt.amountOwedPaid) && val(sl.amount)) dt.amountOwedPaid = val(sl.amount).replace(/[^\d]/g, '');
+    if (!val(dt.stopLocation) && val(sl.location)) dt.stopLocation = val(sl.location);
+    if (!val(dt.officerHandling) && val(sl.handlingOfficer)) dt.officerHandling = val(sl.handlingOfficer);
+    if (!val(dt.vehicleModel) && !val(dt.vehicleRego) && val(sl.vehicle)) dt.vehicleModel = val(sl.vehicle);
+    return s;
   }
 
     // ============================================================================
@@ -2881,6 +2895,7 @@
       debtorLastName: "",
       debtorPhone: "",
       debtorAddress: "",
+      amountOwedPaid: "",
       idConfirmed: "UNCONFIRMED",
       vehicleRego: "",
       vehicleModel: "",
@@ -3840,14 +3855,14 @@ function renderSheriffOpsHelper() {
       el.debtFollowupHelper.innerHTML = "";
     } else {
       const split = splitFullNameForSheriffLogs(getDebtToolName());
-      const callNoAnswer = `!call ${(split.firstName || "First-Name")} ${(split.lastName || "Last-Name")} N/A`;
+      const noAnswerCmd = `!interact ${(split.firstName || "First-Name")} ${(split.lastName || "Last-Name")} ${(getDebtToolPhone() || "Phone-number")} N/A`;
       el.debtFollowupHelper.style.display = "block";
       el.debtFollowupHelper.innerHTML = `
         <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px">FOLLOW-UP WORKFLOW</div>
         <div style="font-size:12px;line-height:1.7">
-          <div>1. Check recent call logs first so you do not duplicate contact attempts.</div>
+          <div>1. Check recent interaction logs first so you do not duplicate contact attempts.</div>
           <div>2. Call the debtor and introduce yourself using the handbook script.</div>
-          <div>3. If there is no answer, use <code style="font-family:ui-monospace,SFMono-Regular,Consolas,monospace">${escapeHtml(callNoAnswer)}</code>.</div>
+          <div>3. Calls are logged as interactions now — if there is no answer, use <code style="font-family:ui-monospace,SFMono-Regular,Consolas,monospace">${escapeHtml(noAnswerCmd)}</code>.</div>
           <div>4. If they answer, direct them to Sheriff's Office on Innocence Blvd before clearing debt.</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
@@ -3944,7 +3959,7 @@ function buildSheriffSharedPresetPayload(presetKey, ctx) {
 
 function buildDebtPresetPayload(presetKey) {
   const dt = state.debtTool || {};
-  const totalValue = Number(dt.total || normalizeSheriffAmount(state.sheriffLogs?.amount || '') || 0);
+  const totalValue = Number(dt.total || normalizeSheriffAmount(dt.amountOwedPaid || '') || 0);
   return buildSheriffSharedPresetPayload(presetKey, {
     fullName: getDebtToolName(),
     phone: getDebtToolPhone() || 'NIL',
@@ -3957,17 +3972,22 @@ function buildDebtPresetPayload(presetKey) {
   });
 }
 
+// !tstop and !call were retired — traffic stops and phone calls are logged as
+// !interact now. Old saved states may still carry the retired keys.
+function normalizePrimaryCommandKey(key) {
+  const k = norm(key).toLowerCase();
+  if (k === "tstop" || k === "call") return "interact";
+  return k;
+}
+
 function getPrimaryCommandKeyFromDebtTool() {
   const preset = norm(state.debtTool?.lastPreset).toLowerCase();
   if (preset === "payment_made") return "cleardebt";
   if (preset === "payment_plan") return "addplan";
   if (preset === "apply_court") return "applycourt";
-  if (preset === "vehicle_seized") return state.debtTool?.useCase === "roadside" ? "tstop" : "applycourt";
-  if (preset === "roadside_note") return state.debtTool?.useCase === "foot" ? "interact" : "tstop";
+  if (preset === "vehicle_seized") return state.debtTool?.useCase === "roadside" ? "interact" : "applycourt";
   if (state.debtTool?.useCase === "warrant") return "applycourt";
-  if (state.debtTool?.useCase === "report") return "interact";
-  if (state.debtTool?.useCase === "foot") return "interact";
-  return "tstop";
+  return "interact";
 }
 
 function getDebtToolSheriffLogsSeed(applySuggestedText = true) {
@@ -4040,33 +4060,33 @@ function getDebtNextStepHint(total, useCase) {
   let hint = '';
   if (uc === 'roadside') {
     if (amount >= 100000) {
-      hint = '&#8594; Detain for Sheriff review &rarr; Use <strong>Roadside stop note</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!tstop</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong>, click <strong>Fill Debt Warrant Report</strong>. Escalate to leadership.';
+      hint = '&#8594; Detain for Sheriff review &rarr; Use <strong>Roadside stop note</strong> preset &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!interact</strong> to log the stop &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong>, click <strong>Fill Debt Warrant Report</strong>. Escalate to leadership.';
     } else if (amount > 60000) {
-      hint = '&#8594; Use <strong>Roadside stop note</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!tstop</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong>, click <strong>Fill Debt Warrant Report</strong> &rarr; Warn debtor of 4-week window.';
+      hint = '&#8594; Use <strong>Roadside stop note</strong> preset &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!interact</strong> to log the stop &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong>, click <strong>Fill Debt Warrant Report</strong> &rarr; Warn debtor of 4-week window.';
     } else if (amount >= 10000) {
-      hint = '&#8594; If plan agreed: use <strong>Payment plan arranged</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!adddebt</strong> then <strong>!addplan</strong>. If no plan: use <strong>Roadside stop note</strong> preset &rarr; Copy <strong>!tstop</strong>.';
+      hint = '&#8594; If plan agreed: use <strong>Payment plan arranged</strong> preset &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!adddebt</strong> then <strong>!addplan</strong>. If no plan: use <strong>Roadside stop note</strong> preset &rarr; Copy <strong>!interact</strong> to log the stop.';
     } else {
-      hint = '&#8594; Request immediate payment. If paid: use <strong>Payment made on scene</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!cleardebt</strong>. If refused: use <strong>Roadside stop note</strong> preset &rarr; Copy <strong>!tstop</strong> &rarr; Consider impound.';
+      hint = '&#8594; Request immediate payment. If paid: use <strong>Payment made on scene</strong> preset &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!cleardebt</strong>. If refused: use <strong>Roadside stop note</strong> preset &rarr; Copy <strong>!interact</strong> to log the stop &rarr; Consider impound.';
     }
   } else if (uc === 'warrant') {
     if (amount >= 100000) {
-      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>. Escalate to leadership.';
+      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>. Escalate to leadership.';
     } else if (amount > 60000) {
-      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>.';
+      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>.';
     } else if (amount >= 10000) {
-      hint = '&#8594; Use <strong>Apply court recommended</strong> or <strong>Payment plan arranged</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> or <strong>!addplan</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>.';
+      hint = '&#8594; Use <strong>Apply court recommended</strong> or <strong>Payment plan arranged</strong> preset &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> or <strong>!addplan</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>.';
     } else {
-      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!adddebt</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>.';
+      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!adddebt</strong> &rarr; Open <strong>Report Tool</strong>, switch to <strong>Debt Warrant</strong> &rarr; Click <strong>Fill Debt Warrant Report</strong>.';
     }
   } else {
     if (amount >= 100000) {
-      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> &rarr; Click <strong>Add Debt Note to Report</strong> to append to narrative.';
+      hint = '&#8594; Use <strong>Apply court recommended</strong> preset &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!applycourt</strong> &rarr; Click <strong>Add Debt Note to Report</strong> to append to narrative.';
     } else if (amount > 60000) {
-      hint = '&#8594; Contact debtor by phone &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!call</strong> to log attempt &rarr; If plan agreed: use <strong>Payment plan arranged</strong> preset &rarr; Copy <strong>!addplan</strong> &rarr; Click <strong>Add Debt Note to Report</strong>.';
+      hint = '&#8594; Contact debtor by phone &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!interact</strong> to log the call &rarr; If plan agreed: use <strong>Payment plan arranged</strong> preset &rarr; Copy <strong>!addplan</strong> &rarr; Click <strong>Add Debt Note to Report</strong>.';
     } else if (amount >= 10000) {
-      hint = '&#8594; Contact debtor &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!call</strong> to log attempt &rarr; If plan agreed: use <strong>Payment plan arranged</strong> preset &rarr; Copy <strong>!addplan</strong>. If escalating: use <strong>Apply court recommended</strong> &rarr; Copy <strong>!applycourt</strong>.';
+      hint = '&#8594; Contact debtor &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!interact</strong> to log the call &rarr; If plan agreed: use <strong>Payment plan arranged</strong> preset &rarr; Copy <strong>!addplan</strong>. If escalating: use <strong>Apply court recommended</strong> &rarr; Copy <strong>!applycourt</strong>.';
     } else {
-      hint = '&#8594; Contact debtor &rarr; Click <strong>Fill Sheriff Logs</strong> &rarr; Copy <strong>!call</strong> to log attempt &rarr; Click <strong>Add Debt Note to Report</strong> to append to narrative &rarr; Follow up at station for payment.';
+      hint = '&#8594; Contact debtor &rarr; Open <strong>Sheriff Logs</strong> &rarr; Copy <strong>!interact</strong> to log the call &rarr; Click <strong>Add Debt Note to Report</strong> to append to narrative &rarr; Follow up at station for payment.';
     }
   }
   return `<div style="margin-top:10px;padding:10px 12px;border-radius:4px;background:rgba(0,191,255,0.06);border:1px solid rgba(0,191,255,0.22);font-size:12px;line-height:1.65"><div style="font-size:10px;font-weight:900;color:var(--accent);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px">SUGGESTED NEXT STEPS</div><div>${hint}</div></div>`;
@@ -4083,6 +4103,7 @@ function renderDebtToolUI() {
     debtDebtorLastName: dt.debtorLastName || "",
     debtDebtorPhone: dt.debtorPhone || "",
     debtDebtorAddress: dt.debtorAddress || "",
+    debtAmountOwedPaid: dt.amountOwedPaid || "",
     debtIdConfirmed: dt.idConfirmed || "UNCONFIRMED",
     debtVehicleRego: dt.vehicleRego || "",
     debtVehicleModel: dt.vehicleModel || "",
@@ -4117,9 +4138,9 @@ function renderDebtToolUI() {
 
   const seed = getDebtToolSheriffLogsSeed(true);
   const commandMap = getSheriffCommandMap(seed);
-  const primaryKey = dt.primaryCommandKey || getPrimaryCommandKeyFromDebtTool();
+  const primaryKey = normalizePrimaryCommandKey(dt.primaryCommandKey) || getPrimaryCommandKeyFromDebtTool();
   const primaryCommand = commandMap[primaryKey]?.command || "";
-  const primaryTitle = commandMap[primaryKey]?.title || "!tstop";
+  const primaryTitle = commandMap[primaryKey]?.title || "!interact";
 
   if (el.debtToolSummary) {
     if (dt.total > 0) {
@@ -4156,6 +4177,7 @@ function renderDebtToolUI() {
 
   renderDebtHistory();
   updateDebtTabModeHint();
+  renderSheriffLogsTool();
   updateCrossLinkStatus();
 }
 
@@ -4169,6 +4191,7 @@ function syncDebtToolFromInputs() {
     debtorLastName: document.getElementById("debtDebtorLastName")?.value || "",
     debtorPhone: document.getElementById("debtDebtorPhone")?.value || "",
     debtorAddress: document.getElementById("debtDebtorAddress")?.value || "",
+    amountOwedPaid: document.getElementById("debtAmountOwedPaid")?.value || "",
     idConfirmed: document.getElementById("debtIdConfirmed")?.value || "UNCONFIRMED",
     vehicleRego: document.getElementById("debtVehicleRego")?.value || "",
     vehicleModel: document.getElementById("debtVehicleModel")?.value || "",
@@ -4258,11 +4281,9 @@ function processDebtToolInput() {
     });
     state.debtTool.history = hist.slice(0, 5);
 
-    const split = splitFullNameForSheriffLogs(getDebtToolName());
-    if (split.firstName && !state.sheriffLogs.firstName) state.sheriffLogs.firstName = split.firstName;
-    if (split.lastName && !state.sheriffLogs.lastName) state.sheriffLogs.lastName = split.lastName;
-    if (getDebtToolPhone() && !state.sheriffLogs.phone) state.sheriffLogs.phone = getDebtToolPhone();
-    state.sheriffLogs.amount = normalizeSheriffAmount(total);
+    // The processed total is the current owed amount for the bot commands.
+    // Editable afterwards (e.g. to record the amount paid for !cleardebt).
+    state.debtTool.amountOwedPaid = normalizeSheriffAmount(total);
   } else {
     state.debtTool.primaryCommandText = "";
   }
@@ -4288,19 +4309,16 @@ function fillSheriffLogsFromDebtTool(showToast = true) {
     if (showToast) toast("Process debt first", "warn");
     return;
   }
+  // Debtor identity flows to Sheriff Logs automatically — this adds the
+  // suggested preset wording into the notes and jumps to the commands.
   const seed = getDebtToolSheriffLogsSeed(true);
-  state.sheriffLogs.firstName = seed.firstName;
-  state.sheriffLogs.lastName = seed.lastName;
-  state.sheriffLogs.phone = seed.phone;
-  state.sheriffLogs.amount = seed.amount;
-  state.sheriffLogs.location = seed.location || state.sheriffLogs.location;
-  state.sheriffLogs.vehicle = seed.vehicle || state.sheriffLogs.vehicle;
-  state.sheriffLogs.handlingOfficer = seed.handlingOfficer || state.sheriffLogs.handlingOfficer;
-  if (seed.details) state.sheriffLogs.details = seed.details;
-  if (seed.outcome) state.sheriffLogs.outcome = seed.outcome;
+  let filled = false;
+  if (seed.details && !norm(state.sheriffLogs.details)) { state.sheriffLogs.details = seed.details; filled = true; }
+  if (seed.outcome && !norm(state.sheriffLogs.outcome)) { state.sheriffLogs.outcome = seed.outcome; filled = true; }
   renderSheriffLogsTool();
   throttledAutosave();
-  if (showToast) toast("Sheriff Logs filled from debt tool", "ok");
+  showToolPage("sherifflogs");
+  if (showToast) toast(filled ? "Suggested wording added — commands ready below" : "Commands ready — debtor details link across automatically", "ok");
 }
 
 function applyDebtToolToSummary(showToast = true) {
@@ -4368,7 +4386,7 @@ async function copyDebtPrimaryCommand() {
   }
   const seed = getDebtToolSheriffLogsSeed(true);
   const cmdMap = getSheriffCommandMap(seed);
-  const key = dt.primaryCommandKey || getPrimaryCommandKeyFromDebtTool();
+  const key = normalizePrimaryCommandKey(dt.primaryCommandKey) || getPrimaryCommandKeyFromDebtTool();
   const command = cmdMap[key]?.command || "";
   if (!command) {
     toast("No command available yet", "warn");
@@ -4386,7 +4404,7 @@ async function copyDebtStopPack() {
   }
   const seed = getDebtToolSheriffLogsSeed(true);
   const cmdMap = getSheriffCommandMap(seed);
-  const key = dt.primaryCommandKey || getPrimaryCommandKeyFromDebtTool();
+  const key = normalizePrimaryCommandKey(dt.primaryCommandKey) || getPrimaryCommandKeyFromDebtTool();
   const command = cmdMap[key]?.command || "";
   const pack = [
     `SHERIFF DEBT SUMMARY`,
@@ -6173,7 +6191,11 @@ Is there anything you would like to add at this time?`;
   }
 
 
-  async function preprocessImage(blob) {
+  // variant: 'binarize' (default full pipeline), 'contrast' (percentile
+  // contrast stretch, stays grayscale) or 'invert' (forced inversion then
+  // binarise) — the extra variants rescue low-contrast / dark-theme shots.
+  async function preprocessImage(blob, opts = {}) {
+    const variant = opts.variant || "binarize";
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -6223,8 +6245,8 @@ Is there anything you would like to add at this time?`;
         const avgBrightness = totalBrightness / pixelCount;
         const isDarkBg = avgBrightness < 128;
         
-        // ── Step 3: Invert if dark background ─────────────────────────
-        if (isDarkBg) {
+        // ── Step 3: Invert if dark background (or when forced) ────────
+        if (isDarkBg || variant === "invert") {
           for (let i = 0; i < pixelCount; i++) {
             gray[i] = 255 - gray[i];
           }
@@ -6232,7 +6254,32 @@ Is there anything you would like to add at this time?`;
           histogram.fill(0);
           for (let i = 0; i < pixelCount; i++) histogram[gray[i]]++;
         }
-        
+
+        // ── Contrast variant: 2–98 percentile stretch, keep grayscale ─
+        // No hard threshold — anti-aliased or low-contrast text survives
+        // where Otsu binarisation would eat it.
+        if (variant === "contrast") {
+          let lo = 0, hi = 255, seen = 0;
+          const loTarget = pixelCount * 0.02;
+          const hiTarget = pixelCount * 0.98;
+          for (let v = 0; v < 256; v++) {
+            seen += histogram[v];
+            if (seen <= loTarget) lo = v;
+            if (seen <= hiTarget) hi = v;
+          }
+          const range = Math.max(1, hi - lo);
+          for (let i = 0; i < pixelCount; i++) {
+            const stretched = Math.max(0, Math.min(255, Math.round(((gray[i] - lo) * 255) / range)));
+            const off = i * 4;
+            data[off] = stretched;
+            data[off + 1] = stretched;
+            data[off + 2] = stretched;
+          }
+          ctx.putImageData(imageData, 0, 0);
+          canvas.toBlob(resolve, 'image/png');
+          return;
+        }
+
         // ── Step 4: Sharpen (3x3 unsharp-mask-like kernel) ───────────
         // This recovers thin strokes that blur during upscaling
         const sharpened = new Uint8Array(pixelCount);
@@ -6393,6 +6440,102 @@ Is there anything you would like to add at this time?`;
     return t;
   }
 
+  // ── OCR content understanding ───────────────────────────────────────
+  // Pull LEAP-style finance lines out of OCR text, normalising the usual
+  // Tesseract slips ("S"/"5" for "$", "O" for "0", "l"/"I" for "1", "\" or
+  // "|" for "/") into lines the debt parser accepts.
+  function extractFinanceLines(text) {
+    const out = [];
+    for (const rawLine of String(text || "").replace(/\r/g, "").split("\n")) {
+      let s = rawLine.replace(/\s+/g, " ").trim();
+      if (!s) continue;
+      s = s.replace(/[\\|]/g, "/");
+      const m = s.match(/^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\s+([A-Za-z])\s+[S$5]?\s?([\dOoIl,\.]+)\s+(.+)$/);
+      if (!m) continue;
+      let [, date, status, amount, desc] = m;
+      const dparts = date.replace(/-/g, "/").split("/");
+      if (dparts[2] && dparts[2].length === 2) dparts[2] = "20" + dparts[2];
+      date = dparts.join("/");
+      amount = amount.replace(/[Oo]/g, "0").replace(/[Il]/g, "1").replace(/[^\d,\.]/g, "");
+      if (!amount || !/\d/.test(amount)) continue;
+      desc = desc.trim()
+        .replace(/^CHAR[CG]E/i, "CHARGE")
+        .replace(/^G[O0]V/i, "GOV")
+        .replace(/^INV[O0]ICE/i, "INVOICE")
+        .replace(/^F[I1]NE/i, "FINE");
+      out.push(`${date} ${status.toUpperCase()} $${amount} ${desc}`);
+    }
+    return out;
+  }
+
+  // Work out what kind of screenshot/text we are looking at so the right
+  // sections get filled: LEAP profile, driver licence / ID, or finance records.
+  function classifyOCRContent(text, parsed, financeLines) {
+    const t = String(text || "").toUpperCase();
+    const finance = Array.isArray(financeLines) ? financeLines : extractFinanceLines(text);
+    if (finance.length >= 2) return "finance";
+    const leapMarkers = /\bNAME\s*[:;]/.test(t) && (/\bDOB\b/.test(t) || /PHONE\s*N/.test(t) || /HOME\s+ADDR/.test(t) || /\bSEX\s*[:;]/.test(t));
+    if (leapMarkers) return "leap_profile";
+    if (/DRIVER\s*LICEN[CS]E|LICEN[CS]E\s*(NO|EXPIRY|TYPE)|VIC\s*ROADS|DATE\s+OF\s+BIRTH/.test(t)) return "licence";
+    if (parsed?.offender?.name && (parsed?.offender?.phone || parsed?.offender?.address)) return "leap_profile";
+    if (parsed?.license?.expires || parsed?.license?.licenseClass) return "licence";
+    if (finance.length === 1) return "finance";
+    return "unknown";
+  }
+
+  function describeOCRKind(kind) {
+    if (kind === "finance") return "financial records";
+    if (kind === "licence") return "a driver licence / ID";
+    if (kind === "leap_profile") return "a LEAP profile";
+    return "unrecognised content";
+  }
+
+  // Licence class (car / rider / heavy) is a Melroads/Melpol matter and is
+  // deliberately ignored here — but an out-of-date licence earns a reminder.
+  function parseLicenceExpiryDate(value) {
+    const m = String(value || "").match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+    if (!m) return null;
+    const d = Number(m[1]);
+    const mo = Number(m[2]);
+    const y = Number(m[3].length === 2 ? "20" + m[3] : m[3]);
+    const date = new Date(y, mo - 1, d);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function getLicenceExpiryWarning(parsed) {
+    const lic = parsed?.license || {};
+    const status = String(lic.licenseStatus || "").toUpperCase();
+    if (status === "EXPIRED" || status === "SUSPENDED") {
+      return `Licence status reads ${status} — remind the driver.`;
+    }
+    const expiry = parseLicenceExpiryDate(lic.expires);
+    if (expiry && expiry < convertTZ(new Date(), "Australia/Melbourne")) {
+      return `Licence expired ${formatDdMmYyyy(expiry)} — remind the driver to renew.`;
+    }
+    return "";
+  }
+
+  function summarizeMissingDebtorFields() {
+    const dt = state.debtTool || {};
+    const missing = [];
+    if (!norm(dt.debtorFirstName) && !norm(dt.debtorLastName)) missing.push("name");
+    if (!norm(dt.debtorPhone)) missing.push("phone");
+    if (!norm(dt.debtorAddress)) missing.push("address");
+    return missing;
+  }
+
+  function showDebtLicenceNotice(msg) {
+    const node = document.getElementById("debtLicenceNotice");
+    if (!node) return;
+    if (msg) {
+      node.style.display = "block";
+      node.textContent = `⚠ ${msg} Licence class is a Melroads/Melpol matter — not checked here.`;
+    } else {
+      node.style.display = "none";
+      node.textContent = "";
+    }
+  }
+
   let _ocrBusy = false;
   // Shared image → OCR text pipeline. Used by the Report Tool OCR zone and the
   // Debt Tool / Sheriff Logs scan zones. Writes progress to the passed-in status
@@ -6443,6 +6586,28 @@ Is there anything you would like to add at this time?`;
       let p = parseOCR(ocrText);
       let bestScore = scoreParsedOCRBundle(p) + ((general.confidence || 0) / 100);
 
+      // Weak first pass? Re-run through the contrast/invert preprocessing
+      // variants — these rescue low-contrast, anti-aliased or dark-theme
+      // screenshots that Otsu binarisation alone loses.
+      if (bestScore < 9) {
+        for (const variant of ["contrast", "invert"]) {
+          setStatus(`Trying ${variant} enhancement...`);
+          const variantBlob = await preprocessImage(blob, { variant });
+          const vres = await recognizeWithWorker(worker, variantBlob, "6");
+          const vtext = postProcessOCR(vres.text || "");
+          const vparsed = parseOCR(vtext);
+          const vscore = scoreParsedOCRBundle(vparsed) + ((vres.confidence || 0) / 100);
+          if (vscore > bestScore) {
+            p = mergeParsedOCR(p, vparsed);
+            bestScore = vscore;
+            ocrText = [ocrText, "", `--- ${variant.toUpperCase()} OCR ---`, vtext].filter(Boolean).join("\n");
+          } else {
+            p = mergeParsedOCR(p, vparsed);
+          }
+          if (bestScore >= 9) break;
+        }
+      }
+
       // Full-screen screenshot helper: scan likely UI regions when the initial pass is weak
       if (bestScore < 7) {
         setStatus("Scanning full-screen screenshot regions...");
@@ -6486,7 +6651,9 @@ Is there anything you would like to add at this time?`;
       }
 
       setStatus("OCR complete");
-      return { text: ocrText, parsed: p, score: bestScore };
+      const financeLines = extractFinanceLines(ocrText);
+      const kind = classifyOCRContent(ocrText, p, financeLines);
+      return { text: ocrText, parsed: p, score: bestScore, kind, financeLines };
     } catch (e) {
       console.error(e);
       if (worker && typeof worker.terminate === "function") {
@@ -6842,6 +7009,21 @@ Is there anything you would like to add at this time?`;
         const text = debtLeapPaste.value.trim();
         if (!text) return;
         const p = parseOCR(text);
+
+        // Pasted a block of finance records? Route it to the debt input box.
+        const financeLines = extractFinanceLines(text);
+        if (classifyOCRContent(text, p, financeLines) === "finance" && financeLines.length) {
+          const inputNode = document.getElementById("debtInput");
+          if (inputNode && !norm(inputNode.value)) {
+            inputNode.value = financeLines.join("\n");
+            state.debtTool.rawInput = inputNode.value;
+            debtLeapPaste.value = "";
+            processDebtToolInput();
+            toast("Financial records detected — filled and processed", "ok");
+            return;
+          }
+        }
+
         let filled = false;
         const firstNameNode = document.getElementById("debtDebtorFirstName");
         const lastNameNode = document.getElementById("debtDebtorLastName");
@@ -6881,17 +7063,53 @@ Is there anything you would like to add at this time?`;
             filled = true;
           }
         }
-        if (filled) { renderDebtToolUI(); throttledAutosave(); toast("LEAP paste auto-filled debtor details", "ok"); }
+        const licenceWarning = getLicenceExpiryWarning(p);
+        showDebtLicenceNotice(licenceWarning);
+        if (filled) {
+          renderDebtToolUI();
+          throttledAutosave();
+          const missing = summarizeMissingDebtorFields();
+          const missingMsg = missing.length ? ` — still missing: ${missing.join(", ")}` : "";
+          toast(`LEAP paste auto-filled debtor details${missingMsg}`, missing.length ? "warn" : "ok");
+          if (licenceWarning) toast(licenceWarning, "warn");
+        }
+        else if (licenceWarning) { toast(licenceWarning, "warn"); }
         else if (p && p.offender && p.offender.name) { toast("Name fields already filled — clear them first to re-apply LEAP paste", "warn"); }
       };
       debtLeapPaste.addEventListener("input", applyDebtLeapPaste);
       debtLeapPaste.addEventListener("paste", () => setTimeout(applyDebtLeapPaste, 0));
 
-      // Screenshot → OCR → review-and-confirm → fill the debtor fields
+      // Screenshot → OCR → understand what it is → fill the right section
       const scanImageIntoDebt = async (blob) => {
         const statusEl = document.getElementById("debtOcrStatus");
         const result = await ocrImageToText(blob, statusEl);
         if (!result) return;
+        const kind = result.kind || "unknown";
+        const kindLabel = describeOCRKind(kind);
+
+        // Financial records → offer to fill the debt input box and process it.
+        if (kind === "finance" && Array.isArray(result.financeLines) && result.financeLines.length) {
+          const inputNode = document.getElementById("debtInput");
+          const nextText = result.financeLines.join("\n");
+          const changes = [{
+            section: "Debt Tool",
+            label: "Financial Records Input",
+            before: norm(inputNode?.value) || "(empty)",
+            after: nextText
+          }];
+          const applied = await openChangeReviewModal("Review financial records scan", changes, () => {
+            if (inputNode) inputNode.value = nextText;
+            state.debtTool.rawInput = nextText;
+            processDebtToolInput();
+            toast("Financial records filled and processed", "ok");
+          }, { summary: `Detected ${kindLabel}. Review the ${result.financeLines.length} record line(s) before filling the debt box — it will be processed automatically.` });
+          if (statusEl) statusEl.value = applied ? "Financial records scanned & processed" : "Scan read — review cancelled";
+          return;
+        }
+
+        // Licence expiry reminder (class is deliberately ignored here).
+        const licenceWarning = getLicenceExpiryWarning(result.parsed);
+
         const offender = (result.parsed && result.parsed.offender) || {};
         const vehicle = (result.parsed && result.parsed.vehicle) || {};
         let fn = "", ln = "";
@@ -6918,17 +7136,24 @@ Is there anything you would like to add at this time?`;
         };
         const changes = buildObjectChangeList(state.debtTool, proposed, labelMap, false, "Debt Tool");
         if (!changes.length) {
-          if (statusEl) statusEl.value = offender.name ? "Scan read — fields already filled" : "No debtor details found in image";
-          toast(offender.name ? "Those fields are already filled — clear them to re-apply" : "No debtor details found in the screenshot", "warn");
+          showDebtLicenceNotice(licenceWarning);
+          if (licenceWarning) toast(licenceWarning, "warn");
+          if (statusEl) statusEl.value = offender.name ? "Scan read — fields already filled" : `Read ${kindLabel} — no new debtor details`;
+          if (!licenceWarning) toast(offender.name ? "Those fields are already filled — clear them to re-apply" : "No new debtor details found in the screenshot", "warn");
           return;
         }
         const applied = await openChangeReviewModal("Review debtor scan", changes, () => {
           applyObjectFields(state.debtTool, proposed, false);
           renderDebtToolUI();
           throttledAutosave();
-          toast("Debtor details filled from screenshot", "ok");
-        }, { summary: "OCR read these debtor details from the screenshot. Review the before and after values before applying them." });
-        if (statusEl) statusEl.value = applied ? "Scan applied" : "Scan read — review cancelled";
+          showDebtLicenceNotice(licenceWarning);
+          const missing = summarizeMissingDebtorFields();
+          const missingMsg = missing.length ? ` — still missing: ${missing.join(", ")}` : "";
+          if (statusEl) statusEl.value = `Applied (${kindLabel})${missingMsg}`;
+          toast(`Debtor details filled from ${kindLabel}${missingMsg}`, missing.length ? "warn" : "ok");
+          if (licenceWarning) toast(licenceWarning, "warn");
+        }, { summary: `Detected ${kindLabel}. OCR read these debtor details — review the before and after values before applying them.${licenceWarning ? " Note: " + licenceWarning : ""}` });
+        if (!applied && statusEl) statusEl.value = "Scan read — review cancelled";
       };
       bindImageScanZone({ zoneId: "debtPasteZone", fileId: "debtImgFile", textareaId: "debtLeapPaste", onImage: scanImageIntoDebt });
     }
@@ -6941,6 +7166,7 @@ Is there anything you would like to add at this time?`;
       ["debtDebtorLastName", "debtorLastName"],
       ["debtDebtorPhone", "debtorPhone"],
       ["debtDebtorAddress", "debtorAddress"],
+      ["debtAmountOwedPaid", "amountOwedPaid"],
       ["debtIdConfirmed", "idConfirmed"],
       ["debtVehicleRego", "vehicleRego"],
       ["debtVehicleModel", "vehicleModel"],
@@ -9642,7 +9868,7 @@ Is there anything you would like to add at this time?`;
   ];
   const SHERIFF_RANKS = [
     "Sheriff Recruit","Sheriff Officer","Sheriff FTO","Senior Sheriff","Sheriff Sergeant",
-    "Regional Manager","Deputy Sheriff","Superintendent","Sheriff"
+    "Regional Manager","Deputy Sheriff","Sheriff"
   ];
   const ALL_RANKS = [...VICPOL_RANKS, ...SHERIFF_RANKS];
   const SIG_PROFILES_KEY = "sheriff_report_signature_profiles";
@@ -10440,8 +10666,8 @@ Is there anything you would like to add at this time?`;
     const officerRef = escapeSheriffCommandArg(sl.handlingOfficer || state.sigName || getHeaderEnteredBy()).toUpperCase();
     const debtorKey = debtorFull.toUpperCase();
 
-    if (!firstName) issues.push('Debtor first name is missing.');
-    if (!lastName) issues.push('Debtor last name is missing.');
+    if (!firstName) issues.push('Debtor first name is missing — add it in the Debt Tool.');
+    if (!lastName) issues.push('Debtor last name is missing — add it in the Debt Tool.');
     if (sl.phone && !phone) issues.push('Phone number must contain digits only.');
     if (phone && (phone.length < 4 || phone.length > 12)) warnings.push('Phone number length looks unusual.');
     if (sl.amount && !amount) issues.push('Amount must contain digits only.');
@@ -10457,8 +10683,6 @@ Is there anything you would like to add at this time?`;
       addplan: ['firstName', 'lastName', 'phone', 'amount', 'details'],
       clearcourtfee: ['firstName', 'lastName', 'amount'],
       applycourt: ['firstName', 'lastName', 'phone', 'amount', 'details'],
-      call: ['firstName', 'lastName', 'outcome'],
-      tstop: ['firstName', 'lastName', 'phone', 'outcome'],
       interact: ['firstName', 'lastName', 'phone', 'outcome']
     };
     if (commandKey && requiredByCommand[commandKey]) {
@@ -10491,14 +10715,14 @@ function formatSheriffAmountForText(amount) {
 }
 
 function getSheriffPresetContext() {
-  const sl = state.sheriffLogs || INITIAL_STATE.sheriffLogs;
+  const sl = getSheriffLogsState();
   const fullName = normalizeSheriffLogText([sl.firstName, sl.lastName].filter(Boolean).join(' ')) || 'the debtor';
-  const phone = normalizeSheriffLogText(sl.phone) || 'no phone recorded';
+  const phone = sl.phone || 'no phone recorded';
   const amountText = formatSheriffAmountForText(sl.amount);
-  const amountDigits = normalizeSheriffAmount(sl.amount) || 'Amount-owed';
-  const location = normalizeSheriffLogText(sl.location) || normalizeSheriffLogText(state.debtTool?.stopLocation) || 'an unknown location';
-  const vehicle = normalizeSheriffLogText(sl.vehicle) || normalizeSheriffLogText([state.debtTool?.vehicleModel, state.debtTool?.vehicleRego].filter(Boolean).join(' ')) || 'their vehicle';
-  const handlingOfficer = normalizeSheriffLogText(sl.handlingOfficer) || normalizeSheriffLogText(state.debtTool?.officerHandling) || 'Sheriffs';
+  const amountDigits = sl.amount || 'Amount-owed';
+  const location = sl.location || 'an unknown location';
+  const vehicle = sl.vehicle || 'their vehicle';
+  const handlingOfficer = sl.handlingOfficer || 'Sheriffs';
   return { fullName, phone, amountText, amountDigits, location, vehicle, handlingOfficer };
 }
 
@@ -10528,15 +10752,22 @@ function applySheriffLogPreset(presetKey) {
 }
 
 function getSheriffLogsState() {
+  // Debtor identity is owned by the Debt Tool — Sheriff Logs derives it live,
+  // so there is a single profile shared by the whole tool. Only the Details
+  // and Outcome notes are edited on the Sheriff Logs tab itself.
+  const dt = state.debtTool || INITIAL_STATE.debtTool;
   const sl = state.sheriffLogs || INITIAL_STATE.sheriffLogs;
+  const name = getDebtToolName();
+  const split = splitFullNameForSheriffLogs(name === 'UNKNOWN' ? '' : name);
+  const vehicle = getDebtToolVehicle();
   return {
-    firstName: normalizeSheriffLogText(sl.firstName),
-    lastName: normalizeSheriffLogText(sl.lastName),
-    phone: normalizeSheriffLogText(sl.phone),
-    amount: normalizeSheriffAmount(sl.amount),
-    location: normalizeSheriffLogText(sl.location),
-    vehicle: normalizeSheriffLogText(sl.vehicle),
-    handlingOfficer: normalizeSheriffLogText(sl.handlingOfficer),
+    firstName: normalizeSheriffLogText(split.firstName),
+    lastName: normalizeSheriffLogText(split.lastName),
+    phone: normalizeSheriffLogText(getDebtToolPhone()),
+    amount: normalizeSheriffAmount(dt.amountOwedPaid || dt.total || ''),
+    location: normalizeSheriffLogText(dt.stopLocation),
+    vehicle: normalizeSheriffLogText([vehicle.model, vehicle.rego].filter(v => v && v !== 'NIL').join(' ')),
+    handlingOfficer: normalizeSheriffLogText(dt.officerHandling),
     details: normalizeSheriffLogText(sl.details),
     outcome: normalizeSheriffLogText(sl.outcome)
   };
@@ -10551,14 +10782,12 @@ function getSheriffCommandTemplates(sl) {
   const outcome = escapeSheriffCommandArg(sl.outcome) || 'Outcome';
 
   return [
+    { key: 'interact', title: '!interact', note: "The interaction log — only required when the person has debt. Traffic stops and phone calls are logged as interactions now (no separate !tstop or !call). Describe what happened in the Outcome; for a call with no answer, click 'Set N/A (no answer)' above.", command: `!interact ${firstName} ${lastName} ${phone} ${outcome}` },
     { key: 'adddebt', title: '!adddebt', note: 'Use first to register the debt with the Sheriff system. Required before you can issue a payment plan or apply for court action. Needs name, phone and full owed amount.', command: `!adddebt ${firstName} ${lastName} ${phone} ${amount}` },
     { key: 'cleardebt', title: '!cleardebt', note: "Use when the debtor has paid in full (on scene or at the station). Amount field should be the amount paid. Include the outcome — e.g. 'Paid in full on scene at Mirror Park'.", command: `!cleardebt ${firstName} ${lastName} ${amount} ${outcome}` },
     { key: 'addplan', title: '!addplan', note: 'Use when a debtor agrees to staged payments — only valid for the $10k–$60k tier. Supervisor approval may be required. Details field should describe the plan (e.g. "$5000 per week for 6 weeks").', command: `!addplan ${firstName} ${lastName} ${phone} ${amount} ${details}` },
-    { key: 'clearcourtfee', title: '!clearcourtfee', note: 'Use after a court-applied fee has been paid. Different from !cleardebt — this specifically clears court-issued fees rather than general government debt.', command: `!clearcourtfee ${firstName} ${lastName} ${amount}` },
     { key: 'applycourt', title: '!applycourt', note: 'Use when escalating to court enforcement. Required for $60k–$100k and over-$100k tiers. The Details field should describe the reason for escalation.', command: `!applycourt ${firstName} ${lastName} ${phone} ${amount} ${details}` },
-    { key: 'call', title: '!call', note: "Use after calling the debtor by phone. If they did not answer, click 'Set N/A for !call' above to fill the Outcome field automatically. Always log every call attempt.", command: `!call ${firstName} ${lastName} ${outcome}` },
-    { key: 'tstop', title: '!tstop', note: "Use for roadside stops where a Sheriff physically intercepted the debtor's vehicle. Outcome should describe what happened (paid on scene, failed to stop, etc.).", command: `!tstop ${firstName} ${lastName} ${phone} ${outcome}` },
-    { key: 'interact', title: '!interact', note: 'Use for in-person or station interactions that are not a roadside stop — typically for Report / Follow Up use-case or when the debtor attends the Sheriff\'s Office.', command: `!interact ${firstName} ${lastName} ${phone} ${outcome}` }
+    { key: 'clearcourtfee', title: '!clearcourtfee', note: 'Use after a court-applied fee has been paid. Different from !cleardebt — this specifically clears court-issued fees rather than general government debt.', command: `!clearcourtfee ${firstName} ${lastName} ${amount}` }
   ].map(item => ({ ...item, command: item.command.replace(/\s+/g, ' ').trim() }));
 }
 
@@ -10572,13 +10801,6 @@ function renderSheriffLogsTool() {
   const sl = getSheriffLogsState();
 
   const map = {
-    slFirstName: sl.firstName,
-    slLastName: sl.lastName,
-    slPhone: sl.phone,
-    slAmount: sl.amount,
-    slLocation: sl.location,
-    slVehicle: sl.vehicle,
-    slHandlingOfficer: sl.handlingOfficer,
     slDetails: state.sheriffLogs?.details || '',
     slOutcome: state.sheriffLogs?.outcome || ''
   };
@@ -10586,6 +10808,25 @@ function renderSheriffLogsTool() {
     const node = document.getElementById(id);
     if (node && node.value !== value) node.value = value;
   });
+
+  const linkedSummary = document.getElementById('slLinkedSummary');
+  if (linkedSummary) {
+    const idStatus = norm(state.debtTool?.idConfirmed) || 'UNCONFIRMED';
+    const rows = [
+      ['Debtor', [sl.firstName, sl.lastName].filter(Boolean).join(' ')],
+      ['Phone', sl.phone],
+      ['Amount owed / paid', sl.amount ? `$${Number(sl.amount).toLocaleString()}` : ''],
+      ['Location', sl.location],
+      ['Vehicle', sl.vehicle],
+      ['Handling officer', sl.handlingOfficer],
+      ['ID status', idStatus]
+    ];
+    linkedSummary.innerHTML = rows.map(([label, value]) => `
+      <div style="padding:10px;border:1px solid var(--border);border-radius:10px;background:rgba(0,0,0,0.15)">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px">${escapeHtml(label.toUpperCase())}</div>
+        <div style="font-size:13px;${value ? 'font-weight:700' : 'color:var(--muted)'}">${escapeHtml(value || 'Not set — add in Debt Tool')}</div>
+      </div>`).join('');
+  }
 
   const presetPreview = document.getElementById('slPresetPreview');
   if (presetPreview) {
@@ -10688,50 +10929,19 @@ function updateSheriffLogsField(key, value) {
 }
 
 function clearSheriffLogsTool() {
-  state.sheriffLogs = JSON.parse(JSON.stringify(INITIAL_STATE.sheriffLogs));
-  const slLeapPaste = document.getElementById('slLeapPaste');
-  if (slLeapPaste) slLeapPaste.value = '';
+  state.sheriffLogs.details = '';
+  state.sheriffLogs.outcome = '';
+  state.sheriffLogs.lastPreset = '';
+  state.sheriffLogs.presetPreview = '';
   renderSheriffLogsTool();
   throttledAutosave();
-  toast('Sheriff log helper cleared', 'ok');
-}
-
-function pullSheriffLogsFromReport(options = {}) {
-  if (typeof options === 'boolean') options = { showToast: options };
-  const { overwrite = false, showToast = true } = options;
-  const seed = getLinkedReportSeed('sheriffLogs');
-  const fromReport = (getDebtToolName() !== 'UNKNOWN' ? getDebtToolName() : '') || seed.name || norm(el.swWarrantName?.value);
-  const phone = norm(state.debtTool?.debtorPhone) || seed.phone;
-  const amount = normalizeSheriffAmount(state.debtTool?.total || '');
-  const location = norm(state.debtTool?.stopLocation) || seed.location;
-  const vehicle = normalizeSheriffLogText([norm(state.debtTool?.vehicleModel) || seed.model, norm(state.debtTool?.vehicleRego) || seed.rego].filter(Boolean).join(' '));
-  const handlingOfficer = norm(state.debtTool?.officerHandling) || getHeaderEnteredBy();
-  const split = splitFullNameForSheriffLogs(fromReport);
-  let changed = false;
-
-  changed = setIfPresent(state.sheriffLogs, 'firstName', split.firstName, overwrite) || changed;
-  changed = setIfPresent(state.sheriffLogs, 'lastName', split.lastName, overwrite) || changed;
-  changed = setIfPresent(state.sheriffLogs, 'phone', phone, overwrite) || changed;
-  changed = setIfPresent(state.sheriffLogs, 'amount', amount, overwrite) || changed;
-  changed = setIfPresent(state.sheriffLogs, 'location', location, overwrite) || changed;
-  changed = setIfPresent(state.sheriffLogs, 'vehicle', vehicle, overwrite) || changed;
-  changed = setIfPresent(state.sheriffLogs, 'handlingOfficer', handlingOfficer, overwrite) || changed;
-
-  renderSheriffLogsTool();
-  throttledAutosave();
-  updateCrossLinkStatus();
-  if (showToast) toast(changed ? (overwrite ? 'Sheriff Logs refreshed from linked details' : 'Missing Sheriff Logs fields filled from linked details') : 'No debtor name found in report yet', changed ? 'ok' : 'warn');
+  toast('Sheriff log notes cleared — debtor details stay in the Debt Tool', 'ok');
 }
 
 function bindSheriffLogsTool() {
+  // Only the log-composition fields live on this tab now — debtor identity is
+  // edited in the Debt Tool and rendered read-only in the linked summary.
   const bindings = [
-    ['slFirstName', 'firstName'],
-    ['slLastName', 'lastName'],
-    ['slPhone', 'phone'],
-    ['slAmount', 'amount'],
-    ['slLocation', 'location'],
-    ['slVehicle', 'vehicle'],
-    ['slHandlingOfficer', 'handlingOfficer'],
     ['slDetails', 'details'],
     ['slOutcome', 'outcome']
   ];
@@ -10742,75 +10952,10 @@ function bindSheriffLogsTool() {
     node.addEventListener('input', () => updateSheriffLogsField(key, node.value || ''));
   });
 
-  const slLeapPaste = document.getElementById('slLeapPaste');
-  if (slLeapPaste && !slLeapPaste.dataset.bound) {
-    slLeapPaste.dataset.bound = '1';
-    const applySlLeapPaste = () => {
-      const text = slLeapPaste.value.trim();
-      if (!text) return;
-      const p = parseOCR(text);
-      let filled = false;
-      const fnNode = document.getElementById('slFirstName');
-      const lnNode = document.getElementById('slLastName');
-      const phNode = document.getElementById('slPhone');
-      if (p.offender.name && fnNode && !fnNode.value && !lnNode.value) {
-        const split = splitFullNameForSheriffLogs(p.offender.name);
-        if (split.firstName) { fnNode.value = split.firstName; updateSheriffLogsField('firstName', split.firstName); filled = true; }
-        if (split.lastName) { lnNode.value = split.lastName; updateSheriffLogsField('lastName', split.lastName); filled = true; }
-      }
-      if (p.offender.phone && phNode && !phNode.value) {
-        phNode.value = p.offender.phone;
-        updateSheriffLogsField('phone', p.offender.phone);
-        filled = true;
-      }
-      if (filled) { renderSheriffLogsTool(); throttledAutosave(); toast('LEAP paste auto-filled debtor details', 'ok'); }
-      else if (p && p.offender && p.offender.name) { toast('Name fields already filled — clear them manually to re-apply LEAP paste', 'warn'); }
-    };
-    slLeapPaste.addEventListener('input', applySlLeapPaste);
-    slLeapPaste.addEventListener('paste', () => setTimeout(applySlLeapPaste, 0));
-
-    // Screenshot → OCR → review-and-confirm → fill the debtor name & phone
-    const scanImageIntoSheriffLogs = async (blob) => {
-      const statusEl = document.getElementById('slOcrStatus');
-      const result = await ocrImageToText(blob, statusEl);
-      if (!result) return;
-      const offender = (result.parsed && result.parsed.offender) || {};
-      const vehicle = (result.parsed && result.parsed.vehicle) || {};
-      const split = offender.name ? splitFullNameForSheriffLogs(offender.name) : { firstName: '', lastName: '' };
-      const proposed = {
-        firstName: split.firstName || '',
-        lastName: split.lastName || '',
-        phone: offender.phone || '',
-        vehicle: [vehicle.model, vehicle.rego].filter(Boolean).join(' ')
-      };
-      const labelMap = { firstName: 'First name', lastName: 'Last name', phone: 'Phone', vehicle: 'Vehicle' };
-      const changes = buildObjectChangeList(state.sheriffLogs, proposed, labelMap, false, 'Sheriff Logs');
-      if (!changes.length) {
-        if (statusEl) statusEl.value = offender.name ? 'Scan read — fields already filled' : 'No debtor details found in image';
-        toast(offender.name ? 'Those fields are already filled — clear them to re-apply' : 'No debtor details found in the screenshot', 'warn');
-        return;
-      }
-      const applied = await openChangeReviewModal('Review debtor scan', changes, () => {
-        applyObjectFields(state.sheriffLogs, proposed, false);
-        renderSheriffLogsTool();
-        throttledAutosave();
-        toast('Debtor details filled from screenshot', 'ok');
-      }, { summary: 'OCR read these debtor details from the screenshot. Review the before and after values before applying them.' });
-      if (statusEl) statusEl.value = applied ? 'Scan applied' : 'Scan read — review cancelled';
-    };
-    bindImageScanZone({ zoneId: 'slPasteZone', fileId: 'slImgFile', textareaId: 'slLeapPaste', onImage: scanImageIntoSheriffLogs });
-  }
-
-  const pullBtn = document.getElementById('slPullFromReportBtn');
-  if (pullBtn && !pullBtn.dataset.bound) {
-    pullBtn.dataset.bound = '1';
-    pullBtn.addEventListener('click', () => pullSheriffLogsFromReport({ overwrite: false, showToast: true }));
-  }
-
-  const refreshBtn = document.getElementById('slRefreshFromReportBtn');
-  if (refreshBtn && !refreshBtn.dataset.bound) {
-    refreshBtn.dataset.bound = '1';
-    refreshBtn.addEventListener('click', () => pullSheriffLogsFromReport({ overwrite: true, showToast: true }));
+  const editInDebtBtn = document.getElementById('slEditInDebtBtn');
+  if (editInDebtBtn && !editInDebtBtn.dataset.bound) {
+    editInDebtBtn.dataset.bound = '1';
+    editInDebtBtn.addEventListener('click', () => showToolPage('debt'));
   }
 
   const clearBtn = document.getElementById('slClearBtn');
@@ -10826,7 +10971,7 @@ function bindSheriffLogsTool() {
       state.sheriffLogs.outcome = 'N/A';
       renderSheriffLogsTool();
       throttledAutosave();
-      toast('Outcome set to N/A for !call', 'ok');
+      toast('Outcome set to N/A for !interact', 'ok');
     });
   }
 
@@ -11633,7 +11778,8 @@ function updateDebtTabModeHint() {
   }
 
   function exportSheriffLogsTxt() {
-    const subject = slugifyFilenamePart(normalizeSheriffLogText([state.sheriffLogs?.firstName, state.sheriffLogs?.lastName].filter(Boolean).join(" ")));
+    const sl = getSheriffLogsState();
+    const subject = slugifyFilenamePart(normalizeSheriffLogText([sl.firstName, sl.lastName].filter(Boolean).join(" ")));
     downloadTextFile(`sheriff_logs_${subject}.txt`, buildSheriffLogsExportText());
     toast("Sheriff Logs TXT exported", "ok");
   }
@@ -11931,53 +12077,6 @@ function updateDebtTabModeHint() {
     renderDiagnostics();
   };
 
-  fillSheriffLogsFromDebtTool = function(showToast = true) {
-    const dt = state.debtTool || {};
-    if (!dt.total) {
-      if (showToast) toast("Process debt first", "warn");
-      return;
-    }
-    const seed = getDebtToolSheriffLogsSeed(true);
-    const proposed = {
-      firstName: seed.firstName,
-      lastName: seed.lastName,
-      phone: seed.phone,
-      amount: seed.amount,
-      location: seed.location || state.sheriffLogs.location,
-      vehicle: seed.vehicle || state.sheriffLogs.vehicle,
-      handlingOfficer: seed.handlingOfficer || state.sheriffLogs.handlingOfficer,
-      details: seed.details || state.sheriffLogs.details,
-      outcome: seed.outcome || state.sheriffLogs.outcome
-    };
-    const labelMap = {
-      firstName: "First name",
-      lastName: "Last name",
-      phone: "Phone",
-      amount: "Amount",
-      location: "Location",
-      vehicle: "Vehicle",
-      handlingOfficer: "Handling officer",
-      details: "Details",
-      outcome: "Outcome"
-    };
-    const changes = Object.entries(proposed).filter(([key, value]) => norm(value) && norm(value) !== norm(state.sheriffLogs?.[key])).map(([key, value]) => ({
-      section: "Sheriff Logs",
-      label: labelMap[key] || key,
-      before: state.sheriffLogs?.[key],
-      after: value
-    }));
-    if (!changes.length) {
-      if (showToast) toast("Sheriff Logs already match the debt tool", "warn");
-      return;
-    }
-    openChangeReviewModal("Review Sheriff Logs autofill", changes, () => {
-      Object.assign(state.sheriffLogs, proposed);
-      renderSheriffLogsTool();
-      throttledAutosave();
-      if (showToast) toast("Sheriff Logs filled from debt tool", "ok");
-    }, { summary: "Debt processing found updated values for the Sheriff Logs helper." });
-  };
-
   applyDebtToolToSummary = function(showToast = true) {
     const dt = state.debtTool || {};
     if (!dt.total) {
@@ -12103,49 +12202,6 @@ function updateDebtTabModeHint() {
       updateCrossLinkStatus();
       if (showToast) toast(overwrite ? "Debt tool refreshed from report" : "Missing debt tool fields filled from report", "ok");
     }, { summary: overwrite ? "These linked report values will overwrite the current debt tool fields." : "These linked report values will fill the empty debt tool fields." });
-  };
-
-  pullSheriffLogsFromReport = function(options = {}) {
-    if (typeof options === "boolean") options = { showToast: options };
-    const { overwrite = false, showToast = true } = options;
-    const seed = getLinkedReportSeed("sheriffLogs");
-    const fromReport = (getDebtToolName() !== 'UNKNOWN' ? getDebtToolName() : '') || seed.name || norm(el.swWarrantName?.value);
-    const phone = norm(state.debtTool?.debtorPhone) || seed.phone;
-    const amount = normalizeSheriffAmount(state.debtTool?.total || "");
-    const location = norm(state.debtTool?.stopLocation) || seed.location;
-    const vehicle = normalizeSheriffLogText([norm(state.debtTool?.vehicleModel) || seed.model, norm(state.debtTool?.vehicleRego) || seed.rego].filter(Boolean).join(" "));
-    const handlingOfficer = norm(state.debtTool?.officerHandling) || getHeaderEnteredBy();
-    const split = splitFullNameForSheriffLogs(fromReport);
-    const proposed = {
-      firstName: split.firstName,
-      lastName: split.lastName,
-      phone,
-      amount,
-      location,
-      vehicle,
-      handlingOfficer
-    };
-    const labelMap = {
-      firstName: "First name",
-      lastName: "Last name",
-      phone: "Phone",
-      amount: "Amount",
-      location: "Location",
-      vehicle: "Vehicle",
-      handlingOfficer: "Handling officer"
-    };
-    const changes = buildObjectChangeList(state.sheriffLogs, proposed, labelMap, overwrite, "Sheriff Logs");
-    if (!changes.length) {
-      if (showToast) toast("No debtor name found in report yet", "warn");
-      return;
-    }
-    openChangeReviewModal("Review Sheriff Logs linked details", changes, () => {
-      applyObjectFields(state.sheriffLogs, proposed, overwrite);
-      renderSheriffLogsTool();
-      throttledAutosave();
-      updateCrossLinkStatus();
-      if (showToast) toast(overwrite ? "Sheriff Logs refreshed from linked details" : "Missing Sheriff Logs fields filled from linked details", "ok");
-    }, { summary: overwrite ? "These linked values will overwrite the Sheriff Logs fields." : "These linked values will fill the empty Sheriff Logs fields." });
   };
 
   // Report Tool OCR: extract text via the shared pipeline, then route the parsed
