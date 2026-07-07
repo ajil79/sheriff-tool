@@ -852,8 +852,8 @@
   <!-- Nav Bar -->
   <nav class="tool-nav" id="toolNav" role="tablist" aria-label="Tools">
     <button class="nav-active" role="tab" id="tab-guide" aria-controls="guidePage" aria-selected="true" data-tool-page="guide" title="Step-by-step guide for recruits: stops, fleeing, arrests and impounds">Recruit Guide</button>
-    <button role="tab" id="tab-sherifflogs" aria-controls="sheriffLogsPage" aria-selected="false" data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
     <button role="tab" id="tab-debt" aria-controls="debtPage" aria-selected="false" data-tool-page="debt" title="Process LEAP financial records and calculate overdue debt">Debt Tool</button>
+    <button role="tab" id="tab-sherifflogs" aria-controls="sheriffLogsPage" aria-selected="false" data-tool-page="sherifflogs" title="Generate bot commands for Sheriff logs">Sheriff Logs</button>
     <button role="tab" id="tab-report" aria-controls="reportPage" aria-selected="false" data-tool-page="report" title="Write formal Sheriff warrant and arrest paperwork">Report Tool</button>
   </nav>
 
@@ -2293,13 +2293,10 @@
 
 
   function getInitialToolPage() {
-    // Returning users land on their last-used tab; brand-new users start on the Recruit Guide.
-    try {
-      const saved = localStorage.getItem('sheriff_tool_page');
-      if (saved && ['guide', 'sherifflogs', 'debt', 'report'].includes(saved)) return saved;
-    } catch (_) {}
-    const activeNav = document.querySelector('.tool-nav button.nav-active[data-tool-page]');
-    return activeNav?.dataset?.toolPage || 'guide';
+    // Always open on the Recruit Guide — it's the recruit's starting point and the
+    // front door to the rest of the tool. (Tab switches are still remembered within
+    // a session via showToolPage, just not restored as the landing page on load.)
+    return 'guide';
   }
 
   function packStoredState(rawState) {
