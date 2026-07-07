@@ -1659,8 +1659,8 @@
       <div class="guidelines-body-inner" style="font-size:12px;line-height:1.7">
         <ol style="margin:4px 0 0 20px;padding:0">
           <li><strong>Select Use Case</strong> — choose Roadside Stop, Report / Follow Up, or Warrant / Enforcement.</li>
-          <li><strong>Fill identity fields</strong> — paste a LEAP profile to auto-fill name, phone and address, or type manually.</li>
-          <li><strong>Paste financial records</strong> — enter LEAP finance lines into the Financial Records Input box.</li>
+          <li><strong>① Their ID</strong> — post a screenshot of their ID / LEAP profile in the <strong>ID</strong> box (paste, drop or pick a file) to auto-fill name, phone and address, or type the fields manually.</li>
+          <li><strong>② Their debt history</strong> — post a screenshot of their LEAP financial records in the <strong>debt history</strong> box, or paste/type the finance lines. These two — ID and debt history — are the main things a debt check needs.</li>
           <li><strong>Click Process Debt</strong> — the tool totals qualifying unpaid government entries older than 14 days.</li>
           <li><strong>Read the summary</strong> — check the tier badge, recommended action and suggested next steps.</li>
           <li><strong>Choose a preset</strong> — pick the wording preset that matches the outcome (e.g. Roadside stop note).</li>
@@ -1695,6 +1695,19 @@
     </div>
   </div>
 
+  <!-- Big catch-all: post everything here (easiest recruit path) -->
+  <div class="card" style="padding:16px;margin-bottom:14px;border-color:rgba(0,191,255,0.45);background:rgba(0,191,255,0.06)">
+    <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:8px">POST EVERYTHING HERE — EASIEST WAY</div>
+    <div id="debtDumpZone" tabindex="0" role="button" aria-label="Post any screenshots here — their ID or LEAP profile and their debt or financial records — to scan and auto-sort" style="padding:24px 16px; border:2px dashed rgba(0,191,255,0.5); border-radius:12px; text-align:center; cursor:pointer; background:rgba(0,0,0,0.15)">
+      <div style="font-weight:900;font-size:16px">📥 Post all their info here</div>
+      <div class="muted" style="font-size:12px;margin-top:5px;line-height:1.5">Drop or paste <strong>one or many</strong> screenshots at once — their <strong>ID / LEAP profile</strong> and their <strong>debt / financial records</strong>. Each one is auto-sorted into the right box below, and you review each before it applies. Prefer to be precise, or to type? Use the labelled boxes further down.</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+      <input id="debtDumpImgFile" type="file" accept="image/*" multiple style="flex:1;min-width:160px"/>
+      <input id="debtDumpStatus" readonly value="Waiting for screenshots" style="flex:2;min-width:160px;background:rgba(0,0,0,0.3);font-size:11px"/>
+    </div>
+  </div>
+
   <div class="card" style="padding:16px;margin-bottom:14px">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px">
       <div>
@@ -1704,9 +1717,9 @@
     </div>
     <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— paste text or a screenshot to auto-fill name, phone &amp; vehicle below</span></div><textarea id="debtLeapPaste" rows="3" placeholder="Paste a LEAP profile — text or a screenshot — to auto-fill debtor details"></textarea></label>
     <div style="margin:-2px 0 12px">
-      <div id="debtPasteZone" tabindex="0" role="button" aria-label="Paste or drop a LEAP/MDT screenshot to scan with OCR" style="padding:12px 14px; border:2px dashed var(--border); border-radius:10px; text-align:center; cursor:pointer; background:rgba(0,0,0,0.15)">
-        <div style="font-weight:700;font-size:12px">📷 Scan a screenshot instead</div>
-        <div class="muted" style="font-size:11px;margin-top:2px">Click, then Ctrl+V · drag &amp; drop an image · or pick a file. Reads the debtor fields below — you review the results before they apply.</div>
+      <div id="debtPasteZone" tabindex="0" role="button" aria-label="Post a screenshot of their ID or LEAP profile here to scan with OCR" style="padding:14px; border:2px dashed rgba(0,191,255,0.4); border-radius:10px; text-align:center; cursor:pointer; background:rgba(0,191,255,0.06)">
+        <div style="font-weight:800;font-size:13px">📷 ① Post their ID screenshot here</div>
+        <div class="muted" style="font-size:11px;margin-top:3px">Their ID, licence or LEAP profile — paste (Ctrl+V), drag &amp; drop, or pick a file. Auto-fills their name, phone, address &amp; vehicle below (you review first). Prefer to type? Just fill the fields below instead.</div>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         <input id="debtImgFile" type="file" accept="image/*" style="flex:1;min-width:140px"/>
@@ -1758,7 +1771,17 @@
     <h2>Sheriff Debt Tool</h2>
     <div class="hint" style="margin-bottom:10px"><span>💰</span><span>Paste LEAP or finance lines below. This checks unpaid government debt older than 14 days using Melbourne time, totals qualifying entries, suggests the next action, and can feed Sheriff logs, reports, or Sheriff debt warrants.</span></div>
     <div class="fields">
-      <label><div class="lbl">Financial Records Input</div><textarea id="debtInput" rows="8" placeholder="09/01/2023 N $5000 CHARGE: Contempt of Court&#10;04/01/2023 N $3000 CHARGE: Engage in a Police Pursuit / Evade Police&#10;01/01/2023 N $12000 GOV INVOICE: Outstanding Government Debt"></textarea></label>
+      <div style="margin-bottom:10px">
+        <div id="debtFinancePasteZone" tabindex="0" role="button" aria-label="Post a screenshot of their debt or financial records here to scan with OCR" style="padding:14px; border:2px dashed rgba(0,191,255,0.4); border-radius:10px; text-align:center; cursor:pointer; background:rgba(0,191,255,0.06)">
+          <div style="font-weight:800;font-size:13px">📷 ② Post their debt history screenshot here</div>
+          <div class="muted" style="font-size:11px;margin-top:3px">Their LEAP financial / debt records — paste (Ctrl+V), drag &amp; drop, or pick a file. Reads the lines into the box below and totals the overdue government debt (you review first). Prefer to type? Paste the lines straight into the box below.</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <input id="debtFinanceImgFile" type="file" accept="image/*" style="flex:1;min-width:140px"/>
+          <input id="debtFinanceOcrStatus" readonly value="OCR idle" style="flex:1;min-width:140px;background:rgba(0,0,0,0.3);font-size:11px"/>
+        </div>
+      </div>
+      <label><div class="lbl">Their debt history <span style="font-weight:400;color:var(--muted);font-size:10px">— LEAP financial records (typed or scanned)</span></div><textarea id="debtInput" rows="8" placeholder="09/01/2023 N $5000 CHARGE: Contempt of Court&#10;04/01/2023 N $3000 CHARGE: Engage in a Police Pursuit / Evade Police&#10;01/01/2023 N $12000 GOV INVOICE: Outstanding Government Debt"></textarea></label>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="debtProcessBtn" type="button" title="Parse the financial records, total unpaid government debt older than 14 days, and calculate the tier and recommended action">Process Debt</button>
         <button class="btn" id="debtApplyBtn" type="button" title="Send processed debt data into the Sheriff Debt Warrant report fields">Fill Debt Warrant Report</button>
@@ -6800,22 +6823,28 @@ Is there anything you would like to add at this time?`;
 
   // Wire a compact image-scan control (drop zone + file input + optional textarea)
   // so a pasted/dropped/picked screenshot is handed to `onImage(blob)`. Idempotent.
-  function bindImageScanZone({ zoneId, fileId, textareaId, onImage }) {
+  function bindImageScanZone({ zoneId, fileId, textareaId, onImage, onImages }) {
     const zone = zoneId ? document.getElementById(zoneId) : null;
     const fileInput = fileId ? document.getElementById(fileId) : null;
     const textarea = textareaId ? document.getElementById(textareaId) : null;
-    const firstClipboardImage = (items) => {
-      const item = [...(items || [])].find(i => i.type && i.type.startsWith("image/"));
-      return item && item.getAsFile ? item.getAsFile() : null;
+    const allClipboardImages = (items) =>
+      [...(items || [])]
+        .filter(i => i.type && i.type.startsWith("image/"))
+        .map(i => (i.getAsFile ? i.getAsFile() : null))
+        .filter(Boolean);
+    const allDroppedImages = (files) => [...(files || [])].filter(f => f.type && f.type.startsWith("image/"));
+    // onImages (whole list) takes priority for catch-all zones; otherwise the first image → onImage.
+    const handleImages = (imgs) => {
+      if (!imgs || !imgs.length) return false;
+      if (onImages) onImages(imgs); else if (onImage) onImage(imgs[0]);
+      return true;
     };
-    const firstDroppedImage = (files) => [...(files || [])].find(f => f.type && f.type.startsWith("image/")) || null;
 
     if (zone && !zone.dataset.scanBound) {
       zone.dataset.scanBound = "1";
       zone.addEventListener("click", () => zone.focus());
       zone.addEventListener("paste", (e) => {
-        const img = firstClipboardImage(e.clipboardData && e.clipboardData.items);
-        if (img) { e.preventDefault(); onImage(img); }
+        if (handleImages(allClipboardImages(e.clipboardData && e.clipboardData.items))) e.preventDefault();
       });
       zone.addEventListener("dragover", (e) => {
         e.preventDefault();
@@ -6830,15 +6859,14 @@ Is there anything you would like to add at this time?`;
         e.preventDefault();
         zone.style.outline = "none";
         zone.style.outlineOffset = "0";
-        const file = firstDroppedImage(e.dataTransfer && e.dataTransfer.files);
-        if (file) onImage(file);
+        handleImages(allDroppedImages(e.dataTransfer && e.dataTransfer.files));
       });
     }
 
     if (fileInput && !fileInput.dataset.scanBound) {
       fileInput.dataset.scanBound = "1";
       fileInput.addEventListener("change", () => {
-        if (fileInput.files && fileInput.files[0]) onImage(fileInput.files[0]);
+        handleImages(allDroppedImages(fileInput.files));
       });
     }
 
@@ -6846,12 +6874,10 @@ Is there anything you would like to add at this time?`;
     if (textarea && !textarea.dataset.scanBound) {
       textarea.dataset.scanBound = "1";
       textarea.addEventListener("paste", (e) => {
-        const img = firstClipboardImage(e.clipboardData && e.clipboardData.items);
-        if (img) { e.preventDefault(); onImage(img); }
+        if (handleImages(allClipboardImages(e.clipboardData && e.clipboardData.items))) e.preventDefault();
       });
       textarea.addEventListener("drop", (e) => {
-        const file = firstDroppedImage(e.dataTransfer && e.dataTransfer.files);
-        if (file) { e.preventDefault(); onImage(file); }
+        if (handleImages(allDroppedImages(e.dataTransfer && e.dataTransfer.files))) e.preventDefault();
       });
     }
   }
@@ -7210,8 +7236,8 @@ Is there anything you would like to add at this time?`;
       debtLeapPaste.addEventListener("paste", () => setTimeout(applyDebtLeapPaste, 0));
 
       // Screenshot → OCR → understand what it is → fill the right section
-      const scanImageIntoDebt = async (blob) => {
-        const statusEl = document.getElementById("debtOcrStatus");
+      const scanImageIntoDebt = async (blob, statusOverride) => {
+        const statusEl = statusOverride || document.getElementById("debtOcrStatus");
         const result = await ocrImageToText(blob, statusEl);
         if (!result) return;
         const kind = result.kind || "unknown";
@@ -7286,6 +7312,24 @@ Is there anything you would like to add at this time?`;
         if (!applied && statusEl) statusEl.value = "Scan read — review cancelled";
       };
       bindImageScanZone({ zoneId: "debtPasteZone", fileId: "debtImgFile", textareaId: "debtLeapPaste", onImage: scanImageIntoDebt });
+      // Second scan zone at the debt-history box — same smart handler routes a
+      // finance screenshot into the Financial Records box (and an ID screenshot
+      // still fills the debtor fields), reporting into its own status field.
+      bindImageScanZone({ zoneId: "debtFinancePasteZone", fileId: "debtFinanceImgFile", textareaId: "debtInput", onImage: (blob) => scanImageIntoDebt(blob, document.getElementById("debtFinanceOcrStatus")) });
+      // Big catch-all zone — accept one OR many screenshots at once and route each
+      // through the same auto-detecting handler in turn (ID → identity fields,
+      // debt records → debt box). Each image shows its own review modal.
+      const scanManyIntoDebt = async (blobs) => {
+        const statusEl = document.getElementById("debtDumpStatus");
+        const imgs = [...(blobs || [])];
+        if (!imgs.length) return;
+        for (let i = 0; i < imgs.length; i++) {
+          if (statusEl) statusEl.value = imgs.length > 1 ? `Scanning ${i + 1} of ${imgs.length}…` : "Scanning…";
+          await scanImageIntoDebt(imgs[i], statusEl);
+        }
+        if (statusEl && imgs.length > 1) statusEl.value = `Done — scanned ${imgs.length} screenshots`;
+      };
+      bindImageScanZone({ zoneId: "debtDumpZone", fileId: "debtDumpImgFile", onImages: scanManyIntoDebt });
     }
 
     [
