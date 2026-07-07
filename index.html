@@ -113,6 +113,11 @@
       .report-badge{font-size:9px;padding:3px 8px}
       /* Prevent iOS Safari zoom on input focus */
       select,input,textarea{font-size:16px}
+      /* Wizard: thumb-friendly nav + a stepper that scrolls if it can't wrap */
+      .wizard-nav .btn{flex:1;min-width:0}
+      .wizard-stepper{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+      .wizard-chip{padding:8px 12px;font-size:12px;flex-shrink:0}
+      .section-copy-btn{padding:9px 12px;font-size:13px}
     }
     @media (max-width:400px){
       header{padding:10px 8px 8px}
@@ -408,6 +413,16 @@
     #reportStepNext.wizard-done{background:rgba(100,255,150,0.14);border-color:rgba(100,255,150,0.4);color:rgba(150,255,190,0.95)}
     body.light-mode .wizard-chip{background:rgba(0,0,0,0.03)}
     body.light-mode .wizard-chip-num{background:rgba(0,0,0,0.1)}
+
+    /* ── Copy one section: grab a single part of the generated warrant ─────── */
+    .section-copy-bar{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+    .section-copy-label{font-size:11px;font-weight:800;letter-spacing:0.03em;color:var(--muted);margin-bottom:8px}
+    .section-copy-hint{font-weight:400;letter-spacing:0}
+    .section-copy-btns{display:flex;flex-wrap:wrap;gap:6px}
+    .section-copy-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(0,191,255,0.08);border:1px solid rgba(0,191,255,0.28);color:var(--text);border-radius:8px;padding:7px 11px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s ease}
+    .section-copy-btn:hover{background:rgba(0,191,255,0.16);border-color:rgba(0,191,255,0.5)}
+    .section-copy-btn::before{content:"⧉";font-size:12px;opacity:0.7}
+    body.light-mode .section-copy-btn{background:rgba(0,120,180,0.06)}
     /* Print styles */
     @media print {
       body{background:#fff !important; color:#000 !important}
@@ -1173,16 +1188,17 @@
 
       <!-- OCR -->
       <div class="card" id="ocrCard">
-        <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">📷 Scan a screenshot <span style="font-weight:400;font-size:12px;color:var(--muted)">— optional</span></h2></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">📷 Scan a photo or screenshot <span style="font-weight:400;font-size:12px;color:var(--muted)">— optional, or just type the details above</span></h2></div>
         <div class="hint">
           <span>📷</span>
-          <span>Click the box then press <strong>Ctrl+V</strong>, drag & drop an image, or pick a file. OCR will auto-fill NAME, DOB, SEX, ADDRESS, PHONE, VEHICLE info.</span>
+          <span>Prefer to type? The fields above work on their own. Or scan instead: on a <strong>phone</strong> tap <strong>Take / choose photo</strong> below (camera or gallery); on a <strong>computer</strong> click the box and press <strong>Ctrl+V</strong> or drag &amp; drop an image. Either way it auto-fills NAME, DOB, SEX, ADDRESS, PHONE, VEHICLE info.</span>
         </div>
         <div id="pasteZone" tabindex="0" role="button" aria-label="Paste a screenshot or text, or drag an image here, to scan with OCR" style="padding:20px; border:2px dashed var(--border); border-radius:12px; text-align:center; cursor:pointer; margin-top:10px; background:rgba(0,0,0,0.15)">
           <div style="font-weight:900; margin-bottom:4px">Paste or drop image here</div>
           <div class="muted">Works best with MDT profiles, licences, VicRoads, fingerprints, serials. Images are auto-upscaled &amp; enhanced for better recognition.</div>
         </div>
-        <input id="imgFile" type="file" accept="image/*" style="margin-top:10px"/>
+        <label for="imgFile" style="display:block;margin-top:10px;font-size:12px;font-weight:700;color:var(--muted)">Take / choose photo (phone or computer)</label>
+        <input id="imgFile" type="file" accept="image/*" style="margin-top:4px"/>
         <div class="row" style="margin-top:10px">
           <input id="ocrStatus" readonly value="OCR idle" style="background:rgba(0,0,0,0.3)"/>
           <button class="btn" id="clearOcrBtn" title="Clear the pasted LEAP/MDT text and reset auto-filled fields">Clear</button>
@@ -1619,6 +1635,10 @@
       <div class="divider"></div>
       <div id="validationPanel" style="margin-bottom:10px"></div>
       <pre id="preview">Start filling out the form...</pre>
+      <div id="sectionCopyBar" class="section-copy-bar" style="display:none">
+        <div class="section-copy-label">📋 Copy one section <span class="section-copy-hint">— building the report elsewhere? Grab just the part you need.</span></div>
+        <div id="sectionCopyBtns" class="section-copy-btns"></div>
+      </div>
     </div>
     </div>
 
@@ -5533,6 +5553,91 @@ Is there anything you would like to add at this time?`;
       ta.remove();
       return success;
     }
+  }
+
+  // ── Copy one section ────────────────────────────────────────────────────
+  // Split the generated warrant into labelled parts so an officer building the
+  // report elsewhere can grab just one piece. Header patterns are taken verbatim
+  // from the four generators; a line that matches starts a new section and every
+  // other line attaches to the current one, so joining the sections reproduces
+  // the preview text exactly (output is never altered).
+  const SECTION_HEADERS = [
+    [/^\(\d+\)\s*OUTSTANDING WARRANT FOR ARREST\b/i, 'Heading'],
+    [/^\(\d+\)\s*OUTSTANDING WARRANT FOR QUESTIONING\b/i, 'Heading'],
+    [/^OUTSTANDING COURT WARRANT\b/i, 'Heading'],
+    [/^WARRANT DETAILS:/i, 'Heading'],
+    [/^\(\d+\)\s*CHARGES BEFORE THE COURT\b/i, 'Charges before court'],
+    [/^\(\d+\)\s*CHARGES:/i, 'Charges'],
+    [/^\(\d+\)\s*ACCUSED\b/i, 'Accused'],
+    [/^\(\d+\)\s*PERSON DETAILS\b/i, 'Person details'],
+    [/^\(\d+\)\s*SUSPECT DETAILS:/i, 'Suspect details'],
+    [/^\(\d+\)\s*COURT-ORDERED OUTCOMES\b/i, 'Court outcomes'],
+    [/^ENFORCEMENT NOTICE\b/i, 'Enforcement notice'],
+    [/^PRESIDING COURT OFFICIAL\b/i, 'Presiding official'],
+    [/^(\(\d+\)\s*)?REPORT:/i, 'Report'],
+    [/^MELROADS VEHICLE LOOK-?UP:/i, 'MELROADS lookup'],
+    [/^\(\d+\)\s*Officers Involved:/i, 'Officers'],
+    [/^\(\d+\)\s*Sentence:/i, 'Sentence'],
+    [/^\(\d+\)\s*Evidence:/i, 'Evidence'],
+    [/^\(\d+\)\s*INTERVIEW QUESTIONS\b/i, 'Interview questions'],
+    [/^Vehicle Details:/i, 'Vehicle details'],
+    [/^ACTION NOTICE\b/i, 'Action Notice'],
+    [/^Signed[:,]/i, 'Signature'],
+  ];
+
+  function splitReportSections(text) {
+    const lines = String(text == null ? '' : text).split('\n');
+    const sections = [];
+    let cur = null;
+    const labelCounts = {};
+    for (const line of lines) {
+      const trimmed = line.trim();
+      let matchedLabel = null;
+      if (trimmed) {
+        for (const [re, label] of SECTION_HEADERS) {
+          if (re.test(trimmed)) { matchedLabel = label; break; }
+        }
+      }
+      if (matchedLabel || !cur) {
+        const base = matchedLabel || 'Top';
+        labelCounts[base] = (labelCounts[base] || 0) + 1;
+        const label = labelCounts[base] > 1 ? base + ' ' + labelCounts[base] : base;
+        cur = { label, lines: [line] };
+        sections.push(cur);
+      } else {
+        cur.lines.push(line);
+      }
+    }
+    return sections.map(s => ({ label: s.label, text: s.lines.join('\n') }));
+  }
+
+  function renderSectionCopyBar() {
+    const bar = document.getElementById('sectionCopyBar');
+    const host = document.getElementById('sectionCopyBtns');
+    const pre = el.preview || document.getElementById('preview');
+    if (!bar || !host || !pre) return;
+    const text = pre.textContent || '';
+    const placeholder = !text.trim() || /^Start filling out the form/.test(text.trim());
+    const sections = placeholder ? [] : splitReportSections(text).filter(s => s.text.trim());
+    if (sections.length < 2) { bar.style.display = 'none'; host.innerHTML = ''; return; }
+    bar.style.display = '';
+    host.innerHTML = '';
+    const makeBtn = (label, getText, okMsg) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'section-copy-btn';
+      btn.textContent = label;
+      btn.title = 'Copy the ' + label + ' to your clipboard';
+      btn.addEventListener('click', async () => {
+        const ok = await copyToClipboard(getText());
+        toast(ok ? okMsg : 'Copy failed — try again', ok ? 'ok' : 'err');
+      });
+      host.appendChild(btn);
+    };
+    makeBtn('Whole warrant', () => text, 'Copied the whole warrant');
+    sections.forEach(sec => {
+      makeBtn(sec.label, () => sec.text.replace(/\s+$/, '') + '\n', 'Copied the ' + sec.label + ' section');
+    });
   }
 
   // OCR Functions
@@ -10364,7 +10469,7 @@ Is there anything you would like to add at this time?`;
 
   // Hook char count into preview render via MutationObserver
   if (el.preview) {
-    const _previewObs = new MutationObserver(() => { updateCharCount(); });
+    const _previewObs = new MutationObserver(() => { updateCharCount(); renderSectionCopyBar(); });
     _previewObs.observe(el.preview, { childList: true, characterData: true, subtree: true });
   }
 
@@ -10738,6 +10843,7 @@ Is there anything you would like to add at this time?`;
   setPreviewStickyOffset();
   showToolPage(getInitialToolPage());
   initReportWizard();
+  renderSectionCopyBar();
 
   // Delegated remove buttons (avoids fragile inline onclick escaping)
   if (el.selectedCharges) {
