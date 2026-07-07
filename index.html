@@ -1188,7 +1188,7 @@
 
       <!-- OCR -->
       <div class="card" id="ocrCard">
-        <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">📷 Scan a photo or screenshot <span style="font-weight:400;font-size:12px;color:var(--muted)">— optional, or just type the details above</span></h2></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">📷 Scan a photo or screenshot <span style="font-weight:400;font-size:12px;color:var(--muted)">(optional)</span></h2></div>
         <div class="hint">
           <span>📷</span>
           <span>Prefer to type? The fields above work on their own. Or scan instead: on a <strong>phone</strong> tap <strong>Take / choose photo</strong> below (camera or gallery); on a <strong>computer</strong> click the box and press <strong>Ctrl+V</strong> or drag &amp; drop an image. Either way it auto-fills NAME, DOB, SEX, ADDRESS, PHONE, VEHICLE info.</span>
@@ -10487,7 +10487,6 @@ Is there anything you would like to add at this time?`;
   const SECTION_CLEAR_ORDER = [
     ["reportMeta", () => document.getElementById("reportMetaCard")],
     ["offender", () => document.getElementById("offenderCard")],
-    ["ocr", () => document.getElementById("ocrCard")],
     ["charges", () => document.getElementById("chargesCard")],
     ["pins", () => document.getElementById("pinsCard")],
     ["sheriffWarrant", () => document.getElementById("sheriffWarrantCard")],
@@ -11650,7 +11649,7 @@ function updateDebtTabModeHint() {
 
   const CARD_COLLAPSE_STORAGE_KEY = 'sheriff_tool_collapsed_cards_v1';
   const COLLAPSIBLE_CARD_CONFIGS = {
-    ocrCard: { mobileCollapsed: true, collapsedDefault: true },
+    ocrCard: { mobileCollapsed: true },
     chargesCard: { mobileCollapsed: true },
     pinsCard: { mobileCollapsed: true },
     itemsCard: { mobileCollapsed: true },
