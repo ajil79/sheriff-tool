@@ -52,8 +52,12 @@
     body.tool-nonreport #copyBtn,
     body.tool-nonreport #saveDraftBtn,
     body.tool-nonreport #presetsBtn,
+    body.tool-nonreport #advancedToggleBtn,
     body.tool-nonreport .header-meta-details,
     body.tool-nonreport #nowBtn{display:none}
+    /* Advanced-only surfaces: hidden in the default (recruit) Simple view */
+    body:not(.report-advanced) .adv-only{display:none !important}
+    body.report-advanced #advancedToggleBtn{background:rgba(0,191,255,0.14);border-color:rgba(0,191,255,0.4);color:var(--vp-cyan)}
     .header-meta-details{margin-top:10px;border:1px solid var(--border);border-radius:4px;background:rgba(0,31,63,0.5);overflow:hidden}
     .header-meta-details summary{list-style:none;cursor:pointer;padding:10px 12px;font-size:12px;font-weight:800;color:var(--text);user-select:none}
     .header-meta-details summary::-webkit-details-marker{display:none}
@@ -370,7 +374,6 @@
     body.light-mode .same-btn{background:rgba(68,102,221,0.08);border-color:rgba(68,102,221,0.2)}
     body.light-mode .same-btn:hover{background:rgba(68,102,221,0.15)}
     body.light-mode .preview-wrap{scrollbar-color:rgba(0,0,0,0.15) transparent}
-    body.light-mode .section-excluded::after{color:rgba(200,40,40,0.7)}
 
     /* ── v61: Report badge context colors ────────── */
     .report-badge[data-context="debt"]{background:rgba(255,180,60,0.18);border-color:rgba(255,180,60,0.35);color:rgba(255,200,100,0.95)}
@@ -384,48 +387,27 @@
     .card:hover{border-color:rgba(255,255,255,0.20)}
     body.light-mode .card:hover{border-color:rgba(0,0,0,0.18)}
 
-    /* Section exclude toggle */
-    .section-excluded {
-      opacity: 0.38;
-      position: relative;
-    }
-    .section-excluded::after {
-      content: "excluded from report";
-      position: absolute;
-      top: 10px;
-      right: 48px;
-      font-size: 10px;
-      font-weight: 900;
-      color: rgba(255,80,80,0.8);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      pointer-events: none;
-    }
-    .section-excluded input,
-    .section-excluded textarea,
-    .section-excluded select,
-    .section-excluded button:not(.section-toggle-btn):not([data-clear-section]) {
-      pointer-events: none;
-    }
-    .section-toggle-btn {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      border-radius: 3px;
-      padding: 4px 8px;
-      cursor: pointer;
-      font-size: 12px;
-      line-height: 1;
-      flex-shrink: 0;
-      transition: all 0.15s ease;
-    }
-    .section-toggle-btn:hover { background: rgba(255,80,80,0.15); border-color: rgba(255,80,80,0.4); color: rgba(255,150,150,0.9); }
-    .section-excluded .section-toggle-btn { background: rgba(255,80,80,0.12); border-color: rgba(255,80,80,0.35); color: rgba(255,150,150,0.9); }
     .card-header-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .card-collapse-btn{background:rgba(255,255,255,0.07);border:1px solid var(--border);color:var(--muted);border-radius:3px;padding:4px 8px;cursor:pointer;font-size:12px;line-height:1;flex-shrink:0;transition:all 0.15s ease}
     .card-collapse-btn:hover{background:rgba(0,191,255,0.14);border-color:rgba(0,191,255,0.35);color:var(--vp-cyan)}
     .card-collapsed .card-collapsible-body{display:none}
     .card-collapsed .card-collapse-btn{background:rgba(0,191,255,0.10);border-color:rgba(0,191,255,0.3);color:var(--vp-cyan)}
+
+    /* ── Report wizard: recruit-friendly stepped flow ───────────── */
+    .wizard-stepper{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:2px}
+    .wizard-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s ease;white-space:nowrap}
+    .wizard-chip:hover{border-color:rgba(0,191,255,0.4);color:var(--text)}
+    .wizard-chip-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.12);font-size:11px;font-weight:900;flex-shrink:0}
+    .wizard-chip.active{background:rgba(0,191,255,0.14);border-color:rgba(0,191,255,0.5);color:var(--vp-cyan)}
+    .wizard-chip.active .wizard-chip-num{background:var(--accent);color:#00121c}
+    .wizard-chip.done .wizard-chip-num{background:rgba(100,255,150,0.85);color:#00220c}
+    .wizard-step{display:none}
+    .wizard-step.active{display:grid;gap:14px;grid-auto-rows:max-content}
+    .wizard-nav{display:flex;justify-content:space-between;gap:10px;margin-top:2px}
+    .wizard-nav .btn{min-width:120px}
+    #reportStepNext.wizard-done{background:rgba(100,255,150,0.14);border-color:rgba(100,255,150,0.4);color:rgba(150,255,190,0.95)}
+    body.light-mode .wizard-chip{background:rgba(0,0,0,0.03)}
+    body.light-mode .wizard-chip-num{background:rgba(0,0,0,0.1)}
     /* Print styles */
     @media print {
       body{background:#fff !important; color:#000 !important}
@@ -645,6 +627,14 @@
     .guide-branch.no .guide-id-flag{color:#5ac8ff;border-color:rgba(0,191,255,0.55);background:rgba(0,191,255,0.14)}
     body.light-mode .guide-branch.yes .guide-id-flag{color:#1c7c3d}
     body.light-mode .guide-branch.no .guide-id-flag{color:#0077b6}
+    /* Collapsible reference cards in the Recruit Guide (declutter — collapsed by default) */
+    .guide-collapse>summary{list-style:none;cursor:pointer;font-size:19px;font-weight:800;display:flex;align-items:center;gap:8px;margin:0}
+    .guide-collapse>summary::-webkit-details-marker{display:none}
+    .guide-collapse>summary::after{content:"▼";margin-left:auto;font-size:12px;font-weight:400;color:var(--muted);transition:transform .15s ease}
+    .guide-collapse[open]>summary::after{transform:rotate(180deg)}
+    .guide-collapse>summary:hover{color:var(--accent)}
+    .guide-collapse>summary .guide-collapse-hint{font-size:11px;font-weight:400;color:var(--muted)}
+    .guide-collapse>*:not(summary){margin-top:12px}
     .guide-jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
     .guide-ref-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
     @media (max-width:600px){.guide-ref-grid{grid-template-columns:1fr}}
@@ -837,7 +827,8 @@
     <div class="actions">
       <button class="btn" id="copyBtn" title="Copy the formatted report to clipboard">Copy Preview <span class="kbd">Ctrl+Shift+C</span></button>
       <button class="btn" id="saveDraftBtn" title="Save the current report as a draft to revisit later">Save Draft <span class="kbd">Ctrl+S</span></button>
-      <button class="btn" id="presetsBtn" title="Save or load officer presets">⚙ Templates</button>
+      <button class="btn adv-only" id="presetsBtn" title="Save or load reusable officer / signature defaults">⚙ Defaults</button>
+      <button class="btn" id="advancedToggleBtn" title="Show advanced options (pools, diagnostics, header details). Recruits can leave this off." aria-pressed="false">⚙ Advanced</button>
       <button class="btn" id="themeToggleBtn" title="Toggle dark/light mode">☀ Light</button>
       <button class="btn danger" id="clearBtn" title="Clear all report fields and start fresh">Clear All</button>
     </div>
@@ -1026,8 +1017,8 @@
       </div>
 
       <!-- Quick reference -->
-      <div class="card">
-        <h2 style="margin:0 0 10px">Quick reference</h2>
+      <details class="card guide-collapse">
+        <summary>Quick reference <span class="guide-collapse-hint">— tap to expand</span></summary>
         <div class="guide-ref-grid">
           <div class="guide-ref"><strong>The one Sheriff charge</strong><br>Failure to Stop for an Enforcement Vehicle (Non-Police). Sentence: PRISON TIME: 60 WEEKS. No fine added by Sheriffs.</div>
           <div class="guide-ref"><strong>Arrest vs Questioning</strong><br>ID confirmed before they fled → Arrest. ID not confirmed → Questioning, naming the MELROADS registered owner.</div>
@@ -1037,11 +1028,11 @@
           <div class="guide-ref"><strong>Enforcement powers</strong><br>Debt enforcement can still include <strong>licence suspension</strong>, vehicle impound or stronger action where properly approved (Handbook 8.7). Suspend a licence where needed, following handbook protocol.</div>
           <div class="guide-ref"><strong>If unsure</strong><br>Ask an FTO or a Sheriff ranked above you first; escalate to Sheriff Leadership only if it can't be resolved.</div>
         </div>
-      </div>
+      </details>
 
       <!-- Callsigns & radio codes (Out & About handbook) -->
-      <div class="card">
-        <h2 style="margin:0 0 10px">📻 Callsigns, ranks &amp; radio codes</h2>
+      <details class="card guide-collapse">
+        <summary>📻 Callsigns, ranks &amp; radio codes <span class="guide-collapse-hint">— tap to expand</span></summary>
         <div class="guide-callout" style="border-color:rgba(0,191,255,0.3);background:rgba(0,191,255,0.07);margin-top:0">Your MDT callsign is <strong>SRF [DUTY][BADGE]</strong> — e.g. <strong>SRF 116</strong> = Duty 1, Badge 16. Service numbers run 0–97 (99 = Sheriff, 98 = Deputy Sheriff).</div>
         <div class="guide-ref-grid" style="margin-top:10px">
           <div class="guide-ref"><strong>Duty numbers</strong><br>
@@ -1068,7 +1059,7 @@
             Sheriff Recruit
           </div>
         </div>
-      </div>
+      </details>
 
     </div>
   </main>
@@ -1095,11 +1086,17 @@
               <li><strong>Fill the Report Narrative</strong> — describe events in court-ready language. Don't guess why they fled.</li>
               <li><strong>Validate before submitting</strong> — the Validate button flags missing fields and handbook issues.</li>
               <li><strong>Click Copy Preview</strong> (top-right) or press <strong>Ctrl+Shift+C</strong> — the formatted report is now on your clipboard.</li>
-              <li><strong>Save a draft</strong> — use Save Draft (Ctrl+S) to keep the report for later, or use Templates to store reusable officer details.</li>
+              <li><strong>Save a draft</strong> — use Save Draft (Ctrl+S) to keep the report for later. On the Sign step you can also save your signature details to reuse next time.</li>
             </ol>
           </div>
         </div>
       </div>
+
+      <!-- Report wizard step navigation (chips built by JS) -->
+      <div id="reportStepper" class="wizard-stepper" role="tablist" aria-label="Report steps"></div>
+
+      <!-- ═══ STEP 1 — Type & person ═══ -->
+      <div class="wizard-step active" data-step="1" data-step-title="Type &amp; person" data-step-cards="reportMetaCard,offenderCard,ocrCard">
 
       <!-- Report Type -->
       <div class="card" id="reportMetaCard">
@@ -1128,7 +1125,6 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <h2 style="margin:0">Offender / Subject Details</h2>
           <div style="display:flex;gap:8px;align-items:center">
-            <button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button>
             <span id="savedPersonsBadge" style="font-size:11px;color:var(--muted);display:none"></span>
             <button class="btn" id="manageSavedPersonsBtn" style="font-size:11px;padding:6px 10px" title="View and manage shared people pool">&#x1F464; People</button>
           </div>
@@ -1177,7 +1173,7 @@
 
       <!-- OCR -->
       <div class="card" id="ocrCard">
-        <h2>Paste / Drop Screenshots (OCR optional)</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">📷 Scan a screenshot <span style="font-weight:400;font-size:12px;color:var(--muted)">— optional</span></h2></div>
         <div class="hint">
           <span>📷</span>
           <span>Click the box then press <strong>Ctrl+V</strong>, drag & drop an image, or pick a file. OCR will auto-fill NAME, DOB, SEX, ADDRESS, PHONE, VEHICLE info.</span>
@@ -1198,9 +1194,14 @@
         <textarea id="ocrText" rows="6" placeholder="OCR text appears here" style="margin-top:10px"></textarea>
       </div>
 
+      </div><!-- ═══ /STEP 1 ═══ -->
+
+      <!-- ═══ STEP 2 — Incident & vehicle ═══ -->
+      <div class="wizard-step" data-step="2" data-step-title="Incident &amp; vehicle" data-step-cards="chargesCard,sheriffWarrantCard,sheriffRefCard">
+
       <!-- Charges -->
       <div class="card" id="chargesCard" style="display:none" data-section="charges">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Charges <span id="chargeCount" style="font-weight:400;font-size:12px;color:var(--muted)"></span></h2><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Charges <span id="chargeCount" style="font-weight:400;font-size:12px;color:var(--muted)"></span></h2></div>
         <div class="hint" style="margin-bottom:8px"><span>💡</span><span>For a Sheriff Failure to Stop warrant the only standard charge is <strong>Failure to Stop for an Enforcement Vehicle (Non-Police)</strong>. Add it with one click below. Any other offence is for MelPol to add separately.</span></div>
         <button class="btn" type="button" id="addFtsChargeBtn" title="Add the standard Sheriff Failure to Stop charge" style="margin-bottom:12px;background:rgba(100,200,120,0.18);border-color:rgba(100,200,120,0.4)">➕ Add Failure to Stop charge</button>
         <!-- Search/filter/browse hidden: Sheriffs use the single Failure to Stop charge only -->
@@ -1318,16 +1319,20 @@
 
         </div>
       </div>
+      </div><!-- ═══ /STEP 2 ═══ -->
+
+      <!-- ═══ STEP 3 — Officers ═══ -->
+      <div class="wizard-step" data-step="3" data-step-title="Officers" data-step-cards="officersCard">
+
       <!-- Officers -->
       <div class="card" id="officersCard" style="display:none;position:relative;z-index:20" data-section="officers">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <h2 style="margin:0">Officers Involved</h2>
           <div style="display:flex;gap:8px;align-items:center">
-            <button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button>
             <span id="savedCallsignsBadge" style="font-size:11px;color:var(--muted);display:none"></span>
-            <button class="btn" id="manageSavedCallsignsBtn" style="font-size:11px;padding:6px 10px" title="View and manage saved callsigns">&#x1F4FB; Callsigns</button>
+            <button class="btn adv-only" id="manageSavedCallsignsBtn" style="font-size:11px;padding:6px 10px" title="View and manage saved callsigns (advanced)">&#x1F4FB; Callsigns</button>
             <span id="savedOfficersBadge" style="font-size:11px;color:var(--muted);display:none"></span>
-            <button class="btn" id="manageSavedOfficersBtn" style="font-size:11px;padding:6px 10px" title="View and manage saved officers">&#x1F46E; Saved</button>
+            <button class="btn" id="manageSavedOfficersBtn" style="font-size:11px;padding:6px 10px" title="View and reuse saved officers">&#x1F46E; Saved officers</button>
           </div>
         </div>
         <!-- Structured quick-add: Sheriff + (optional) VICPOL -->
@@ -1395,9 +1400,14 @@
         </div>
       </div>
 
+      </div><!-- ═══ /STEP 3 ═══ -->
+
+      <!-- ═══ STEP 4 — Narrative & evidence ═══ -->
+      <div class="wizard-step" data-step="4" data-step-title="Narrative &amp; evidence" data-step-cards="narrativeCard,interviewCard,sentenceCard">
+
       <!-- Report Narrative -->
       <div class="card" id="narrativeCard" style="display:none;position:relative;z-index:15" data-section="narrative">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Report Narrative</h2><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Report Narrative</h2></div>
         <div class="hint" style="margin-bottom:10px">
           <div style="width:100%">
             <div class="guidelines-toggle" id="guidelinesToggle">
@@ -1490,7 +1500,6 @@
       <div class="card" id="interviewCard" style="display:none;position:relative;z-index:12" data-section="interview">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
           <h2 style="margin:0">Interview Questions</h2>
-          <button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button>
           <button class="btn" id="fillQuestionsBtn" title="Fill in the default interview questions template">Fill Default Questions</button>
                   </div>
         <div class="hint">
@@ -1502,7 +1511,7 @@
 
       <!-- Sentence & Evidence -->
       <div class="card" id="sentenceCard" style="display:none;position:relative;z-index:11" data-section="sentence">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Sentence & Evidence Locker</h2><button type="button" class="section-toggle-btn" title="Toggle section in/out of report">👁</button></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Sentence & Evidence Locker</h2></div>
         <div class="fields">
           <div>
             <div class="lbl" style="margin-bottom:8px">Sentence suggestion from selected charges</div>
@@ -1519,13 +1528,18 @@
         </div>
       </div>
 
+      </div><!-- ═══ /STEP 4 ═══ -->
+
+      <!-- ═══ STEP 5 — Sign & finish ═══ -->
+      <div class="wizard-step" data-step="5" data-step-title="Sign &amp; finish" data-step-cards="signatureCard,draftsCard,diagnosticsCard">
+
       <!-- Signature -->
       <div class="card" id="signatureCard" style="position:relative;z-index:10">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
           <h2 style="margin:0">Signature</h2>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <button class="btn" id="saveSignatureProfileBtn" type="button" style="font-size:11px;padding:6px 10px" title="Save the current officer signature details to the pool for reuse">Save to Pool</button>
-            <button class="btn" id="manageSignaturePoolBtn" type="button" style="font-size:11px;padding:6px 10px" title="View and manage saved officer signature profiles">Manage Pool</button>
+            <button class="btn" id="saveSignatureProfileBtn" type="button" style="font-size:11px;padding:6px 10px" title="Remember these signature details (name, rank, division, callsign) so you can reuse them next time">💾 Save my details</button>
+            <button class="btn" id="manageSignaturePoolBtn" type="button" style="font-size:11px;padding:6px 10px" title="View and reuse your saved signature details">My saved details</button>
           </div>
         </div>
         <div class="hint" style="margin-bottom:10px"><span>✍️</span><span>This signature block has its own saved pool, separate from report officers. Save monthly rank and division updates here without changing the officer list.</span></div>
@@ -1568,7 +1582,7 @@
         <div class="hint"><span>💾</span><span>Auto-saves as you type. Click "Save Draft" to create named versions. Auto-backups are created every 60 seconds (max 5 kept).</span></div>
       </div>
 
-      <div class="card" id="diagnosticsCard" style="position:relative;z-index:1">
+      <div class="card adv-only" id="diagnosticsCard" style="position:relative;z-index:1">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
           <h2 style="margin:0">Diagnostics</h2>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1578,6 +1592,14 @@
         </div>
         <div class="hint" style="margin-bottom:10px"><span>🧰</span><span>Quick build checks for active mode, dirty sections, OCR status, header completeness, and legacy code paths kept disabled in this Sheriff build.</span></div>
         <div id="diagnosticsContent"></div>
+      </div>
+
+      </div><!-- ═══ /STEP 5 ═══ -->
+
+      <!-- Wizard navigation -->
+      <div class="wizard-nav" id="reportWizardNav">
+        <button class="btn" id="reportStepBack" type="button" title="Go to the previous step">← Back</button>
+        <button class="btn" id="reportStepNext" type="button" title="Go to the next step">Next →</button>
       </div>
 
     </div>
@@ -4576,6 +4598,7 @@ function clearDebtTool() {
     }
     updateDebtTabModeHint();
     updateCrossLinkStatus();
+    if (typeof updateWizardStepAvailability === "function") updateWizardStepAvailability();
   }
 
   // Preview Generation (DEBOUNCED)
@@ -6876,7 +6899,6 @@ Is there anything you would like to add at this time?`;
     const defectsToggleIcon = document.getElementById("defectsToggleIcon");
     if (defectsToggle && defectsPanel) {
       defectsToggle.addEventListener("click", (e) => {
-        if (e.target.closest('.section-toggle-btn')) return; // let eye toggle handle itself
         const open = defectsPanel.style.display !== "none";
         defectsPanel.style.display = open ? "none" : "block";
         if (defectsToggleIcon) defectsToggleIcon.textContent = open ? "▶ Show" : "▼ Hide";
@@ -8276,7 +8298,6 @@ Is there anything you would like to add at this time?`;
     updateLicenseWarning();
     updateSentenceSuggestion();
     updateNarrativeHints();
-    applyExcludedClasses();
     updateCrossLinkStatus();
     debouncedRenderPreview();
   }
@@ -10279,6 +10300,25 @@ Is there anything you would like to add at this time?`;
     });
   }
 
+  // Advanced / Simple view toggle — Simple (default) keeps the recruit view clean;
+  // Advanced reveals diagnostics, saved-detail pools and the reusable Defaults.
+  const advancedToggleBtn = document.getElementById("advancedToggleBtn");
+  if (advancedToggleBtn) {
+    const applyAdvanced = (on) => {
+      document.body.classList.toggle("report-advanced", on);
+      advancedToggleBtn.setAttribute("aria-pressed", on ? "true" : "false");
+      advancedToggleBtn.textContent = on ? "⚙ Advanced ✓" : "⚙ Advanced";
+    };
+    let advSaved = false;
+    try { advSaved = localStorage.getItem("sheriff_report_mode") === "advanced"; } catch(e) {}
+    applyAdvanced(advSaved);
+    advancedToggleBtn.addEventListener("click", () => {
+      const on = !document.body.classList.contains("report-advanced");
+      applyAdvanced(on);
+      try { localStorage.setItem("sheriff_report_mode", on ? "advanced" : "simple"); } catch(e) {}
+    });
+  }
+
   // ==========================================================================
   // KEYBOARD SHORTCUTS
   // ==========================================================================
@@ -10329,42 +10369,13 @@ Is there anything you would like to add at this time?`;
   }
 
   // ============================================================================
-  // SECTION EXCLUDE TOGGLE
+  // SECTION VISIBILITY
   // ============================================================================
-  function sectionExcluded(name) {
-    return Array.isArray(state.excludedSections) && state.excludedSections.includes(name);
-  }
-
-  function applyExcludedClasses() {
-    document.querySelectorAll('[data-section]').forEach(card => {
-      const sec = card.dataset.section;
-      const excluded = sectionExcluded(sec);
-      card.classList.toggle('section-excluded', excluded);
-      const btn = card.querySelector('.section-toggle-btn');
-      if (btn) {
-        btn.textContent = excluded ? '🚫' : '👁';
-        btn.title = excluded ? 'Click to include in report' : 'Click to exclude from report';
-      }
-    });
-  }
-
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.section-toggle-btn');
-    if (!btn) return;
-    const card = btn.closest('[data-section]');
-    if (!card) return;
-    const sec = card.dataset.section;
-    if (!Array.isArray(state.excludedSections)) state.excludedSections = [];
-    const idx = state.excludedSections.indexOf(sec);
-    if (idx === -1) {
-      state.excludedSections.push(sec);
-    } else {
-      state.excludedSections.splice(idx, 1);
-    }
-    applyExcludedClasses();
-    debouncedRenderPreview();
-    throttledAutosave();
-  });
+  // The per-section "eye toggle" UI was removed to simplify the tool for recruits.
+  // Sections are now driven solely by report type (updateReportTypeUI). This stub
+  // keeps the 12 generator call sites intact while guaranteeing every section is
+  // always emitted — identical to the previous default (nothing excluded).
+  function sectionExcluded() { return false; }
 
 
   // Section clear buttons
@@ -10567,16 +10578,6 @@ Is there anything you would like to add at this time?`;
         controls = wrap;
       }
 
-      const toggleEligible = new Set(['offender','charges','pins','fieldContact','searchSeizure','defects','items','officers','narrative','interview','sentence']);
-      if (toggleEligible.has(section) && !row.querySelector('.section-toggle-btn')) {
-        const toggleBtn = document.createElement('button');
-        toggleBtn.type = 'button';
-        toggleBtn.className = 'section-toggle-btn';
-        toggleBtn.title = 'Toggle section in/out of report';
-        toggleBtn.textContent = sectionExcluded(section) ? '🚫' : '👁';
-        controls.appendChild(toggleBtn);
-      }
-
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'btn danger';
@@ -10591,6 +10592,132 @@ Is there anything you would like to add at this time?`;
     });
   }
 
+
+  // ============================================================================
+  // REPORT WIZARD — recruit-friendly stepped flow
+  // ============================================================================
+  // Wraps the existing Report Tool cards into 5 steps. Steps whose cards are all
+  // hidden for the current report type (via updateReportTypeUI) are auto-skipped.
+  let _wizardStep = 1;
+  let _wizardReady = false;
+
+  function getWizardSteps() {
+    return Array.from(document.querySelectorAll('#reportPage .wizard-step'));
+  }
+  function wizardStepIsEmpty(stepEl) {
+    const ids = (stepEl.dataset.stepCards || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (!ids.length) return true;
+    return ids.every(id => {
+      const card = document.getElementById(id);
+      if (!card) return true;
+      return getComputedStyle(card).display === 'none';
+    });
+  }
+  function getVisibleWizardSteps() {
+    return getWizardSteps().filter(s => !wizardStepIsEmpty(s));
+  }
+  function renderWizardStepper() {
+    const stepper = document.getElementById('reportStepper');
+    if (!stepper) return;
+    const visible = getVisibleWizardSteps();
+    const activeIdx = visible.findIndex(s => parseInt(s.dataset.step, 10) === _wizardStep);
+    stepper.innerHTML = '';
+    visible.forEach((stepEl, i) => {
+      const num = parseInt(stepEl.dataset.step, 10);
+      const title = stepEl.dataset.stepTitle || ('Step ' + (i + 1));
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'wizard-chip' + (num === _wizardStep ? ' active' : (activeIdx > -1 && i < activeIdx ? ' done' : ''));
+      chip.dataset.stepTarget = String(num);
+      chip.innerHTML = '<span class="wizard-chip-num">' + (i + 1) + '</span><span>' + escapeHtml(title) + '</span>';
+      stepper.appendChild(chip);
+    });
+  }
+  function updateWizardNav() {
+    const nums = getVisibleWizardSteps().map(s => parseInt(s.dataset.step, 10));
+    const idx = nums.indexOf(_wizardStep);
+    const back = document.getElementById('reportStepBack');
+    const next = document.getElementById('reportStepNext');
+    if (back) back.disabled = idx <= 0;
+    if (next) {
+      const last = idx >= nums.length - 1;
+      next.textContent = last ? '✓ Done — review preview' : 'Next →';
+      next.classList.toggle('wizard-done', last);
+    }
+  }
+  function showWizardStep(stepNum) {
+    const steps = getWizardSteps();
+    const visible = getVisibleWizardSteps();
+    if (!visible.length) return;
+    let target = steps.find(s => parseInt(s.dataset.step, 10) === stepNum);
+    if (!target || wizardStepIsEmpty(target)) {
+      // land on the nearest visible step at or before the requested one, else the first
+      const nums = visible.map(s => parseInt(s.dataset.step, 10));
+      let best = nums[0];
+      for (const n of nums) { if (n <= stepNum) best = n; }
+      stepNum = best;
+      target = steps.find(s => parseInt(s.dataset.step, 10) === stepNum);
+    }
+    _wizardStep = stepNum;
+    steps.forEach(s => s.classList.toggle('active', s === target));
+    renderWizardStepper();
+    updateWizardNav();
+    if (_wizardReady) {
+      const stepper = document.getElementById('reportStepper');
+      if (stepper) stepper.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }
+  }
+  function wizardNext() {
+    const nums = getVisibleWizardSteps().map(s => parseInt(s.dataset.step, 10));
+    const idx = nums.indexOf(_wizardStep);
+    if (idx < nums.length - 1) { showWizardStep(nums[idx + 1]); }
+    else { const pv = document.querySelector('#reportPage .preview-wrap'); if (pv) pv.scrollIntoView({ block: 'start' }); }
+  }
+  function wizardPrev() {
+    const nums = getVisibleWizardSteps().map(s => parseInt(s.dataset.step, 10));
+    const idx = nums.indexOf(_wizardStep);
+    if (idx > 0) showWizardStep(nums[idx - 1]);
+  }
+  // Accepts either a step's card id or any element id living inside a step.
+  function wizardGoToCard(idOrCardId) {
+    let step = getWizardSteps().find(s =>
+      (s.dataset.stepCards || '').split(',').map(x => x.trim()).includes(idOrCardId));
+    if (!step) {
+      const target = document.getElementById(idOrCardId);
+      if (target && target.closest) step = target.closest('.wizard-step');
+    }
+    if (step) showWizardStep(parseInt(step.dataset.step, 10));
+  }
+  // Called at the end of updateReportTypeUI(): if the active step became empty for
+  // the current type, relocate to the nearest visible step; otherwise refresh chrome.
+  function updateWizardStepAvailability() {
+    const steps = getWizardSteps();
+    if (!steps.length) return;
+    const cur = steps.find(s => parseInt(s.dataset.step, 10) === _wizardStep);
+    if (!cur || wizardStepIsEmpty(cur)) {
+      showWizardStep(_wizardStep); // showWizardStep clamps to a visible step
+      return;
+    }
+    renderWizardStepper();
+    updateWizardNav();
+  }
+  function initReportWizard() {
+    showWizardStep(1);
+    _wizardReady = true;
+    const back = document.getElementById('reportStepBack');
+    const next = document.getElementById('reportStepNext');
+    if (back && !back.dataset.bound) { back.dataset.bound = '1'; back.addEventListener('click', wizardPrev); }
+    if (next && !next.dataset.bound) { next.dataset.bound = '1'; next.addEventListener('click', wizardNext); }
+    const stepper = document.getElementById('reportStepper');
+    if (stepper && !stepper.dataset.bound) {
+      stepper.dataset.bound = '1';
+      stepper.addEventListener('click', (e) => {
+        const chip = e.target.closest('[data-step-target]');
+        if (!chip) return;
+        showWizardStep(parseInt(chip.dataset.stepTarget, 10));
+      });
+    }
+  }
 
   // Initialize
   loadAutosave();
@@ -10608,9 +10735,9 @@ Is there anything you would like to add at this time?`;
   renderSelectedPins();
   updateSentenceSuggestion();
   updateLicenseWarning();
-  applyExcludedClasses();
   setPreviewStickyOffset();
   showToolPage(getInitialToolPage());
+  initReportWizard();
 
   // Delegated remove buttons (avoids fragile inline onclick escaping)
   if (el.selectedCharges) {
@@ -11105,10 +11232,13 @@ function bindSheriffLogsTool() {
             if (swEl) { swEl.value = idStatus; swEl.dispatchEvent(new Event('change')); }
           }
           showToolPage('report');
-          // An Arrest warrant needs the ID basis recorded — point the recruit straight at it.
+          // An Arrest warrant needs the ID basis recorded — jump to that step and point the recruit at it.
           if (idStatus === 'CONFIRMED') {
+            if (typeof wizardGoToCard === 'function') wizardGoToCard('swIdBasis');
             const basisEl = document.getElementById('swIdBasis');
             if (basisEl) { try { basisEl.focus(); } catch (_) {} }
+          } else if (typeof showWizardStep === 'function') {
+            showWizardStep(1);
           }
           // Next-step nudge so the recruit knows what to do on arrival.
           if (rt === 'sheriff_arrest') toast('Arrest warrant — record the ID confirmation basis (licence / ID / fingerprint).', 'ok');
@@ -11414,6 +11544,7 @@ function updateDebtTabModeHint() {
 
   const CARD_COLLAPSE_STORAGE_KEY = 'sheriff_tool_collapsed_cards_v1';
   const COLLAPSIBLE_CARD_CONFIGS = {
+    ocrCard: { mobileCollapsed: true, collapsedDefault: true },
     chargesCard: { mobileCollapsed: true },
     pinsCard: { mobileCollapsed: true },
     itemsCard: { mobileCollapsed: true },
@@ -11553,7 +11684,8 @@ function updateDebtTabModeHint() {
 
       const hasSavedState = Object.prototype.hasOwnProperty.call(collapsedCardState, id);
       const hasContent = cardHasMeaningfulContent(card);
-      const defaultCollapsed = hasSavedState ? !!collapsedCardState[id] : (!!cfg.mobileCollapsed && mobileDefault && !hasContent);
+      const collapseByDefault = !!cfg.collapsedDefault || (!!cfg.mobileCollapsed && mobileDefault);
+      const defaultCollapsed = hasSavedState ? !!collapsedCardState[id] : (collapseByDefault && !hasContent);
       setCardCollapsed(card, defaultCollapsed, false);
       card.dataset.collapseInit = '1';
     });
