@@ -1715,7 +1715,11 @@
         <div style="font-size:13px;color:var(--text);line-height:1.5">This is the one place debtor details live — for roadside stops (code 4) as well as follow-up debt enforcement. Everything here flows live into the Sheriff Logs commands, reports and warrants.</div><div id="debtLinkStatus" style="margin-top:8px;font-size:12px;color:var(--muted)">Waiting for linked report details.</div>
       </div>
     </div>
-    <label style="margin-bottom:10px"><div class="lbl">LEAP / MDT Paste <span style="font-weight:400;color:var(--muted);font-size:10px">— paste text or a screenshot to auto-fill name, phone &amp; vehicle below</span></div><textarea id="debtLeapPaste" rows="3" placeholder="Paste a LEAP profile — text or a screenshot — to auto-fill debtor details"></textarea></label>
+    <div style="padding:14px; border:2px solid rgba(0,191,255,0.4); border-radius:10px; background:rgba(0,191,255,0.06); margin-bottom:12px">
+      <div style="font-weight:800;font-size:13px">📋 Paste their LEAP / MDT profile here</div>
+      <div class="muted" style="font-size:11px;margin:3px 0 8px">Copy their profile text and paste it in — auto-fills their name, phone, address &amp; vehicle below. Got a screenshot instead? Use the box just below.</div>
+      <textarea id="debtLeapPaste" rows="3" placeholder="Paste a LEAP profile here to auto-fill debtor details" style="margin:0"></textarea>
+    </div>
     <div style="margin:-2px 0 12px">
       <div id="debtPasteZone" tabindex="0" role="button" aria-label="Post a screenshot of their ID or LEAP profile here to scan with OCR" style="padding:14px; border:2px dashed rgba(0,191,255,0.4); border-radius:10px; text-align:center; cursor:pointer; background:rgba(0,191,255,0.06)">
         <div style="font-weight:800;font-size:13px">📷 ① Post their ID screenshot here</div>
