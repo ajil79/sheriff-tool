@@ -2052,6 +2052,82 @@
   </div>
 
 <script>
+  /* ==========================================================================
+   * SHERIFF TOOL — paperwork helper for the BBRP Victorian Sheriff's Office
+   * ==========================================================================
+   *
+   * WHAT THIS IS
+   * A single-file, no-build, offline-capable web app. Sheriffs use it to draft
+   * warrants, work out debt-enforcement steps, and generate Discord bot log
+   * commands. It produces TEXT that a Sheriff pastes into the in-game MDT and
+   * Discord — it is a drafting aid, not a system of record. The handbook is
+   * explicit that the writing Sheriff, not this tool, is responsible for the
+   * warrant being correct.
+   *
+   * WHY IT LOOKS LIKE THIS
+   * Everything is inline in one HTML file on purpose: no build step, no
+   * bundler, no dependencies. It has to run by double-clicking the file, and
+   * keep working with no network. The only external call is Tesseract.js,
+   * loaded from a CDN on demand for OCR, and it degrades cleanly without it.
+   *
+   * DATA
+   * All state is localStorage under the `sheriff_` prefix. Nothing is sent to a
+   * server. Warrants name real people (in-character), which is a large part of
+   * why that stays true.
+   *
+   * THE THREE TABS  (.tool-nav + .tool-page, data-tool-page attribute)
+   *   Sheriff Logs — builds `!interact` / `!adddebt` / `!addplan` etc. commands
+   *   Debt Tool    — parses LEAP financial records, applies the debt tiers
+   *   Report Tool  — the warrant builder, a 5-step wizard
+   *
+   * HOW A WARRANT GETS BUILT  (the main path worth tracing first)
+   *   input event
+   *     -> bindInputs() handler writes to `state`
+   *     -> debouncedRenderPreview()  [~line 4680]
+   *     -> generateSheriffArrest() / ...Warrant() / ...Court() / ...DebtWarrant()
+   *     -> normalizeGeneratedReport()
+   *     -> written to <pre id="preview">
+   * `state` is the single source of truth; the DOM is rendered from it, never
+   * read as truth. renderAll() pushes state back into the fields after a load.
+   *
+   * DOMAIN RULES ARE NOT ARBITRARY
+   * Numbers and wordings that look like magic values are usually quoting a
+   * source document, and are cited inline where they appear:
+   *   - Sheriff Warrant Handbook v1.0 (rev 06/07/2026) — warrant procedure,
+   *     the single Failure to Stop charge, the 40-65 week sentence, Action
+   *     Notices, Debt Enforcement Warrant approval
+   *   - 2026 Sheriff's Handbook, Out and About — debt tiers, callsigns and
+   *     radio codes, licence suspension, criminal-record fees
+   * Please check the citation before "simplifying" one of these.
+   *
+   * TWO THINGS THAT LOOK LIKE DEAD CODE AND ARE NOT
+   *   ENABLED_REPORT_TYPES / LEGACY_REPORT_TYPES / sheriffGuardType()
+   *     Old report types were retired, but users may still hold an autosaved
+   *     draft naming one. The guard coerces those to sheriff_arrest so an old
+   *     draft loads instead of throwing.
+   *   INITIAL_STATE.trafficWarrant / bailConditions / fieldContact /
+   *   searchSeizure / vehicleInspection
+   *     Dormant features whose UI cards were removed but whose logic is kept.
+   *     Deleting these sub-objects while references remain is what caused the
+   *     phantom "Traffic vehicle" rows in the OCR review modal.
+   *
+   * LAYOUT OF THIS SCRIPT  (search the ==== banners to jump)
+   *   constants & Tesseract loader ............ top
+   *   CHARGES / PINS reference data
+   *   core helpers — debounce, escapeHtml, norm
+   *   charge & PIN selection UI
+   *   sentence suggestion, narrative hints, validators
+   *   presets & templates
+   *   DEBT TOOL — parsing, tiers, command building
+   *   REPORT GENERATORS — the four warrant builders
+   *   drafts, autosave & backups
+   *   interview questions, quality scanner
+   *   OCR pipeline
+   *   event wiring (bindInputs) & renderAll
+   *   local databases — persons, officers, callsigns, signatures
+   *   wizard, mobile layout, diagnostics, cross-linking
+   * ========================================================================== */
+
   const APP_VERSION = "v3";
   const APP_TITLE = "Sheriff Tool";
   const STORAGE_SCHEMA_VERSION = 2;
@@ -2106,13 +2182,16 @@
   const PINS = [];
 
   // ============================================================================
-  // OPTIMIZED VERSION with Complete Feature Set
-  // - Debounced preview rendering
-  // - Throttled autosave  
-  // - Consolidated event listeners
-  // - Sheriff warrant boilerplate
-  // - Traffic warrant boilerplate
-  // - All original features preserved
+  // CORE HELPERS
+  // ----------------------------------------------------------------------------
+  // Used everywhere below. Two worth knowing before reading anything else:
+  //   norm(v)        — trims and coerces null/undefined to "". Most comparisons
+  //                    in this file go through it, so an unset field and an
+  //                    empty one behave the same.
+  //   escapeHtml(s)  — every piece of user text interpolated into innerHTML must
+  //                    pass through this. Warrants carry names typed by hand.
+  // Rendering is debounced (~200ms) and autosave throttled, because both fire on
+  // every keystroke across a form with a few hundred inputs.
   // ============================================================================
 
   // Utilities
@@ -2936,7 +3015,25 @@
   window.togglePin = togglePin;
 
 
-  // State
+  // ============================================================================
+  // STATE
+  // ----------------------------------------------------------------------------
+  // The single source of truth. Everything visible is rendered FROM here; the
+  // DOM is never read back as truth. Input handlers write state, then trigger a
+  // re-render — so what the Sheriff sees in the preview is always what will be
+  // copied out.
+  //
+  // INITIAL_STATE doubles as the schema. It is deep-cloned for a fresh form and
+  // per-section by clearSection(), so every key a feature touches must exist
+  // here — a missing sub-object turns into `undefined` at the call site rather
+  // than an empty value, which is subtler and worse than a crash. That is
+  // exactly how the phantom "Traffic vehicle" rows got into the OCR review
+  // modal: the sub-objects were deleted, the references were not.
+  //
+  // Sub-objects are grouped by the card that owns them (offender, sheriffWarrant,
+  // debtTool, sheriffLogs), plus the dormant-feature block noted below.
+  // ============================================================================
+
   const INITIAL_STATE = {
     reportType: "sheriff_arrest",
     enteredBy: "",
@@ -3601,6 +3698,29 @@
     mel.setDate(mel.getDate() + days);
     return mel;
   }
+
+  // ============================================================================
+  // DEBT TOOL
+  // ----------------------------------------------------------------------------
+  // Sheriffs recover GOVERNMENT debt only — never private debt. A Sheriff pastes
+  // (or OCRs) a person's LEAP financial records; this parses them, keeps the
+  // overdue government lines, totals them, and says what to do next.
+  //
+  // The tiers come from the Out and About handbook, slides 9-10. Boundaries are
+  // inclusive-low and were confirmed directly with Sheriff leadership, because
+  // the handbook's "over $10,000 & under $60,000" wording is ambiguous at the
+  // edges. Exactly $60,000 is a 4-week debt; exactly $100,000 is top tier:
+  //
+  //   under $10,000      pay immediately; else suspend licence + #impound-request
+  //   $10,000-$59,999    3 weeks; payment plan allowed (!addplan)
+  //   $60,000-$99,999    4 weeks; warn that $100k triggers a bank freeze
+  //   $100,000 and over  no plans; pay / forfeit asset / seizure / 60wk detention
+  //
+  // getDebtThreshold() is the single place those boundaries live — the tier
+  // labels, deadlines and next-action text all derive from it. Everything from
+  // here to updateReportTypeUI() is this tool: parsing, the tier cards, the
+  // callsign and phone-script builders, and the handoff into the Report Tool.
+  // ============================================================================
 
   function parseDebtCurrency(raw) {
     const cleaned = String(raw || "").replace(/[^0-9.]/g, "");
@@ -4611,6 +4731,31 @@ function clearDebtTool() {
   let _pendingReviewApply = null;
 
   // Update UI based on report type
+  // ============================================================================
+  // REPORT GENERATORS — the core output of the app
+  // ----------------------------------------------------------------------------
+  // Four builders, one per live warrant type. Each returns the finished warrant
+  // as plain text, which the Sheriff copies into the MDT. They are pure string
+  // assembly over `state` — no DOM reads — so the preview and the copied text
+  // can never disagree.
+  //
+  //   generateSheriffArrest()      ID was confirmed, then the person fled
+  //   generateSheriffWarrant()     ID unconfirmed — questioning warrant
+  //   generateSheriffCourt()       records an outcome a Magistrate directed
+  //   generateSheriffDebtWarrant() approved debt enforcement on a vehicle/asset
+  //
+  // Arrest vs Questioning is the distinction recruits get wrong most often, and
+  // it is not a style choice: it turns on whether ID was FORMALLY confirmed
+  // (licence sighted or fingerprint match), per Handbook 2.1/2.2 and 3.1.
+  //
+  // Layout of every warrant is fixed by the handbook appendices — numbered
+  // sections, the MELROADS block, then the Action Notice. Don't reorder them;
+  // MelPol reads these at a glance and the shape is the convention.
+  //
+  // Section numbering is dynamic (`++dn`) because sections can be excluded, so
+  // the numbers stay contiguous rather than gaining holes.
+  // ============================================================================
+
   function updateReportTypeUI() {
     const type = state.reportType;
     
@@ -5206,6 +5351,21 @@ function clearDebtTool() {
   const BACKUP_MAX = 5;
   const BACKUP_INTERVAL = 60000; // 60 seconds
   let _lastBackupTime = 0;
+
+  // ============================================================================
+  // DRAFTS, AUTOSAVE & ROLLING BACKUPS
+  // ----------------------------------------------------------------------------
+  // Three layers, because losing a half-written warrant means re-interviewing a
+  // person who has already left:
+  //   autosave  — one slot, throttled, overwritten constantly. Restored on load.
+  //   drafts    — named, saved deliberately by the Sheriff.
+  //   backups   — rolling snapshots every 60s, max 5, the undo of last resort.
+  //
+  // All localStorage, all under `sheriff_`. Reads are defensive throughout: the
+  // stored shape can predate the current STORAGE_SCHEMA_VERSION, and a Sheriff
+  // mid-shift must never meet a stack trace instead of their form. A load that
+  // cannot be parsed is dropped rather than partially applied.
+  // ============================================================================
 
   function saveBackupSnapshot() {
     const now = Date.now();
@@ -6162,6 +6322,28 @@ Is there anything you would like to add at this time?`;
 
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
+  // ============================================================================
+  // OCR PIPELINE
+  // ----------------------------------------------------------------------------
+  // A Sheriff screenshots the in-game MDT / MELROADS / LEAP panels and pastes
+  // the image here rather than retyping a plate and eight fields under time
+  // pressure. Tesseract.js is fetched from a CDN on first use only; if that
+  // fetch fails the tool stays fully usable and the Sheriff types it in.
+  //
+  // Accuracy comes from constraining the problem, not from the engine:
+  //   1. crop to the panel region that holds the field (zone rects below)
+  //   2. upscale — game text is small and Tesseract is much better on 2-3x
+  //   3. post-process to repair the substitutions Tesseract reliably makes on
+  //      this font (O/0, I/1, S/5) before parsing
+  //   4. parse into a structured object, never straight into `state`
+  //
+  // Step 4 matters: OCR output is a SUGGESTION. It goes through the review modal
+  // (buildOcrReviewChanges / openChangeReviewModal) so the Sheriff confirms
+  // every field before it lands on a warrant. Nothing here writes to state
+  // directly, and it should stay that way — a misread plate on a warrant names
+  // the wrong person.
+  // ============================================================================
+
   async function cropBlobFromImageBlob(blob, rect, options = {}) {
     const img = await blobToImage(blob);
     const sx = clamp(Math.round((rect.x || 0) * img.width), 0, img.width - 1);
@@ -7022,6 +7204,30 @@ Is there anything you would like to add at this time?`;
       container.appendChild(row);
     });
   }
+
+  // ============================================================================
+  // EVENT WIRING
+  // ----------------------------------------------------------------------------
+  // bindInputs() is long — it is one function because it is one job: attach
+  // every listener, once, at startup. Splitting it by feature would scatter the
+  // wiring for a single field across the file.
+  //
+  // Every handler follows the same shape, and it is worth matching when adding
+  // one:
+  //     el.<field>.addEventListener("input", () => {
+  //       state.<path> = el.<field>.value;   // 1. state first
+  //       debouncedRenderPreview();          // 2. re-render from state
+  //       throttledAutosave();               // 3. persist
+  //     });
+  //
+  // State is written before anything renders, so the preview is always built
+  // from committed state rather than from the event. `el` is a lookup table of
+  // cached getElementById results, built once; entries can be null when a card
+  // is hidden for the current report type, hence the `if (el.x)` guards.
+  //
+  // renderAll() below is the reverse direction — state back into the fields —
+  // and runs after a draft/autosave load, not on ordinary edits.
+  // ============================================================================
 
   function bindInputs() {
     // Report type
@@ -10450,7 +10656,13 @@ Is there anything you would like to add at this time?`;
   if (nowBtn) nowBtn.addEventListener("click", fillNow);
 
   // ==========================================================================
-  // DARK/LIGHT MODE TOGGLE
+  // DEDUPE HELPERS for the saved pools
+  // --------------------------------------------------------------------------
+  // The persons / officers / callsigns / signatures pools are append-heavy: a
+  // Sheriff re-enters the same colleague every shift. These collapse repeats
+  // and cap the list so localStorage cannot grow without bound.
+  // (This banner previously read "DARK/LIGHT MODE TOGGLE" — that toggle lives
+  // with the theme code further down. Renamed to match what follows it.)
   // ==========================================================================
 
   function dedupeStringArray(values, max = 500) {
