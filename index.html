@@ -233,6 +233,50 @@
       font-weight:900;
     }
     .danger:hover{background:rgba(255,80,80,0.22); transform:translateY(-1px)}
+    /* ID status banner — the confirmed/unconfirmed distinction decides whether a
+       fled driver gets an Arrest or a Questioning warrant (Handbook 2.1/2.2/3.1),
+       so it is deliberately loud and centred rather than a quiet inline hint.
+       .warn = blocked, still UNCONFIRMED.  .ok = basis recorded, CONFIRMED. */
+    .id-status-banner{
+      display:none;
+      text-align:center;
+      padding:14px 16px;
+      margin:10px 0;
+      border-radius:10px;
+      border:2px solid transparent;
+      font-size:15px;
+      font-weight:800;
+      line-height:1.5;
+    }
+    .id-status-banner.show{display:block}
+    .id-status-banner .id-status-title{
+      display:block;
+      font-size:17px;
+      font-weight:900;
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+      margin-bottom:4px;
+    }
+    .id-status-banner .id-status-detail{
+      display:block;
+      font-size:13px;
+      font-weight:600;
+      opacity:0.92;
+    }
+    .id-status-banner.warn{
+      border-color:rgba(255,170,0,0.55);
+      background:rgba(255,170,0,0.12);
+      color:var(--warn);
+    }
+    .id-status-banner.ok{
+      border-color:rgba(0,204,102,0.5);
+      background:rgba(0,204,102,0.10);
+      color:var(--ok);
+    }
+    @media (max-width:640px){
+      .id-status-banner{padding:12px}
+      .id-status-banner .id-status-title{font-size:15px}
+    }
     /* Autocomplete dropdown */
     .ac-drop{
       position:absolute;
@@ -1248,7 +1292,7 @@
             <label><div class="lbl">Subject / Warrant Name (override)</div><input id="swWarrantName" placeholder="Leave blank to use Offender Name"/></label>
           </div>
           <label><div class="lbl">ID Confirmation Basis</div><input id="swIdBasis" placeholder="Required for ID CONFIRMED — e.g. driver licence shown / government ID shown / fingerprint result confirmed"/></label>
-          <div id="swIdStatusWarn" style="display:none;padding:10px;border-radius:10px;border:1px solid rgba(255,200,100,0.25);background:rgba(255,200,100,0.08);font-size:12px;line-height:1.6;color:var(--warn)">ID CONFIRMED is only for when the person actually showed ID or returned a fingerprint match. State the basis (driver licence shown / government ID shown / fingerprint result confirmed) or this stays ID UNCONFIRMED. A verbal name or visual recognition is not enough (Handbook 3.1).</div>
+          <div id="swIdStatusWarn" class="id-status-banner warn"><span class="id-status-title">ID Unconfirmed</span><span class="id-status-detail">ID CONFIRMED is only for when the person actually showed ID or returned a fingerprint match. State the basis above (driver licence shown / government ID shown / fingerprint result confirmed) or this stays ID UNCONFIRMED. A verbal name or visual recognition is not enough (Handbook 3.1).</span></div>
           <label><div class="lbl">MDT/LEAP Paste (auto-fill)</div><textarea id="swPaste" rows="3" placeholder="Paste profile here"></textarea></label>
           <div class="divider"></div>
           <label><div class="lbl">Interaction Type</div><select id="swInteractionType"><option value="vehicle">Vehicle Stop</option><option value="foot">On Foot / No Vehicle</option></select></label>
@@ -2876,12 +2920,14 @@
   }
 
 
-  function toggleCharge(chargeName) {
-    if (selectedChargesSet.has(chargeName)) {
-      selectedChargesSet.delete(chargeName);
-    } else {
-      selectedChargesSet.add(chargeName);
-    }
+  // Everything that must happen after selectedChargesSet is mutated. The charge
+  // list drives the sentence suggestion, the narrative hints and the generated
+  // warrant, so all three go stale together if a caller forgets one — which is
+  // exactly what happened on Clear Charges, where the hints kept advising on
+  // charges that had just been removed.
+  // Callers that also touch PINs (backup restore, renderAll) do more than this
+  // and correctly do not use it.
+  function chargesChanged() {
     renderSelectedCharges();
     renderChargeList();
     updateSentenceSuggestion();
@@ -2889,6 +2935,15 @@
     state.chargesList = Array.from(selectedChargesSet).join('\n');
     debouncedRenderPreview();
     throttledAutosave();
+  }
+
+  function toggleCharge(chargeName) {
+    if (selectedChargesSet.has(chargeName)) {
+      selectedChargesSet.delete(chargeName);
+    } else {
+      selectedChargesSet.add(chargeName);
+    }
+    chargesChanged();
   }
 
   // The single standard charge for a Sheriff Failure to Stop warrant (Handbook 4.1).
@@ -2899,13 +2954,7 @@
       return;
     }
     selectedChargesSet.add(SHERIFF_FTS_CHARGE);
-    renderSelectedCharges();
-    renderChargeList();
-    updateSentenceSuggestion();
-    updateNarrativeHints();
-    state.chargesList = Array.from(selectedChargesSet).join('\n');
-    debouncedRenderPreview();
-    throttledAutosave();
+    chargesChanged();
     toast("Failure to Stop charge added", "ok");
   }
   window.addFailureToStopCharge = addFailureToStopCharge;
@@ -4107,23 +4156,33 @@ function enforceSheriffIdStatus(showToast = false, fromBasis = false) {
   if (wantsConfirmed && !basis) {
     state.sheriffWarrant.idStatus = "UNCONFIRMED";
     if (el.swIdStatus) el.swIdStatus.value = "UNCONFIRMED";
-    if (warnNode) {
-      warnNode.style.display = "block";
-      warnNode.textContent = "ID confirmed warrants are only for when the person actually showed ID. Add the confirmation basis first, otherwise this stays ID unconfirmed.";
-    }
+    setIdStatusBanner(warnNode, "warn", "ID Unconfirmed",
+      "ID confirmed warrants are only for when the person actually showed ID or returned a fingerprint match. Add the confirmation basis above, otherwise this stays ID UNCONFIRMED.");
     if (showToast) toast("Add an ID confirmation basis before setting ID confirmed", "warn");
     return false;
   }
-  if (warnNode) {
-    if (basis) {
-      warnNode.style.display = "block";
-      warnNode.textContent = `ID confirmation basis recorded: ${basis}`;
-    } else {
-      warnNode.style.display = "none";
-      warnNode.textContent = "";
-    }
+  if (basis) {
+    setIdStatusBanner(warnNode, "ok", "ID Confirmed", `Basis recorded: ${basis}`);
+  } else {
+    setIdStatusBanner(warnNode, null, "", "");
   }
   return true;
+}
+
+// Renders the ID status banner. Kept in one place because the banner carries two
+// opposite meanings — blocked (amber) vs confirmed (green) — and they previously
+// shared the same amber styling, so a successful confirmation read as a warning.
+// Passing a null tone hides it. Text is set via textContent, never innerHTML:
+// `basis` is free text typed by a Sheriff.
+function setIdStatusBanner(node, tone, title, detail) {
+  if (!node) return;
+  node.classList.remove("warn", "ok", "show");
+  if (!tone) return;
+  const titleEl = node.querySelector(".id-status-title");
+  const detailEl = node.querySelector(".id-status-detail");
+  if (titleEl) titleEl.textContent = title;
+  if (detailEl) detailEl.textContent = detail;
+  node.classList.add(tone, "show");
 }
 
 function buildSheriffSharedPresetPayload(presetKey, ctx) {
@@ -4556,6 +4615,30 @@ function applyDebtToolToSummary(showToast = true) {
   if (showToast) toast("Debt note added to report summary", "ok");
 }
 
+// Pushes the debt-warrant subset of state.sheriffWarrant back into its inputs.
+// Two paths apply a debt result to the warrant — applyDebtToolToWarrant() below
+// and the review-modal path in applyDebtToolToSheriffWarrantReviewed() — and both
+// must leave the form in the same state. This was duplicated verbatim in both;
+// adding a debt-warrant field meant remembering to edit two places 8,000 lines
+// apart, and forgetting one would leave that field stale in the form while the
+// preview showed the new value.
+// (renderAll() deliberately does NOT call this: it renders every sheriffWarrant
+// field, including the vehicle and court ones, not just this subset.)
+function renderDebtWarrantFields() {
+  if (el.swWarrantName) el.swWarrantName.value = state.sheriffWarrant.warrantName || "";
+  if (el.swOwner) el.swOwner.value = state.sheriffWarrant.owner || "";
+  if (el.swRego) el.swRego.value = state.sheriffWarrant.rego || "";
+  if (el.swModel) el.swModel.value = state.sheriffWarrant.model || "";
+  if (el.swIdStatus) el.swIdStatus.value = state.sheriffWarrant.idStatus || "UNCONFIRMED";
+  if (el.swIdBasis) el.swIdBasis.value = state.sheriffWarrant.idBasis || "";
+  enforceSheriffIdStatus(false);
+  if (el.swDebtNarrative) el.swDebtNarrative.value = state.sheriffWarrant.debtNarrative || "";
+  if (el.swDebtDeadline) el.swDebtDeadline.value = state.sheriffWarrant.debtDeadline || "";
+  if (el.swImpoundTime) el.swImpoundTime.value = state.sheriffWarrant.impoundTime || "";
+  if (el.swImpoundPrice) el.swImpoundPrice.value = state.sheriffWarrant.impoundPrice || "";
+  if (el.swApprovedBy) el.swApprovedBy.value = state.sheriffWarrant.approvedBy || "";
+}
+
 function applyDebtToolToWarrant(showToast = true) {
   const dt = state.debtTool || {};
   if (!dt.total) {
@@ -4580,18 +4663,7 @@ function applyDebtToolToWarrant(showToast = true) {
   state.sheriffWarrant.impoundPrice = defaults.impoundPrice || state.sheriffWarrant.impoundPrice;
   state.sheriffWarrant.approvedBy = norm(state.sheriffWarrant.approvedBy) || defaults.approvedByHint;
 
-  if (el.swWarrantName) el.swWarrantName.value = state.sheriffWarrant.warrantName || "";
-  if (el.swOwner) el.swOwner.value = state.sheriffWarrant.owner || "";
-  if (el.swRego) el.swRego.value = state.sheriffWarrant.rego || "";
-  if (el.swModel) el.swModel.value = state.sheriffWarrant.model || "";
-  if (el.swIdStatus) el.swIdStatus.value = state.sheriffWarrant.idStatus || "UNCONFIRMED";
-  if (el.swIdBasis) el.swIdBasis.value = state.sheriffWarrant.idBasis || "";
-  enforceSheriffIdStatus(false);
-  if (el.swDebtNarrative) el.swDebtNarrative.value = state.sheriffWarrant.debtNarrative || "";
-  if (el.swDebtDeadline) el.swDebtDeadline.value = state.sheriffWarrant.debtDeadline || "";
-  if (el.swImpoundTime) el.swImpoundTime.value = state.sheriffWarrant.impoundTime || "";
-  if (el.swImpoundPrice) el.swImpoundPrice.value = state.sheriffWarrant.impoundPrice || "";
-  if (el.swApprovedBy) el.swApprovedBy.value = state.sheriffWarrant.approvedBy || "";
+  renderDebtWarrantFields();
 
   debouncedRenderPreview();
   throttledAutosave();
@@ -5516,7 +5588,11 @@ function clearDebtTool() {
       }
 
       // Render backup snapshots
-      const backups = JSON.parse(localStorage.getItem(BACKUP_KEY) || "[]");
+      // Guarded like the other backup reads: this one runs inside renderDrafts(),
+      // so a corrupt backups entry would throw and take out the entire drafts
+      // panel — the recovery UI failing exactly when there is something to recover.
+      let backups = [];
+      try { backups = JSON.parse(localStorage.getItem(BACKUP_KEY) || "[]") || []; } catch (e) { backups = []; }
       if (backups.length > 0) {
         const divider = document.createElement("div");
         divider.className = "divider";
@@ -8442,12 +8518,9 @@ Is there anything you would like to add at this time?`;
     if (el.clearChargesBtn) {
       el.clearChargesBtn.addEventListener("click", () => {
         selectedChargesSet.clear();
-        renderSelectedCharges();
-        renderChargeList();
-        updateSentenceSuggestion();
-        state.chargesList = "";
-        debouncedRenderPreview();
-        throttledAutosave();
+        // Was hand-rolled here and omitted updateNarrativeHints(), so clearing
+        // every charge left the hints panel advising on charges just removed.
+        chargesChanged();
       });
     }
     
@@ -12694,18 +12767,7 @@ function updateDebtTabModeHint() {
     }
     openChangeReviewModal("Review Sheriff debt warrant update", changes, () => {
       Object.assign(state.sheriffWarrant, proposed);
-      if (el.swWarrantName) el.swWarrantName.value = state.sheriffWarrant.warrantName || "";
-      if (el.swOwner) el.swOwner.value = state.sheriffWarrant.owner || "";
-      if (el.swRego) el.swRego.value = state.sheriffWarrant.rego || "";
-      if (el.swModel) el.swModel.value = state.sheriffWarrant.model || "";
-      if (el.swIdStatus) el.swIdStatus.value = state.sheriffWarrant.idStatus || "UNCONFIRMED";
-      if (el.swIdBasis) el.swIdBasis.value = state.sheriffWarrant.idBasis || "";
-      enforceSheriffIdStatus(false);
-      if (el.swDebtNarrative) el.swDebtNarrative.value = state.sheriffWarrant.debtNarrative || "";
-      if (el.swDebtDeadline) el.swDebtDeadline.value = state.sheriffWarrant.debtDeadline || "";
-      if (el.swImpoundTime) el.swImpoundTime.value = state.sheriffWarrant.impoundTime || "";
-      if (el.swImpoundPrice) el.swImpoundPrice.value = state.sheriffWarrant.impoundPrice || "";
-      if (el.swApprovedBy) el.swApprovedBy.value = state.sheriffWarrant.approvedBy || "";
+      renderDebtWarrantFields();
       debouncedRenderPreview();
       throttledAutosave();
       markDirtyByIds(["sheriffWarrantCard"]);
