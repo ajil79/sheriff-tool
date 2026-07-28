@@ -5982,6 +5982,26 @@ Is there anything you would like to add at this time?`;
     return false;
   }
 
+  // LEAP and MELROADS print two columns on one line ("LIC CLASS: CAR HEAVY COMBIN
+  // LIC STATUS: EXPIRED"), so a value has to be cut where the next label starts.
+  // Anchored on the real label vocabulary rather than a generic "capitals then a
+  // colon" pattern — that pattern allowed spaces inside the label token, so it ate
+  // the multi-word value as well and "CAR HEAVY COMBIN" came back as "CAR".
+  // Longest-first so VIOLENCE POLICE wins over VIOLENCE.
+  const OCR_COLUMN_LABELS = [
+    "NAME", "DOB", "SEX", "HOME ADDR", "HOME ADDRESS", "PHONE NO", "PHONE NUMBER",
+    "LIC CLASS", "LIC STATUS", "EXPIRES", "CONDITIONS", "DEMERIT PTS",
+    "WANTED", "BAIL", "MEN. HEALTH", "GANG AFF", "VIOLENCE POLICE", "VIOLENCE",
+    "POS WEAP", "WEAPON LONGARM", "HANDGUN", "CONCEAL CARRY PERMIT",
+    "F/ARM PROHIB ORDER", "DNA ON FILE",
+    "REGISTRATION", "MODEL", "COLOUR", "REGISTERED", "STOLEN", "SUSPENDED", "OWNER",
+    "LICENCE NO", "LICENCE EXPIRY", "LICENCE TYPE", "DATE OF BIRTH"
+  ].sort((a, b) => b.length - a.length);
+  const OCR_TRAILING_LABEL_RE = new RegExp(
+    "\\s+(?:" + OCR_COLUMN_LABELS
+      .map(l => l.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+"))
+      .join("|") + ")\\s*:.*$", "i");
+
   function parseOCR(text) {
     const raw = String(text || "").replace(/\r/g, "");
     const cleanedRaw = raw
@@ -6050,7 +6070,7 @@ Is there anything you would like to add at this time?`;
             const m = lineU.match(re);
             if (m && m[1]) {
               let raw = cleanedRaw[i].slice(m.index + m[0].length - m[1].length);
-              raw = raw.replace(/\s+[A-Z][A-Z. \/-]*\s*:.*$/, '');
+              raw = raw.replace(OCR_TRAILING_LABEL_RE, '');
               if (/^[A-Z][A-Z. \/-]*\s*:/i.test(raw)) continue;
               const value = clean(raw);
               if (value) return value;
@@ -6068,7 +6088,13 @@ Is there anything you would like to add at this time?`;
     const findAfterHeader = (headerMatchers, offset = 1, maxScan = 8) => {
       for (let i = 0; i < upperLines.length; i++) {
         if (headerMatchers.every(re => re.test(upperLines[i]) || re.test(upperLines[i + 1] || ""))) {
-          const skipRe = /^(DRIVER|VICTORIA|AUSTRALIA|SEARCH PERSON|RUN PERSON CHECK|PENDING|LICEN[CS]E\s*(NO|EXPIRY|TYPE)|DATE\s+OF\s+BIRTH|NATIONAL\s+CRIME\s+CHECK|VIC\s*ROADS|CRIMTRAC)$/i;
+          // Chrome/OCR keeps the licence masthead on single lines — "DRIVER LICENCE"
+          // and "VICTORIA AUSTRALIA" — but these were listed as bare single words
+          // and anchored ^...$, so neither matched. "VICTORIA AUSTRALIA" then
+          // counted as the first real line and was read as the person's name,
+          // pushing the actual name into the address slot. Each header phrase now
+          // matches whole or split, and trailing punctuation is tolerated.
+          const skipRe = /^(DRIVER(\s+LICEN[CS]E)?|LICEN[CS]E|VICTORIA(\s+AUSTRALIA)?|AUSTRALIA|SEARCH\s+PERSON|RUN\s+PERSON\s+CHECK|PENDING(\s+PAPERWORK)?|PAPERWORK|LICEN[CS]E\s*(NO|EXPIRY|TYPE)|DATE\s+OF\s+BIRTH|NATIONAL\s+CRIME\s+CHECK|VIC\s*ROADS|CRIMTRAC)[.:]?$/i;
           let seen = 0;
           for (let j = i + 1; j < Math.min(i + maxScan, cleanedRaw.length); j++) {
             const line = cleanedRaw[j];
