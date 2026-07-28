@@ -2955,6 +2955,27 @@
       courtCharges: "", imprisonmentWeeks: "", courtActions: "", courtFees: "", magistrate: "", presidingRole: "Magistrate", courtHeardIn: "Magistrates Courts of Victoria", courtEvidence: "", mrcWeeks: "",
       sigRank: "Senior Sheriff", sigName: ""
     },
+    // Dormant feature state. The UI cards and report types for these were
+    // removed, but their logic is retained in case the features return. Keep
+    // these initialised: ~35 sites read state.<key> or clone INITIAL_STATE.<key>,
+    // and dropping them (as an earlier cleanup did) leaves those sites throwing
+    // on undefined. See ENABLED_REPORT_TYPES for what is actually live.
+    bailConditions: {
+      bailAmount: ""
+    },
+    trafficWarrant: {
+      impoundNum: "", impoundDays: "", fineAmount: "", reason: "", legNotes: "",
+      rego: "", model: "", colour: "", registered: "", regoExpires: "", stolen: "", suspended: "", owner: ""
+    },
+    fieldContact: {
+      name: "", dob: "", phone: ""
+    },
+    searchSeizure: {
+      name: "", dob: "", phone: ""
+    },
+    vehicleInspection: {
+      vehicleType: "", checklistState: {}
+    },
     debtTool: {
       rawInput: "",
       useCase: "roadside",
@@ -12246,7 +12267,10 @@ function updateDebtTabModeHint() {
       if (norm(next) !== norm(state.sheriffWarrant?.[fieldKey])) {
         changes.push({ section: "Sheriff vehicle", label, before: state.sheriffWarrant?.[fieldKey], after: next });
       }
-      if (norm(next) !== norm(state.trafficWarrant?.[fieldKey])) {
+      // Only offer Traffic vehicle rows when that report type is actually live.
+      // Otherwise every field differs from an empty dormant state and the review
+      // modal fills with rows for fields the Sheriff has no way to see.
+      if (ENABLED_REPORT_TYPES.includes("traffic_warrant") && norm(next) !== norm(state.trafficWarrant?.[fieldKey])) {
         changes.push({ section: "Traffic vehicle", label, before: state.trafficWarrant?.[fieldKey], after: next });
       }
     });
