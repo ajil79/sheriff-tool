@@ -972,7 +972,7 @@
               <div class="guide-branch-cta">→ Start Questioning Warrant</div>
             </div>
           </div>
-          <div class="guide-callout">Both warrants: Charge = <strong>Failure to Stop for an Enforcement Vehicle (Non-Police)</strong> · Sentence = <strong>PRISON TIME: 60 WEEKS</strong>. Sheriffs don't add a fine. Then: draft in Warrant Practice → ping an FTO (recruits wait 1 min) → enter in the MDT → put the warrant + evidence in DPS emails.</div>
+          <div class="guide-callout">Both warrants: Charge = <strong>Failure to Stop for an Enforcement Vehicle (Non-Police)</strong> · Sentence = <strong>PRISON TIME: 65 WEEKS</strong>. Sheriffs don't add a fine. Then: draft in Warrant Practice → ping an FTO (recruits wait 1 min) → enter in the MDT → put the warrant + evidence in DPS emails.</div>
         </div>
 
         <!-- D. Impound / Debt Enforcement -->
@@ -1000,7 +1000,7 @@
             <li>Only write one when a <strong>presiding official directs you to</strong> (commonly a guilty no-show).</li>
             <li>Record the charges, fines and the <strong>single total outcome exactly</strong> as the official gives them.</li>
             <li>Include the official's name and position, the court date and location.</li>
-            <li>Court Warrants use the court's outcome — not the standard Sheriff charge or 60-week sentence.</li>
+            <li>Court Warrants use the court's outcome — not the standard Sheriff charge or 65-week sentence.</li>
           </ol>
           <div class="guide-jump">
             <button class="btn" type="button" data-guide-jump="report" data-report-type="sheriff_court">Start Court Warrant</button>
@@ -1035,7 +1035,7 @@
       <details class="card guide-collapse">
         <summary>Quick reference <span class="guide-collapse-hint">— tap to expand</span></summary>
         <div class="guide-ref-grid">
-          <div class="guide-ref"><strong>The one Sheriff charge</strong><br>Failure to Stop for an Enforcement Vehicle (Non-Police). Sentence: PRISON TIME: 60 WEEKS. No fine added by Sheriffs.</div>
+          <div class="guide-ref"><strong>The one Sheriff charge</strong><br>Failure to Stop for an Enforcement Vehicle (Non-Police). Sentence: PRISON TIME: 65 WEEKS. No fine added by Sheriffs.</div>
           <div class="guide-ref"><strong>Arrest vs Questioning</strong><br>ID confirmed before they fled → Arrest. ID not confirmed → Questioning, naming the MELROADS registered owner.</div>
           <div class="guide-ref"><strong>No force · No pursuit</strong><br>Request ID/fingerprints, but never force them. Never chase a fleeing vehicle — record and request MelPol.</div>
           <div class="guide-ref"><strong>Confidentiality</strong><br>Never tell a person they have a warrant (only exception: a paid criminal-history check).</div>
@@ -1097,7 +1097,7 @@
               <li><strong>New here? Start on the <button type="button" class="js-open-guide guide-link">Recruit Guide</button></strong> — it walks you through stops, fleeing, arrests and impounds and sends you to the right place.</li>
               <li><strong>Select report type</strong> — Arrest (ID confirmed before they fled), Questioning (ID unconfirmed → names the registered owner), Court (on court direction), or Debt Enforcement.</li>
               <li><strong>For debt enforcement warrants</strong> — process the debt in the Debt Tool first, then click <strong>Fill Debt Warrant Report</strong> to push all data here automatically.</li>
-              <li><strong>For arrest / questioning warrants</strong> — paste a LEAP or MDT profile to auto-fill subject details, or type manually. The only charge is Failure to Stop; the sentence is 60 weeks.</li>
+              <li><strong>For arrest / questioning warrants</strong> — paste a LEAP or MDT profile to auto-fill subject details, or type manually. The only charge is Failure to Stop; the sentence is 65 weeks.</li>
               <li><strong>Fill the Report Narrative</strong> — describe events in court-ready language. Don't guess why they fled.</li>
               <li><strong>Validate before submitting</strong> — the Validate button flags missing fields and handbook issues.</li>
               <li><strong>Click Copy Preview</strong> (top-right) or press <strong>Ctrl+Shift+C</strong> — the formatted report is now on your clipboard.</li>
@@ -1122,7 +1122,7 @@
           <option value="sheriff_court">Sheriff Court Warrant</option>
           <option value="sheriff_debt">Sheriff Debt Enforcement Warrant</option>
         </select>
-        <div class="hint" style="margin-top:8px"><span>🧭</span><span><strong>Which warrant?</strong> ID confirmed before they fled → <strong>Arrest</strong>. ID not confirmed → <strong>Questioning</strong> (name the MELROADS registered owner). The only charge is Failure to Stop; the sentence is 60 weeks. <button type="button" class="js-open-guide guide-link">Open the Recruit Guide</button> for the full walkthrough.</span></div>
+        <div class="hint" style="margin-top:8px"><span>🧭</span><span><strong>Which warrant?</strong> ID confirmed before they fled → <strong>Arrest</strong>. ID not confirmed → <strong>Questioning</strong> (name the MELROADS registered owner). The only charge is Failure to Stop; the sentence is 65 weeks. <button type="button" class="js-open-guide guide-link">Open the Recruit Guide</button> for the full walkthrough.</span></div>
         <div class="hint" style="margin-top:8px"><span>💡</span><span>Date/time, callsign and unit can still auto-fill from MDT paste or your saved template, but you can now edit them here as well.</span></div>
         <details id="reportHeaderMetaDetails" class="header-meta-details">
           <summary>Report header details</summary>
@@ -1300,7 +1300,7 @@
           </div>
           <div id="swMrcWeeksWrap" style="display:none">
             <div class="divider"></div>
-            <label><div class="lbl">MRC Remand (weeks)</div><input id="swMrcWeeks" inputmode="numeric" placeholder="up to 60"/><div class="muted" style="font-size:11px;margin-top:6px">Handbook recommends a maximum of 60 weeks MRC unless directed by court or leadership.</div></label>
+            <label><div class="lbl">MRC Remand (weeks)</div><input id="swMrcWeeks" inputmode="numeric" placeholder="up to 65"/><div class="muted" style="font-size:11px;margin-top:6px">Handbook recommends a maximum of 65 weeks MRC unless directed by court or leadership.</div></label>
           </div>
           <label><div class="lbl">Instruction Block (optional override)</div><input id="swInstruction" placeholder="Leave blank for default"/></label>
         </div>
@@ -2646,12 +2646,12 @@
     if (!textEl) return;
 
     // Handbook 4.3 — for a Sheriff Failure to Stop warrant the recommended Sheriff outcome
-    // is a fixed PRISON TIME: 60 WEEKS, not a MelPol sentence range. Show that instead.
+    // is a fixed PRISON TIME: 65 WEEKS, not a MelPol sentence range. Show that instead.
     if (state.reportType === "sheriff_arrest" || state.reportType === "sheriff_warrant") {
       textEl.innerHTML =
-        '<div style="font-size:18px;font-weight:900;color:rgba(100,200,255,0.9);margin-bottom:2px">🔒 PRISON TIME: 60 WEEKS</div>'
+        '<div style="font-size:18px;font-weight:900;color:rgba(100,200,255,0.9);margin-bottom:2px">🔒 PRISON TIME: 65 WEEKS</div>'
         + '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Recommended Sheriff outcome for Failure to Stop (Handbook 4.3). Sheriffs do not add a fine — leave any fine to MelPol or the court.</div>'
-        + '<div style="font-size:11px;color:var(--muted)">The 40-week minimum is allowed by the law-book range but is not the recommended outcome. Only a Court Warrant or senior leadership direction changes this.</div>';
+        + '<div style="font-size:11px;color:var(--muted)">65 weeks is the set outcome — the old 40–60 week range no longer applies. Only a Court Warrant or senior leadership direction changes this.</div>';
       return;
     }
 
@@ -4831,7 +4831,7 @@ function clearDebtTool() {
         add(`- ${norm(state.sentence)}`);
       } else if (!mrcWeeks) {
         // Handbook 4.3 recommended Sheriff outcome for Failure to Stop.
-        add("- PRISON TIME: 60 WEEKS");
+        add("- PRISON TIME: 65 WEEKS");
       }
       if (norm(state.sentenceApproval)) add(`- ${norm(state.sentenceApproval)}`);
       add("");
@@ -4931,7 +4931,7 @@ function clearDebtTool() {
         add(`- ${norm(state.sentence)}`);
       } else {
         // Handbook 4.3 recommended Sheriff outcome for Failure to Stop.
-        add("- PRISON TIME: 60 WEEKS");
+        add("- PRISON TIME: 65 WEEKS");
       }
       if (norm(state.sentenceApproval)) add(`- ${norm(state.sentenceApproval)}`);
       add("");
@@ -5402,7 +5402,7 @@ function clearDebtTool() {
       if (!norm(state.sigName)) warnings.push("Missing signature name.");
       if (type === "sheriff_arrest") {
         const w = parseInt(norm(state.sheriffWarrant.mrcWeeks), 10);
-        if (!isNaN(w) && w > 60) warnings.push("MRC remand exceeds the handbook maximum of 60 weeks.");
+        if (!isNaN(w) && w > 65) warnings.push("MRC remand exceeds the handbook maximum of 65 weeks.");
       }
       // Handbook 4.4 / 9.3 — a Sheriff Failure to Stop warrant lists ONLY the Failure to Stop charge.
       const extraCharges = Array.from(selectedChargesSet).filter(c => c !== SHERIFF_FTS_CHARGE);
