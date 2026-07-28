@@ -5,10 +5,10 @@ Single-file offline-capable web app (`index.html`) for Sheriff warrant paperwork
 
 ## Running locally
 ```bash
-npm install
-npm run dev        # serves at http://localhost:3000
+npm run dev        # serves at http://localhost:3000 (just wraps `npx serve .`)
 ```
 Or just open `index.html` directly in a browser — no server needed.
+There is nothing to install: `package.json` declares no dependencies.
 
 ## Architecture
 Everything lives in `index.html`:
