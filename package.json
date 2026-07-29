@@ -4,8 +4,12 @@
   "description": "Sheriff Tool — Warrants, Debt Enforcement & Logs",
   "scripts": {
     "start": "npx serve .",
-    "dev": "npx serve ."
+    "dev": "npx serve .",
+    "test": "node test/run.js"
   },
   "license": "UNLICENSED",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
 }

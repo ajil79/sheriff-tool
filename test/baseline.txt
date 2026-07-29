@@ -1,0 +1,202 @@
+════════════════ sheriff_arrest ════════════════
+(1) OUTSTANDING WARRANT FOR ARREST - Marcus Bellamy (ID CONFIRMED)
+(2) CHARGES:
+- NIL
+
+REPORT:
+(1) Preliminary Details:
+- Time: NIL
+- Date: NIL
+- Location: NIL
+
+Vehicle stopped, ID sighted, then failed to remain stopped and fled.
+
+MELROADS VEHICLE LOOK-UP:
+=====================  MELROADS  ====================
+    REGISTRATION:        VHY 86
+    MODEL:               OBEY OMNIS VENUMM
+    COLOUR:              YELLOW
+    REGISTERED:          NIL
+    EXPIRES:             NIL
+    STOLEN:              NO
+    SUSPENDED:           NO
+
+---------------------  OWNER DETAILS ---------------------------
+    OWNER:               Marcus Bellamy
+
+(3) Officers Involved:
+- SRF 116 - - Sheriff Sergeant Stephen Palmes
+
+(4) Sentence:
+- The individual is to be remanded to MRC for 65 weeks.
+
+(5) Evidence:
+- NIL
+
+ACTION NOTICE
+PLEASE ARREST THE INDIVIDUAL AND PROCESS THE LISTED CHARGE AND SENTENCE.
+CONTACT AVAILABLE SHERIFFS FOR ANY OUTSTANDING DEBT ENFORCEMENT.
+NOTIFY SHERIFFS THROUGH DPS EMAILS OF THE OUTCOME.
+IF A COURT CASE OCCURS, SHERIFFS ONLY CLOSE THE WARRANT AFTER A GUILTY OR NOT-GUILTY FINDING.
+IF MELPOL CANNOT ACTION IT, LEAVE THE WARRANT ACTIVE AND REQUEST A SHERIFF.
+
+Signed:
+Sheriff Sergeant
+Stephen Palmes - SRF 116
+VICTORIAN DEPT. OF JUSTICE
+
+════════════════ sheriff_warrant ════════════════
+(1) OUTSTANDING WARRANT FOR QUESTIONING - Marcus Bellamy (ID CONFIRMED)
+(2) CHARGE IF OFFENCE IS PROVEN:
+- NIL
+
+REPORT:
+(1) Preliminary Details:
+- Time: NIL
+- Date: NIL
+- Location: NIL
+
+Vehicle stopped, ID sighted, then failed to remain stopped and fled.
+
+MELROADS VEHICLE LOOK-UP:
+=====================  MELROADS  ====================
+    REGISTRATION:        VHY 86
+    MODEL:               OBEY OMNIS VENUMM
+    COLOUR:              YELLOW
+    REGISTERED:          NIL
+    EXPIRES:             NIL
+    STOLEN:              NO
+    SUSPENDED:           NO
+
+---------------------  OWNER DETAILS ---------------------------
+    OWNER:               Marcus Bellamy
+
+(3) Officers Involved:
+- SRF 116 - - Sheriff Sergeant Stephen Palmes
+
+(4) Sentence If Offence Is Proven:
+- PRISON TIME: 65 WEEKS
+
+(5) Evidence:
+- NIL
+
+ACTION NOTICE
+PLEASE DETAIN THE INDIVIDUAL, COMPLETE THE OUTSTANDING QUESTIONS AND CONTACT AVAILABLE SHERIFFS FOR ANY OUTSTANDING DEBT ENFORCEMENT.
+IF THE OFFENCE IS PROVEN, PROGRESS TO ARREST AND PROCESS THE LISTED CHARGE AND SENTENCE.
+NOTIFY SHERIFFS THROUGH DPS EMAILS OF THE OUTCOME.
+IF A COURT CASE OCCURS, SHERIFFS ONLY CLOSE THE WARRANT AFTER A GUILTY OR NOT-GUILTY FINDING.
+
+Signed:
+Sheriff Sergeant
+Stephen Palmes - SRF 116
+VICTORIAN DEPT. OF JUSTICE
+
+════════════════ sheriff_court ════════════════
+THIS WARRANT IS ISSUED ON BEHALF OF THE COURTS OF VICTORIA
+OUTSTANDING COURT WARRANT - ID CONFIRMED
+
+(1) ACCUSED
+Full Name: Marcus Bellamy
+
+(2) PERSON DETAILS
+Phone Number: 555104
+
+(3) CHARGES BEFORE THE COURT (FOUND GUILTY)
+Charge: Contempt of Court
+Penalty Level: MEDIUM
+
+(4) COURT-ORDERED OUTCOMES
+Imprisonment: 70 weeks
+Court Actions: 15 Actions
+Court Fees: $25,000
+
+ENFORCEMENT NOTICE
+This warrant is issued under the authority of the Courts of Victoria and must be executed in full.
+All imprisonment weeks, actions, and fees listed above are court-ordered and mandatory.
+No officer, agency, or department has authority to alter, reduce, convert, defer, waive, or remove any part of this warrant.
+The accused must be dealt with strictly in accordance with the terms set out above.
+
+PRESIDING COURT OFFICIAL
+Presiding Magistrate: Evelyn Hart
+Court Heard In: Magistrates Courts of Victoria
+Court Date: NIL
+Court Location: NIL
+
+(5) OFFICERS INVOLVED
+SRF 116 - - Sheriff Sergeant Stephen Palmes
+
+PRELIMINARY DETAILS
+Time: NIL
+Date: NIL
+Location: NIL
+
+(6) SUMMARY OF EVENTS
+Vehicle stopped, ID sighted, then failed to remain stopped and fled.
+This warrant is issued on behalf of the court to locate, arrest, and detain the accused in accordance with the court-ordered outcomes.
+
+(7) APPEAL NOTICE
+This matter was heard in the Magistrates Courts of Victoria. Any appeal or challenge may only be made through the District Courts of Victoria.
+This warrant remains valid and enforceable unless formally stayed or overturned on appeal.
+
+(8) EVIDENCE
+Court records are available.
+Bodycam available if arrest is conducted.
+Images available in Sheriff Warrants under the Sheriff Warrants thread.
+
+ACTION NOTICE
+PLEASE ARREST THE INDIVIDUAL AND PROCESS THE COURT-ORDERED OUTCOME LISTED IN THIS WARRANT.
+ONCE ACTIONED, CLEAR THE WARRANT AND NOTIFY SHERIFFS THROUGH DPS EMAILS.
+IF MELPOL CANNOT ACTION IT, LEAVE THE WARRANT ACTIVE AND REQUEST A SHERIFF.
+
+Signed:
+Sheriff Sergeant
+Stephen Palmes - SRF 116
+VICTORIAN DEPT. OF JUSTICE
+
+════════════════ sheriff_debt ════════════════
+WARRANT DETAILS: (1) OUTSTANDING DEBT ENFORCEMENT WARRANT - Marcus Bellamy
+
+(2) SUSPECT DETAILS:
+
+NAME: Marcus Bellamy
+DOB: 1994-08-21
+SEX: M
+HOME ADDR: 12 Power Street, Pillbox Hill
+PHONE NO: 555104
+
+(3) REPORT:
+
+Current overdue debt total: NIL
+
+Marcus Bellamy has breached their payment plan by failing to keep up with their plan. Marcus Bellamy must have their OBEY OMNIS VENUMM with the plate VHY 86 impounded. Marcus Bellamy has until 18/02/2026 to pay their debt, otherwise the vehicle will belong to Melbourne Sheriffs and be sold.
+
+Sheriffs will monitor their debt and release the vehicle if all debt is cleared before 18/02/2026. Failure to pay the debt will result in the vehicle being sold, with the proceeds used to pay all outstanding debt.
+
+ACTION NOTICE
+PLEASE CONTACT A SHERIFF MEMBER ONCE THE INDIVIDUAL IS IN CUSTODY SO THE SHERIFF'S OFFICE CAN DEAL WITH THE DEBT ENFORCEMENT.
+IF NO SHERIFF IS AVAILABLE, LEAVE THE WARRANT ACTIVE AND PING SHERIFFS IN DPS EMAILS.
+
+The vehicle belonging to Marcus Bellamy is to be impounded by order of the Sheriff's Office of Melbourne.
+
+Vehicle Details:
+
+Reg: VHY 86
+
+Model: OBEY OMNIS VENUMM
+
+Impound Duration: 5 Months
+
+Impound Fee: $250,000
+
+REASON: SHERIFF'S OFFICE DEBT ENFORCEMENT
+
+APPROVED BY: Jack Fkn-Kone
+
+Signed,
+Sheriff Sergeant
+Stephen Palmes
+Sheriff's Office, Melbourne
+
+════════════════ meta ════════════════
+fields not found: (none)
+page errors: (none)

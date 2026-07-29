@@ -92,10 +92,46 @@ CSP lives in the HTML, not in `vercel.json`.
 
 ## Checking changes
 
-There is no test suite in the repo. The check that matters is **output
-equivalence**: generate all four warrant types before and after a change and diff
-the results. Anything in the generators, `state` shape, or `bindInputs` should
-leave that output byte-identical unless you meant to change it.
+```bash
+npm install     # jsdom, the only devDependency — the app itself still has none
+npm test
+```
 
-Worth doing by hand for any change to `generateSheriff*`, since those strings are
-what ends up in the MDT.
+The check that matters is **output equivalence**: `test/capture.js` generates all
+four warrant types and diffs them against `test/baseline.txt`. Almost every change
+should leave that byte-identical. If it moves and you did not intend it to,
+something is wrong; if you did intend it, regenerate the baseline with
+`node test/capture.js index.html test/baseline.txt` and say so in the commit.
+
+The suite also covers the parser against ten real LEAP and licence screenshots
+(`test/leap.js`) — that case set is what caught the licence card being read as
+"Victoria Australia" instead of the person's name.
+
+No framework, by design: the app has no build step and no runtime dependencies,
+so the tests do not drag in a toolchain either.
+
+## OCR engine
+
+Tesseract.js v4 (WASM), running **entirely client-side** — no cloud OCR, no API
+key. Images never leave the machine, which is the point for MDT screenshots.
+
+By default the engine loads from a CDN on first use. To run fully offline, drop
+these in and the tool picks them up automatically with no code change:
+
+```
+assets/vendor/tesseract/tesseract.min.js
+assets/vendor/tesseract/tesseract-core.wasm.js
+assets/vendor/tesseract/worker.min.js
+assets/vendor/tessdata/eng.traineddata.gz
+```
+
+Leave them out and it falls back to the CDN, so the app stays a single file you
+can double-click. `ocrAssetSource` in the diagnostics snapshot says which is live.
+
+Accuracy comes from the pipeline around the stock engine, not the engine:
+multi-pass scanning merged by confidence (`mergeParsedOCR`), region-aware crops
+with per-region page-segmentation modes (6 block / 7 single line / 11 sparse),
+and named preprocessing styles (`OCR_STYLES`) combining upscale, greyscale,
+auto-invert, CLAHE, unsharp mask, Otsu thresholding and morphological cleanup.
+Parsed output is then a **suggestion** — it goes through a review modal before
+anything reaches a warrant.

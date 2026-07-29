@@ -2223,8 +2223,45 @@
   const STORAGE_SCHEMA_VERSION = 2;
   const AUTOSAVE_KEY = "sheriff_report_autosave";
   const DRAFTS_KEY = "sheriff_report_drafts";
-  const OCR_ASSET_BASE = "https://cdn.jsdelivr.net/npm/tesseract.js@4/dist";
-  const OCR_LANG_BASE = "https://tessdata.projectnaptha.com/4.0.0";
+  // ── OCR engine assets ───────────────────────────────────────────────────────
+  // Tesseract.js runs entirely client-side either way — no image ever leaves the
+  // machine, which is the part that matters for MDT screenshots. What a local
+  // copy buys is working with no network at all, and no third-party runtime
+  // dependency.
+  //
+  // Drop these four files in and the tool uses them automatically, no code change:
+  //   assets/vendor/tesseract/tesseract.min.js
+  //   assets/vendor/tesseract/tesseract-core.wasm.js
+  //   assets/vendor/tesseract/worker.min.js
+  //   assets/vendor/tessdata/eng.traineddata.gz
+  // Leave them out and it falls back to the CDN, so the app stays a single file
+  // that runs by double-clicking. Both paths are allow-listed in the CSP.
+  const OCR_LOCAL_ASSET_BASE = "assets/vendor/tesseract";
+  const OCR_LOCAL_LANG_BASE = "assets/vendor/tessdata";
+  const OCR_CDN_ASSET_BASE = "https://cdn.jsdelivr.net/npm/tesseract.js@4/dist";
+  const OCR_CDN_LANG_BASE = "https://tessdata.projectnaptha.com/4.0.0";
+  // Resolved by probeLocalOcrAssets() on first OCR use; null until then.
+  let OCR_ASSET_BASE = OCR_CDN_ASSET_BASE;
+  let OCR_LANG_BASE = OCR_CDN_LANG_BASE;
+  let ocrAssetSource = "cdn";
+
+  // HEAD the local library; if it is there, prefer the whole local set. Cached on
+  // the function so this costs one request per session at most.
+  async function probeLocalOcrAssets() {
+    if (probeLocalOcrAssets._done) return ocrAssetSource;
+    probeLocalOcrAssets._done = true;
+    try {
+      const res = await fetch(`${OCR_LOCAL_ASSET_BASE}/tesseract.min.js`, { method: "HEAD" });
+      if (res && res.ok) {
+        OCR_ASSET_BASE = OCR_LOCAL_ASSET_BASE;
+        OCR_LANG_BASE = OCR_LOCAL_LANG_BASE;
+        ocrAssetSource = "local";
+      }
+    } catch (e) {
+      // No local copy, or file:// where HEAD is not answerable — stay on the CDN.
+    }
+    return ocrAssetSource;
+  }
 
   // ============================================================================
   // Offline-first note:
@@ -2235,8 +2272,11 @@
   async function ensureTesseract() {
     if (window.Tesseract && typeof window.Tesseract.recognize === "function") return true;
 
-    // If we're offline, do not hang.
-    if (typeof navigator !== "undefined" && navigator.onLine === false) return false;
+    // Prefer a vendored copy if one has been dropped in; otherwise the CDN.
+    await probeLocalOcrAssets();
+
+    // Offline with no local copy would just hang, so do not try.
+    if (ocrAssetSource !== "local" && typeof navigator !== "undefined" && navigator.onLine === false) return false;
 
     // Avoid double-loading.
     if (ensureTesseract._loading) return ensureTesseract._loading;
@@ -2244,7 +2284,9 @@
       const s = document.createElement("script");
       s.src = `${OCR_ASSET_BASE}/tesseract.min.js`;
       s.async = true;
-      s.crossOrigin = "anonymous"; // v47: Required for SRI integrity checks
+      // crossOrigin is meaningful for the CDN copy only; setting it on a
+      // same-origin vendored file would needlessly force a CORS check.
+      if (ocrAssetSource !== "local") s.crossOrigin = "anonymous";
       s.onload = () => resolve(true);
       s.onerror = () => {
         ensureTesseract._loading = null;
@@ -6704,22 +6746,34 @@ Is there anything you would like to add at this time?`;
     const ratio = img.width && img.height ? img.width / img.height : 1;
     const landscape = ratio >= 1.3;
 
+    // Each region names the preprocessing style suited to that screen and the
+    // page-segmentation mode suited to its shape:
+    //   PSM 6  uniform block of text  — the LEAP/MELROADS panels
+    //   PSM 7  a single text line     — the licence card's name and date rows
+    //   PSM 11 sparse text            — cluttered full-window shots
+    // Style "green" turns on CLAHE, which is what lifts the dim green-on-black
+    // LEAP text; the licence card is a pale scan so it takes the stretch instead.
     const regions = landscape
       ? [
-          { label: "LEFT PANEL", rect: { x: 0.00, y: 0.10, w: 0.58, h: 0.82 }, scale: 2.2, psm: "6" },
-          { label: "LEFT CENTRE", rect: { x: 0.00, y: 0.18, w: 0.50, h: 0.60 }, scale: 2.5, psm: "6" },
+          { label: "LEFT PANEL", rect: { x: 0.00, y: 0.10, w: 0.58, h: 0.82 }, scale: 2.2, psm: "6", style: "green" },
+          { label: "LEFT CENTRE", rect: { x: 0.00, y: 0.18, w: 0.50, h: 0.60 }, scale: 2.5, psm: "6", style: "green" },
           { label: "CENTRE PANEL", rect: { x: 0.10, y: 0.08, w: 0.80, h: 0.82 }, scale: 2.0, psm: "11" },
-          { label: "LOWER LEFT", rect: { x: 0.00, y: 0.46, w: 0.58, h: 0.38 }, scale: 2.1, psm: "6" }
+          { label: "LOWER LEFT", rect: { x: 0.00, y: 0.46, w: 0.58, h: 0.38 }, scale: 2.1, psm: "6", style: "green" }
         ]
       : [
-          { label: "MAIN PANEL", rect: { x: 0.04, y: 0.06, w: 0.92, h: 0.88 }, scale: 2.2, psm: "6" },
-          { label: "UPPER PANEL", rect: { x: 0.04, y: 0.04, w: 0.92, h: 0.54 }, scale: 2.3, psm: "6" }
+          { label: "MAIN PANEL", rect: { x: 0.04, y: 0.06, w: 0.92, h: 0.88 }, scale: 2.2, psm: "6", style: "green" },
+          { label: "UPPER PANEL", rect: { x: 0.04, y: 0.04, w: 0.92, h: 0.54 }, scale: 2.3, psm: "6" },
+          // Licence card: the name sits on its own line under the masthead, and
+          // expiry/DOB share one line. Reading each as a single line beats
+          // treating the card as one block.
+          { label: "CARD NAME LINE", rect: { x: 0.02, y: 0.13, w: 0.66, h: 0.17 }, scale: 3.0, psm: "7", style: "licencecard" },
+          { label: "CARD DATE LINE", rect: { x: 0.02, y: 0.44, w: 0.72, h: 0.16 }, scale: 3.0, psm: "7", style: "licencecard" }
         ];
 
     let best = null;
     for (const region of regions) {
       const cropped = await cropBlobFromImageBlob(originalBlob, region.rect, { scale: region.scale || 2 });
-      const processed = await preprocessImage(cropped);
+      const processed = await preprocessImage(cropped, { variant: region.style || "binarize" });
       const result = await recognizeWithWorker(worker, processed, region.psm || "6");
       const text = postProcessOCR(result.text || "");
       const parsed = parseOCR(text);
@@ -6766,8 +6820,82 @@ Is there anything you would like to add at this time?`;
   // variant: 'binarize' (default full pipeline), 'contrast' (percentile
   // contrast stretch, stays grayscale) or 'invert' (forced inversion then
   // binarise) — the extra variants rescue low-contrast / dark-theme shots.
+  // Contrast Limited Adaptive Histogram Equalisation.
+  // Global stretching is dominated by whichever region has the widest range, so
+  // on a LEAP panel — bright green glyphs on near-black, with a photo box in one
+  // corner — the text ends up barely touched. CLAHE equalises per tile instead,
+  // clipping each tile's histogram so noise in flat areas is not amplified, then
+  // bilinearly blends the tile LUTs so no tile seams appear.
+  // Operates in place on a Uint8Array of grey values.
+  function applyClahe(gray, w, h, opts = {}) {
+    const tiles = Math.max(2, opts.tiles || 8);
+    const clipLimit = opts.clipLimit || 3.0;
+    const tw = Math.ceil(w / tiles), th = Math.ceil(h / tiles);
+    const luts = [];
+
+    for (let ty = 0; ty < tiles; ty++) {
+      luts[ty] = [];
+      for (let tx = 0; tx < tiles; tx++) {
+        const x0 = tx * tw, y0 = ty * th;
+        const x1 = Math.min(x0 + tw, w), y1 = Math.min(y0 + th, h);
+        const hist = new Uint32Array(256);
+        let n = 0;
+        for (let y = y0; y < y1; y++) {
+          for (let x = x0; x < x1; x++) { hist[gray[y * w + x]]++; n++; }
+        }
+        if (!n) { luts[ty][tx] = null; continue; }
+        // Clip tall bins and spread the excess evenly — the "contrast limited" part.
+        const limit = Math.max(1, Math.floor((clipLimit * n) / 256));
+        let excess = 0;
+        for (let v = 0; v < 256; v++) if (hist[v] > limit) { excess += hist[v] - limit; hist[v] = limit; }
+        const share = Math.floor(excess / 256);
+        for (let v = 0; v < 256; v++) hist[v] += share;
+        const lut = new Uint8Array(256);
+        let cum = 0;
+        for (let v = 0; v < 256; v++) { cum += hist[v]; lut[v] = Math.max(0, Math.min(255, Math.round((cum * 255) / n))); }
+        luts[ty][tx] = lut;
+      }
+    }
+
+    const out = new Uint8Array(gray.length);
+    for (let y = 0; y < h; y++) {
+      const fy = Math.min(tiles - 1, Math.max(0, y / th - 0.5));
+      const ty0 = Math.floor(fy), ty1 = Math.min(tiles - 1, ty0 + 1), wy = fy - ty0;
+      for (let x = 0; x < w; x++) {
+        const fx = Math.min(tiles - 1, Math.max(0, x / tw - 0.5));
+        const tx0 = Math.floor(fx), tx1 = Math.min(tiles - 1, tx0 + 1), wx = fx - tx0;
+        const v = gray[y * w + x];
+        const a = luts[ty0][tx0], b = luts[ty0][tx1], c = luts[ty1][tx0], d = luts[ty1][tx1];
+        if (!a || !b || !c || !d) { out[y * w + x] = v; continue; }
+        const top = a[v] * (1 - wx) + b[v] * wx;
+        const bot = c[v] * (1 - wx) + d[v] * wx;
+        out[y * w + x] = Math.round(top * (1 - wy) + bot * wy);
+      }
+    }
+    gray.set(out);
+  }
+
+  // Named preprocessing styles, so a caller can say what kind of screen it is
+  // rather than which pixel operations to run. The first three preserve the
+  // original variant names and behaviour exactly; the rest are combinations
+  // tuned for the in-game screens Sheriffs actually scan.
+  //   stretch     — 2-98 percentile stretch, stay greyscale (no hard threshold)
+  //   forceInvert — invert even when the background reads as light
+  //   clahe       — adaptive local contrast before sharpening/threshold
+  const OCR_STYLES = {
+    binarize:    {},                                  // default: sharpen + Otsu + dilate
+    contrast:    { stretch: true },
+    invert:      { forceInvert: true },
+    green:       { clahe: true },                     // LEAP: green on near-black
+    clahe:       { clahe: true },
+    darkpanel:   { clahe: true, forceInvert: true },  // dark hover/overlay panels
+    licencecard: { stretch: true },                   // pale card, anti-aliased text
+    banner:      { stretch: true }                    // result banners
+  };
+
   async function preprocessImage(blob, opts = {}) {
     const variant = opts.variant || "binarize";
+    const style = OCR_STYLES[variant] || OCR_STYLES.binarize;
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -6818,7 +6946,7 @@ Is there anything you would like to add at this time?`;
         const isDarkBg = avgBrightness < 128;
         
         // ── Step 3: Invert if dark background (or when forced) ────────
-        if (isDarkBg || variant === "invert") {
+        if (isDarkBg || style.forceInvert) {
           for (let i = 0; i < pixelCount; i++) {
             gray[i] = 255 - gray[i];
           }
@@ -6830,7 +6958,14 @@ Is there anything you would like to add at this time?`;
         // ── Contrast variant: 2–98 percentile stretch, keep grayscale ─
         // No hard threshold — anti-aliased or low-contrast text survives
         // where Otsu binarisation would eat it.
-        if (variant === "contrast") {
+        // Adaptive local contrast, before any stretch/threshold decision.
+        if (style.clahe) {
+          applyClahe(gray, w, h);
+          histogram.fill(0);
+          for (let i = 0; i < pixelCount; i++) histogram[gray[i]]++;
+        }
+
+        if (style.stretch) {
           let lo = 0, hi = 255, seen = 0;
           const loTarget = pixelCount * 0.02;
           const hiTarget = pixelCount * 0.98;
@@ -12531,6 +12666,7 @@ function updateDebtTabModeHint() {
       draftCount: Object.keys(JSON.parse(localStorage.getItem(DRAFTS_KEY) || "{}")).length,
       autosavePresent,
       ocrLoaded: !!(window.Tesseract && typeof window.Tesseract.recognize === "function"),
+      ocrAssetSource, // "local" once vendored assets are found, otherwise "cdn"
       online: typeof navigator === "undefined" ? true : navigator.onLine !== false,
       headerReady,
       headerDateTime: norm(state.reportDateTime) || "NIL",
