@@ -21,6 +21,7 @@ const CHECKS = [
   ['syntax', 'inline <script> parses'],
   ['equivalence', 'generated warrants match test/baseline.txt'],
   ['leap.js', 'ten real LEAP / licence samples parse correctly'],
+  ['amounts.js', 'money keeps its decimal point; phones stay digits-only'],
   ['flags.js', 'LEAP risk flags, incl. "YES [ACTIVE CRIMINAL WARRANT]"'],
   ['ocrbug.js', 'no phantom "Traffic vehicle" rows in the OCR review modal'],
   ['throwsites.js', 'INITIAL_STATE clone sites + legacy draft load'],

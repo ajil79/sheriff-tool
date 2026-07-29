@@ -2569,7 +2569,7 @@
       dt.debtorLastName = val(sl.lastName);
     }
     if (!val(dt.debtorPhone) && val(sl.phone)) dt.debtorPhone = val(sl.phone);
-    if (!val(dt.amountOwedPaid) && val(sl.amount)) dt.amountOwedPaid = val(sl.amount).replace(/[^\d]/g, '');
+    if (!val(dt.amountOwedPaid) && val(sl.amount)) dt.amountOwedPaid = normalizeSheriffAmount(val(sl.amount));
     if (!val(dt.stopLocation) && val(sl.location)) dt.stopLocation = val(sl.location);
     if (!val(dt.officerHandling) && val(sl.handlingOfficer)) dt.officerHandling = val(sl.handlingOfficer);
     if (!val(dt.vehicleModel) && !val(dt.vehicleRego) && val(sl.vehicle)) dt.vehicleModel = val(sl.vehicle);
@@ -11517,7 +11517,7 @@ Is there anything you would like to add at this time?`;
     const warnings = [];
     const firstName = escapeSheriffCommandArg(sl.firstName);
     const lastName = escapeSheriffCommandArg(sl.lastName);
-    const phone = normalizeSheriffAmount(sl.phone);
+    const phone = normalizeSheriffPhone(sl.phone);
     const amount = normalizeSheriffAmount(sl.amount);
     const details = escapeSheriffCommandArg(sl.details);
     const outcome = escapeSheriffCommandArg(sl.outcome);
@@ -11529,7 +11529,7 @@ Is there anything you would like to add at this time?`;
     if (!lastName) issues.push('Debtor last name is missing — add it in the Debt Tool.');
     if (sl.phone && !phone) issues.push('Phone number must contain digits only.');
     if (phone && (phone.length < 4 || phone.length > 12)) warnings.push('Phone number length looks unusual.');
-    if (sl.amount && !amount) issues.push('Amount must contain digits only.');
+    if (sl.amount && !amount) issues.push('Amount must contain a number, e.g. 13301 or 13301.50.');
     if (debtorKey && officerRef && (debtorKey === officerRef || officerRef.includes(debtorKey) || debtorKey.includes(officerRef))) {
       warnings.push('Debtor name looks too similar to the handling officer or signature. Double-check you are not logging your own name.');
     }
@@ -11553,9 +11553,29 @@ Is there anything you would like to add at this time?`;
     return { issues, warnings };
   }
 
+  // Phone numbers are digit strings ("330201", "1717") — stripping everything
+  // else is right here, and this is what normalizeSheriffAmount used to do.
+  function normalizeSheriffPhone(v) {
+    return String(v || '').replace(/[^\d]/g, '');
+  }
+
+  // Money for the bot commands. This previously stripped every non-digit, decimal
+  // point included, so "$13,301.50" came out as "1330150" — the digits ran
+  // together and the amount sent to the bot was 100x the real debt. That matters
+  // most on !cleardebt, where the Sheriff types the exact amount paid by hand.
+  // Returns a bare string with no separators, since it is interpolated straight
+  // into a command. Cents are preserved; whole amounts stay whole.
   function normalizeSheriffAmount(v) {
-    const digits = String(v || '').replace(/[^\d]/g, '');
-    return digits || '';
+    let s = String(v || '').replace(/[^\d.]/g, '');   // drop $ , spaces, letters
+    if (!s) return '';
+    const firstDot = s.indexOf('.');
+    if (firstDot !== -1) {
+      // Keep only the first dot — "13.301.50" must not become "13.30150".
+      s = s.slice(0, firstDot + 1) + s.slice(firstDot + 1).replace(/\./g, '');
+      s = s.slice(0, firstDot + 3);                    // at most two decimals
+      s = s.replace(/\.$/, '');                        // no trailing lone dot
+    }
+    return /\d/.test(s) ? s : '';
   }
 
   function splitFullNameForSheriffLogs(fullName) {
@@ -11570,7 +11590,13 @@ Is there anything you would like to add at this time?`;
 
 function formatSheriffAmountForText(amount) {
   const digits = normalizeSheriffAmount(amount);
-  return digits ? `$${Number(digits).toLocaleString()}` : 'outstanding government debt';
+  if (!digits) return 'outstanding government debt';
+  // Show cents only when there are cents — a plain 13301 should not gain ".00",
+  // and 13301.50 must not render as "$13,301.5".
+  const n = Number(digits);
+  if (!Number.isFinite(n)) return 'outstanding government debt';
+  const hasCents = digits.includes('.');
+  return `$${n.toLocaleString(undefined, hasCents ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {})}`;
 }
 
 function getSheriffPresetContext() {
@@ -11635,7 +11661,7 @@ function getSheriffLogsState() {
 function getSheriffCommandTemplates(sl) {
   const firstName = escapeSheriffCommandArg(sl.firstName) || 'First-name';
   const lastName = escapeSheriffCommandArg(sl.lastName) || 'Last-name';
-  const phone = normalizeSheriffAmount(sl.phone) || 'Phone-number';
+  const phone = normalizeSheriffPhone(sl.phone) || 'Phone-number';
   const amount = normalizeSheriffAmount(sl.amount) || 'Amount-owed';
   const details = escapeSheriffCommandArg(sl.details) || 'Details';
   const outcome = escapeSheriffCommandArg(sl.outcome) || 'Outcome';
@@ -11674,7 +11700,7 @@ function renderSheriffLogsTool() {
     const rows = [
       ['Debtor', [sl.firstName, sl.lastName].filter(Boolean).join(' ')],
       ['Phone', sl.phone],
-      ['Amount owed / paid', sl.amount ? `$${Number(sl.amount).toLocaleString()}` : ''],
+      ['Amount owed / paid', sl.amount ? formatSheriffAmountForText(sl.amount) : ''],
       ['Location', sl.location],
       ['Vehicle', sl.vehicle],
       ['Handling officer', sl.handlingOfficer],
