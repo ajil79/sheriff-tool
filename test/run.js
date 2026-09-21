@@ -32,6 +32,10 @@ const CHECKS = [
   ['editpreview.js', 'Edit Preview warns before discarding unsaved manual edits'],
   ['dobvalidator.js', 'VALIDATORS.dob rejects an impossible day-of-month'],
   ['storeoverwrite.js', 'draft/preset overwrite, load-confirm and name safety'],
+  ['ctrlsscope.js', 'Ctrl+S is scoped to the Report Tool tab'],
+  ['evidencetrim.js', 'evidence lines are trimmed before qty parsing'],
+  ['sherifflogscopyall.js', 'Copy All is validated the same way per-command Copy is'],
+  ['debthandoff.js', 'Debt-to-Report hand-off navigates to the Report Tool'],
 ];
 
 let failed = 0;

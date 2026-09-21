@@ -2495,6 +2495,24 @@
     return ensureLines(text).split("\n").map(l => l.trim()).filter(Boolean);
   }
 
+  // Renders the editable evidence-row markup shared by renderEvidenceList() (in
+  // bindInputs()) and renderAll()'s initial population — previously duplicated
+  // verbatim in both places, and easy to let drift out of sync.
+  function renderEvidenceRowsHtml(items) {
+    return items.map((item, idx) => {
+      // Parse qty prefix if present (e.g. "3x BWC" -> qty=3, text="BWC")
+      const qtyMatch = item.match(/^(\d+)\s*x\s+(.+)$/i);
+      const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+      const text = qtyMatch ? qtyMatch[2] : item;
+      return `<div class="evidence-row">
+        <input type="number" class="ev-qty-edit" data-ev-qty="${idx}" value="${qty}" min="1" max="50000" title="Quantity"/>
+        <span style="font-size:11px;color:var(--muted)">x</span>
+        <span class="ev-text">${escapeHtml(text)}</span>
+        <button class="btn" data-remove-evidence="${idx}" style="padding:6px 10px; font-size:11px" title="Remove this evidence item">Remove</button>
+      </div>`;
+    }).join('');
+  }
+
   function normalizeGeneratedReport(text) {
     return String(text || "")
       .replace(/\r/g, "")
@@ -4824,6 +4842,11 @@ function applyDebtToolToWarrant(showToast = true) {
   debouncedRenderPreview();
   throttledAutosave();
   if (showToast) toast("Debt result applied to Sheriff debt warrant", "ok");
+  // UI copy promises "push all data here automatically" for one click — kept in
+  // sync with the live override below (this base definition is superseded by
+  // the Sheriff Upgrade Layer's reassignment and no longer runs, but leaving it
+  // silently diverged from the override is its own trap for a future editor).
+  showToolPage('report');
 }
 
 async function copyDebtPrimaryCommand() {
@@ -8054,6 +8077,7 @@ Is there anything you would like to add at this time?`;
       throttledAutosave();
       updateDebtTabModeHint();
       toast("Report type set to Sheriff Debt Enforcement Warrant", "ok");
+      showToolPage('report');
     });
 
     // Preliminary details structured inputs
@@ -8090,19 +8114,8 @@ Is there anything you would like to add at this time?`;
     function renderEvidenceList() {
       if (!evidenceList) return;
       // v47: Evidence items now support inline quantity editing
-      evidenceList.innerHTML = evidenceItems.map((item, idx) => {
-        // Parse qty prefix if present (e.g. "3x BWC" -> qty=3, text="BWC")
-        const qtyMatch = item.match(/^(\d+)\s*x\s+(.+)$/i);
-        const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
-        const text = qtyMatch ? qtyMatch[2] : item;
-        return `<div class="evidence-row">
-          <input type="number" class="ev-qty-edit" data-ev-qty="${idx}" value="${qty}" min="1" max="50000" title="Quantity"/>
-          <span style="font-size:11px;color:var(--muted)">x</span>
-          <span class="ev-text">${escapeHtml(text)}</span>
-          <button class="btn" data-remove-evidence="${idx}" style="padding:6px 10px; font-size:11px" title="Remove this evidence item">Remove</button>
-        </div>`;
-      }).join('');
-      
+      evidenceList.innerHTML = renderEvidenceRowsHtml(evidenceItems);
+
       // Update the readonly textarea
       if (el.evidence) {
         el.evidence.value = evidenceItems.join('\n');
@@ -8997,12 +9010,6 @@ Is there anything you would like to add at this time?`;
     }
     if (el.ocrText) el.ocrText.value = state.ocrText || "";
 
-    // Restore evidenceItems array from state so evidence list panel is repopulated
-    if (state.evidence) {
-      evidenceItems = state.evidence.split('\n').map(s => s.trim()).filter(Boolean);
-    } else {
-      evidenceItems = [];
-    }
 
     // Sheriff Warrant
     if (state.sheriffWarrant) {
@@ -9047,25 +9054,15 @@ Is there anything you would like to add at this time?`;
     if (el.prelimLocation) el.prelimLocation.value = state.prelimLocation || "";
     if (el.summary) el.summary.value = state.summary;
     if (el.evidence) el.evidence.value = state.evidence;
-    // Restore evidence items array from state so add/remove buttons work after draft load
-    evidenceItems.length = 0;
-    if (state.evidence) {
-      ensureLines(state.evidence).split("\n").filter(Boolean).forEach(l => evidenceItems.push(l));
-    }
+    // Restore evidence items array from state so add/remove buttons work after draft
+    // load. getLines() trims each line individually — a leading space on a line
+    // (e.g. " 3x Widget") used to survive untrimmed here and break the "NxItem"
+    // qty-parsing regex below, showing qty 1 / text "3x Widget" instead of qty 3.
+    evidenceItems = getLines(state.evidence);
     const evidenceListEl = document.getElementById('evidenceList');
     if (evidenceListEl) {
       // v47: Use editable evidence rows matching renderEvidenceList
-      evidenceListEl.innerHTML = evidenceItems.map((item, idx) => {
-        const qtyMatch = item.match(/^(\d+)\s*x\s+(.+)$/i);
-        const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
-        const text = qtyMatch ? qtyMatch[2] : item;
-        return `<div class="evidence-row">
-          <input type="number" class="ev-qty-edit" data-ev-qty="${idx}" value="${qty}" min="1" max="50000" title="Quantity"/>
-          <span style="font-size:11px;color:var(--muted)">x</span>
-          <span class="ev-text">${escapeHtml(text)}</span>
-          <button class="btn" data-remove-evidence="${idx}" style="padding:6px 10px; font-size:11px" title="Remove this evidence item">Remove</button>
-        </div>`;
-      }).join('');
+      evidenceListEl.innerHTML = renderEvidenceRowsHtml(evidenceItems);
     }
     if (el.interviewQs) el.interviewQs.value = state.interviewQs;
 
@@ -11137,10 +11134,13 @@ Is there anything you would like to add at this time?`;
       if (presetOverlay && presetOverlay.classList.contains("open")) { closePresetModal(); return; }
     }
 
-    // Ctrl+S / Cmd+S → Save Draft
+    // Ctrl+S / Cmd+S → Save Draft (Report Tool only — this used to fire from any
+    // tab, popping the "Draft name:" prompt even while on the Debt Tool or
+    // Sheriff Logs, which have nothing to do with a report draft).
     if ((e.ctrlKey || e.metaKey) && key === "s") {
       e.preventDefault();
-      saveDraft();
+      const activePage = document.querySelector('.tool-page.active');
+      if (activePage && activePage.id === 'reportPage') saveDraft();
       return;
     }
 
@@ -11866,7 +11866,20 @@ function renderSheriffLogsTool() {
   if (copyAllBtn && !copyAllBtn.dataset.bound) {
     copyAllBtn.dataset.bound = '1';
     copyAllBtn.addEventListener('click', async () => {
-      const latest = getSheriffCommandTemplates(getSheriffLogsState()).map(item => item.command).join('\n');
+      // The per-command Copy button blocks on validateSheriffLogState() so a
+      // command still containing literal placeholder text (e.g. "First-name")
+      // can't be copied into a Discord command channel — Copy All used to skip
+      // that same check entirely.
+      const sl = getSheriffLogsState();
+      const cmds = getSheriffCommandTemplates(sl);
+      const firstIssue = cmds
+        .map(item => ({ item, result: validateSheriffLogState(sl, item.key) }))
+        .find(({ result }) => result.issues.length);
+      if (firstIssue) {
+        toast(firstIssue.item.title + ': ' + firstIssue.result.issues[0], 'warn');
+        return;
+      }
+      const latest = cmds.map(item => item.command).join('\n');
       const ok = await copyToClipboard(latest);
       toast(ok ? 'All Sheriff commands copied' : 'Failed to copy commands', ok ? 'ok' : 'err');
     });
@@ -13116,6 +13129,10 @@ function updateDebtTabModeHint() {
       throttledAutosave();
       markDirtyByIds(["sheriffWarrantCard"]);
       if (showToast) toast("Debt result applied to Sheriff debt warrant", "ok");
+      // UI copy promises "push all data here automatically" for one click — it
+      // previously populated the fields but never actually navigated there,
+      // leaving the recruit to find the Report Tool tab themselves.
+      showToolPage('report');
     }, { summary: "These debt tool values will update the Sheriff debt warrant fields." });
   };
 
