@@ -31,6 +31,7 @@ const CHECKS = [
   ['debtgovonly.js', 'Debt Tool govOnly dead-end self-heals instead of blocking'],
   ['editpreview.js', 'Edit Preview warns before discarding unsaved manual edits'],
   ['dobvalidator.js', 'VALIDATORS.dob rejects an impossible day-of-month'],
+  ['storeoverwrite.js', 'draft/preset overwrite, load-confirm and name safety'],
 ];
 
 let failed = 0;

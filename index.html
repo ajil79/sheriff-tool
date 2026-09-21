@@ -3589,10 +3589,30 @@
     toast("Template deleted", "ok");
   };
 
+  const UNSAFE_STORE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+  // Prompts for a name, trims it, rejects blank/whitespace-only and unsafe keys
+  // (a name of exactly "__proto__" would corrupt the drafts/presets object's
+  // prototype instead of adding a normal key — the "save" would appear to
+  // succeed but nothing would actually persist or show up in the list), and
+  // confirms before overwriting an existing entry. Returns the final name to
+  // use, or null if the caller should not proceed.
+  function promptForStoreName(labelText, existing) {
+    const raw = prompt(labelText);
+    if (raw === null) return null; // cancelled
+    const name = raw.trim();
+    if (!name) { toast("Name can't be blank.", "warn"); return null; }
+    if (UNSAFE_STORE_KEYS.has(name)) { toast('"' + name + '" is a reserved name — pick another.', "err"); return null; }
+    if (Object.prototype.hasOwnProperty.call(existing, name)) {
+      if (!confirm('"' + name + '" already exists. Overwrite it?')) return null;
+    }
+    return name;
+  }
+
   function saveCurrentPreset() {
-    const name = prompt("Template name:");
-    if (!name) return;
     const presets = loadPresets();
+    const name = promptForStoreName("Template name:", presets);
+    if (!name) return;
     presets[name] = {
       callsign: (document.getElementById("tplCallsign")?.value || "").trim(),
       unit: (document.getElementById("tplUnit")?.value || "").trim(),
@@ -5626,6 +5646,13 @@ function clearDebtTool() {
     toast("Backups cleared", "ok");
   }
 
+  function clearAllDrafts() {
+    if (!confirm("Delete all saved drafts?")) return;
+    try { localStorage.removeItem(DRAFTS_KEY); } catch(e) {}
+    renderDrafts();
+    toast("Drafts cleared", "ok");
+  }
+
   function loadAutosave() {
     try {
       const saved = localStorage.getItem(AUTOSAVE_KEY);
@@ -5642,12 +5669,13 @@ function clearDebtTool() {
 
   // Drafts — v47: sync Sets before save, use safe storage
   function saveDraft() {
-    const name = prompt("Draft name:");
+    let drafts;
+    try { drafts = JSON.parse(localStorage.getItem(DRAFTS_KEY) || "{}"); } catch (e) { drafts = {}; }
+    const name = promptForStoreName("Draft name:", drafts);
     if (!name) return;
     try {
       state.chargesList = Array.from(selectedChargesSet).join('\n');
       state.pinsList = Array.from(selectedPinsSet).join('\n');
-      const drafts = JSON.parse(localStorage.getItem(DRAFTS_KEY) || "{}");
       drafts[name] = { ...packStoredState(state), _charges: [...selectedChargesSet], _pins: [...selectedPinsSet], savedAt: Date.now() };
       if (safeLocalStorageSet(DRAFTS_KEY, JSON.stringify(drafts))) {
         renderDrafts();
@@ -5662,6 +5690,7 @@ function clearDebtTool() {
     try {
       const drafts = JSON.parse(localStorage.getItem(DRAFTS_KEY) || "{}");
       if (drafts[name]) {
+        if (!confirm('Load draft "' + name + '"? Current form data will be replaced.')) return;
         const draft = drafts[name];
         state = unpackStoredState(draft);
         // v47: Restore Sets from saved arrays if available
@@ -5699,6 +5728,17 @@ function clearDebtTool() {
       if (names.length === 0) {
         el.draftsList.innerHTML = '<div class="muted">No saved drafts</div>';
       } else {
+        const draftsHeader = document.createElement("div");
+        draftsHeader.style.cssText = "display:flex;justify-content:space-between;align-items:center;margin-bottom:8px";
+        draftsHeader.innerHTML = '<span style="font-size:12px;font-weight:800;color:var(--muted)">Drafts (' + names.length + ')</span>';
+        const clearDraftsBtn = document.createElement("button");
+        clearDraftsBtn.className = "btn";
+        clearDraftsBtn.style.cssText = "font-size:10px;padding:4px 8px";
+        clearDraftsBtn.textContent = "Clear All";
+        clearDraftsBtn.addEventListener("click", clearAllDrafts);
+        draftsHeader.appendChild(clearDraftsBtn);
+        el.draftsList.appendChild(draftsHeader);
+
         names.forEach(name => {
           const row = document.createElement("div");
           row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:8px 0";
