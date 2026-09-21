@@ -495,6 +495,8 @@
     .wizard-chip.active{background:rgba(0,191,255,0.14);border-color:rgba(0,191,255,0.5);color:var(--vp-cyan)}
     .wizard-chip.active .wizard-chip-num{background:var(--accent);color:#00121c}
     .wizard-chip.done .wizard-chip-num{background:rgba(100,255,150,0.85);color:#00220c}
+    .wizard-chip.has-issues{border-color:rgba(255,170,0,0.5)}
+    .wizard-chip.has-issues .wizard-chip-num{background:rgba(255,170,0,0.85);color:#221200}
     .wizard-step{display:none}
     .wizard-step.active{display:grid;gap:14px;grid-auto-rows:max-content}
     .wizard-nav{display:flex;justify-content:space-between;gap:10px;margin-top:2px}
@@ -1224,6 +1226,7 @@
           </div>
         </details>
         <button class="now-btn" id="nowBtn" type="button" style="margin-top:10px" title="Fill the date and time fields with the current date and time">Use current date/time</button>
+        <div id="headerReadyBadge" style="margin-top:8px;font-size:11px;font-weight:700"></div>
       </div>
 
       <!-- Offender/Subject -->
@@ -2688,6 +2691,20 @@
     updateChargeFineTotal(); // Update running fine total
   }
 
+  // Parses a CHARGES cost string like "500-1000" or "500" into {min, max}.
+  // Shared by updateChargeFineTotal() and calculateBailAmount() — both are
+  // currently unreachable (fines are Sheriff-excluded below, and
+  // bail_conditions is a disabled legacy report type), but kept in sync here
+  // in case either becomes reachable again.
+  function parseChargeCostRange(costStr) {
+    const clean = String(costStr || "").replace(/,/g, '');
+    const range = clean.match(/(\d+)\s*-\s*(\d+)/);
+    if (range) return { min: parseInt(range[1], 10), max: parseInt(range[2], 10) };
+    const single = clean.match(/(\d+)/);
+    if (single) { const n = parseInt(single[1], 10); return { min: n, max: n }; }
+    return null;
+  }
+
   function updateChargeFineTotal() {
     const totalEl = document.getElementById("chargeFineTotal");
     const amountEl = document.getElementById("chargeFineAmount");
@@ -2703,17 +2720,8 @@
     let minTotal = 0, maxTotal = 0;
     selectedChargesSet.forEach(chargeName => {
       const charge = CHARGES.find(c => c.name === chargeName);
-      if (charge && charge.cost) {
-        const costStr = charge.cost.replace(/,/g, '');
-        const range = costStr.match(/(\d+)\s*-\s*(\d+)/);
-        if (range) {
-          minTotal += parseInt(range[1]);
-          maxTotal += parseInt(range[2]);
-        } else {
-          const single = costStr.match(/(\d+)/);
-          if (single) { minTotal += parseInt(single[1]); maxTotal += parseInt(single[1]); }
-        }
-      }
+      const parsed = charge && charge.cost ? parseChargeCostRange(charge.cost) : null;
+      if (parsed) { minTotal += parsed.min; maxTotal += parsed.max; }
     });
     totalEl.style.display = "flex";
     if (minTotal === maxTotal) {
@@ -2784,18 +2792,8 @@
     // Calculate from selected charges
     selectedChargesSet.forEach(chargeName => {
       const charge = CHARGES.find(c => c.name === chargeName);
-      if (charge && charge.cost) {
-        const costStr = charge.cost.replace(/,/g, '');
-        const match = costStr.match(/(\d+)\s*-\s*(\d+)/);
-        if (match) {
-          baseTotal += parseInt(match[2]);
-        } else {
-          const singleMatch = costStr.match(/(\d+)/);
-          if (singleMatch) {
-            baseTotal += parseInt(singleMatch[1]);
-          }
-        }
-      }
+      const parsed = charge && charge.cost ? parseChargeCostRange(charge.cost) : null;
+      if (parsed) baseTotal += parsed.max;
     });
     
     // Parse LEAP Criminal History for unpaid charges
@@ -3489,13 +3487,10 @@
       const pct = Math.round((total / (5 * 1024 * 1024)) * 100);
       const quotaEl = document.getElementById("storageQuota");
       if (quotaEl) {
-        if (pct > 70) {
-          quotaEl.textContent = `⚠ Storage: ${pct}% used (${(total/1024).toFixed(0)}KB / 5MB). Consider deleting old drafts.`;
-          quotaEl.style.display = "block";
-        } else {
-          quotaEl.textContent = `Storage: ${pct}% used (${(total/1024).toFixed(0)}KB / 5MB)`;
-          quotaEl.style.display = "block";
-        }
+        quotaEl.style.display = "block";
+        quotaEl.textContent = pct > 70
+          ? `⚠ Storage: ${pct}% used (${(total/1024).toFixed(0)}KB / 5MB). Consider deleting old drafts.`
+          : `Storage: ${pct}% used (${(total/1024).toFixed(0)}KB / 5MB)`;
       }
       return { total, pct };
     } catch(e) { return { total: 0, pct: 0 }; }
@@ -4666,6 +4661,12 @@ function processDebtToolInput() {
     toast("Government-only debt filter was reset (legacy setting) — continuing.", "warn");
   }
 
+  // UNVERIFIED: this 14-day overdue cutoff has no handbook citation anywhere in
+  // this file, unlike every other domain-rule number here (contrast
+  // getDebtThreshold(), cited to "Out and About handbook, slides 9-10"). Needs
+  // confirmation from Sheriff leadership against the source handbooks before
+  // this number is treated as authoritative. Do not change without that
+  // confirmation.
   const cutoff = convertTZ(new Date(), "Australia/Melbourne");
   cutoff.setDate(cutoff.getDate() - 14);
 
@@ -5844,6 +5845,34 @@ function clearDebtTool() {
   }
 
   // Validation
+  // Maps a validateDraft() warning message to the wizard card most likely to fix
+  // it, so the Validate panel can offer a "Fix →" jump button. Verified against
+  // each field's actual data-step-cards card (e.g. prelim time/date/location live
+  // on narrativeCard, step 4 — not reportMetaCard, despite the field names).
+  // Best-effort, not exhaustive: a warning with no match just renders without a
+  // button. NOTE: this table matches on the literal wording validateDraft() pushes
+  // — if a warning string changes, its regex here needs updating too, or the jump
+  // button silently stops appearing for that warning.
+  const VALIDATION_WARNING_CARD_HINTS = [
+    [/warrant name|accused name/i, 'sheriffWarrantCard'],
+    [/charges? selected|no charges|charges before the court|failure to stop warrants list only/i, 'chargesCard'],
+    [/officers? listed|no officers/i, 'officersCard'],
+    [/summary|warrant details|sentencing magistrate|cctv/i, 'narrativeCard'],
+    [/signature name/i, 'signatureCard'],
+    [/mrc remand/i, 'sheriffWarrantCard'],
+    [/dob format/i, 'offenderCard'],
+    [/vehicle rego|vehicle model/i, 'sheriffWarrantCard'],
+    [/prelim time/i, 'narrativeCard'],
+    [/header date|entered by header/i, 'reportMetaCard'],
+    [/id confirmed/i, 'sheriffWarrantCard'],
+    [/impound time|impound price|approval line|approver|debt enforcement warrant may only be approved|handbook 8\.[24]/i, 'sheriffWarrantCard'],
+    [/debtor phone/i, 'offenderCard'],
+  ];
+  function findCardForWarning(msg) {
+    const hit = VALIDATION_WARNING_CARD_HINTS.find(([re]) => re.test(msg));
+    return hit ? hit[1] : null;
+  }
+
   function validateDraft() {
     const warnings = [];
     const type = state.reportType;
@@ -7659,6 +7688,7 @@ Is there anything you would like to add at this time?`;
             if (cs) addCallsignToPool(cs);
             renderOfficerTags();
           }
+          updateHeaderReadyBadge();
           debouncedRenderPreview();
           throttledAutosave();
         });
@@ -8657,8 +8687,13 @@ Is there anything you would like to add at this time?`;
             html += '✓ No missing fields — ' + qualityHints.length + ' suggestion' + (qualityHints.length > 1 ? 's' : '') + ' to improve quality';
           }
           html += '</span><button class="validation-close-btn" type="button" style="background:none;border:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;opacity:0.7;flex-shrink:0">✕</button></div>';
-          // Required field warnings
-          html += warnings.map(w => '<div class="vi"><span>' + escapeHtml(w) + '</span></div>').join("");
+          // Required field warnings — each links back to the wizard step most
+          // likely to fix it, when findCardForWarning() recognizes the message.
+          html += warnings.map(w => {
+            const cardId = findCardForWarning(w);
+            const btn = cardId ? '<button type="button" class="btn vi-fix-btn" data-jump-card="' + cardId + '" style="font-size:10px;padding:3px 8px;margin-left:8px;flex-shrink:0">Fix →</button>' : '';
+            return '<div class="vi" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>' + escapeHtml(w) + '</span>' + btn + '</div>';
+          }).join("");
           // Quality hints (amber, different icon)
           if (hasQuality) {
             if (totalIssues > 0) html += '<div style="height:1px;background:var(--border);margin:8px 0"></div>';
@@ -8673,6 +8708,17 @@ Is there anything you would like to add at this time?`;
           }
         }
       });
+
+      // Delegated on the stable panel container (rebuilt via innerHTML on every
+      // Validate click) so "Fix →" buttons work without re-binding per render.
+      const validationPanelEl = document.getElementById("validationPanel");
+      if (validationPanelEl && !validationPanelEl.dataset.jumpBound) {
+        validationPanelEl.dataset.jumpBound = "1";
+        validationPanelEl.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-jump-card]");
+          if (btn) wizardGoToCard(btn.dataset.jumpCard);
+        });
+      }
     }
 
     // Edit Preview toggle
@@ -8978,6 +9024,7 @@ Is there anything you would like to add at this time?`;
     if (el.enteredBy) el.enteredBy.value = state.enteredBy || "";
     if (el.reportDateTime) el.reportDateTime.value = state.reportDateTime || "";
     if (el.enteredUnit) el.enteredUnit.value = state.enteredUnit || "";
+    updateHeaderReadyBadge();
     if (el.offenderName) el.offenderName.value = state.offender.name;
     if (el.offenderDOB) el.offenderDOB.value = state.offender.dob;
     if (el.offenderSex) el.offenderSex.value = state.offender.sex;
@@ -11419,13 +11466,25 @@ Is there anything you would like to add at this time?`;
     if (!stepper) return;
     const visible = getVisibleWizardSteps();
     const activeIdx = visible.findIndex(s => parseInt(s.dataset.step, 10) === _wizardStep);
+    // A chip previously showed "done" purely from being visited (i < activeIdx),
+    // which is not the same as actually valid — a Sheriff could step past an
+    // empty required field and see a false-reassuring checkmark. Cross-reference
+    // validateDraft()'s current warnings against each step's own cards instead.
+    const warnings = validateDraft();
     stepper.innerHTML = '';
     visible.forEach((stepEl, i) => {
       const num = parseInt(stepEl.dataset.step, 10);
       const title = stepEl.dataset.stepTitle || ('Step ' + (i + 1));
+      const stepCards = (stepEl.dataset.stepCards || '').split(',').map(s => s.trim());
+      const stepHasIssue = warnings.some(w => stepCards.includes(findCardForWarning(w)));
+      const isVisited = activeIdx > -1 && i < activeIdx;
+      let stateClass = '';
+      if (num === _wizardStep) stateClass = ' active';
+      else if (isVisited && stepHasIssue) stateClass = ' has-issues';
+      else if (isVisited) stateClass = ' done';
       const chip = document.createElement('button');
       chip.type = 'button';
-      chip.className = 'wizard-chip' + (num === _wizardStep ? ' active' : (activeIdx > -1 && i < activeIdx ? ' done' : ''));
+      chip.className = 'wizard-chip' + stateClass;
       chip.dataset.stepTarget = String(num);
       chip.innerHTML = '<span class="wizard-chip-num">' + (i + 1) + '</span><span>' + escapeHtml(title) + '</span>';
       stepper.appendChild(chip);
@@ -12803,6 +12862,19 @@ function updateDebtTabModeHint() {
       `Disabled Legacy Modes: ${data.legacyDisabled}`,
       `Legacy Compatibility Stubs Present: ${data.hiddenCompatCount}`
     ].join("\n"));
+  }
+
+  // The "header ready" signal (report date/time + entered-by both filled) is
+  // genuinely useful to every recruit, but it used to live only inside the
+  // Diagnostics card, which is hidden behind the Advanced toggle (off by
+  // default) — exactly the audience least likely to ever see it. Surfaced here
+  // as a small always-visible badge on Step 1 instead.
+  function updateHeaderReadyBadge() {
+    const badge = document.getElementById('headerReadyBadge');
+    if (!badge) return;
+    const ready = !!norm(state.reportDateTime) && !!norm(state.enteredBy);
+    badge.textContent = ready ? '✓ Header ready' : '⚠ Header incomplete — add date/time and entered-by above';
+    badge.style.color = ready ? 'var(--ok)' : 'var(--warn)';
   }
 
   function renderDiagnostics() {

@@ -36,6 +36,7 @@ const CHECKS = [
   ['evidencetrim.js', 'evidence lines are trimmed before qty parsing'],
   ['sherifflogscopyall.js', 'Copy All is validated the same way per-command Copy is'],
   ['debthandoff.js', 'Debt-to-Report hand-off navigates to the Report Tool'],
+  ['wizardvalidation.js', 'wizard validation jump-to-step and has-issues chips'],
 ];
 
 let failed = 0;

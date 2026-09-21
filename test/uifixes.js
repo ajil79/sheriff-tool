@@ -81,7 +81,31 @@ async function boot(seed) {
     dom.window.close();
   }
 
+  // ---- 3. header-ready badge (was only visible behind the Advanced toggle) --
+  console.log('\n── #headerReadyBadge reflects reportDateTime + enteredBy completeness');
+  {
+    const { dom } = await boot();
+    const d = dom.window.document;
+    const fire = (el, t) => el.dispatchEvent(new dom.window.Event(t, { bubbles: true }));
+    const badge = d.getElementById('headerReadyBadge');
+    check('badge element exists and is not adv-only gated', !!badge, true);
+    check('starts incomplete (both header fields blank)', badge.textContent.includes('incomplete'), true);
+
+    d.getElementById('reportDateTime').value = '14/06/2026 20:50';
+    fire(d.getElementById('reportDateTime'), 'input');
+    check('still incomplete with only one field filled', badge.textContent.includes('incomplete'), true);
+
+    d.getElementById('enteredBy').value = 'SRF 116 | Stephen Palmes';
+    fire(d.getElementById('enteredBy'), 'input');
+    check('ready once both fields are filled', badge.textContent.includes('ready'), true);
+
+    d.getElementById('enteredBy').value = '';
+    fire(d.getElementById('enteredBy'), 'input');
+    check('back to incomplete after clearing a field', badge.textContent.includes('incomplete'), true);
+    dom.window.close();
+  }
+
   console.log('\n' + '─'.repeat(64));
-  console.log(fails === 0 ? 'PASS: both behaviour changes verified.' : `FAIL: ${fails} check(s)`);
+  console.log(fails === 0 ? 'PASS: all behaviour changes verified.' : `FAIL: ${fails} check(s)`);
   process.exit(fails === 0 ? 0 : 1);
 })();
