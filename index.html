@@ -3405,6 +3405,10 @@
       if (month < 1 || month > 12) return "Invalid month";
       if (day < 1 || day > 31) return "Invalid day";
       const d = new Date(year, month - 1, day);
+      // new Date() silently rolls an out-of-range day into the next month (e.g.
+      // 31/02/2000 becomes March), so day<1||day>31 alone lets impossible dates
+      // like Feb 31 through. Confirm the constructed date round-trips exactly.
+      if (d.getDate() !== day || d.getMonth() !== month - 1) return "Invalid day for that month";
       if (d > new Date()) return "DOB is in the future";
       if (year < 1900) return "Year seems too old";
       return null;
@@ -4588,7 +4592,11 @@ function renderDebtToolUI() {
 function syncDebtToolFromInputs() {
   const map = {
     useCase: document.getElementById("debtUseCase")?.value || "roadside",
-    govOnly: document.getElementById("debtGovOnly") ? !!document.getElementById("debtGovOnly").checked : true,
+    // govOnly is intentionally NOT re-derived from #debtGovOnly here: that checkbox
+    // lives inside a display:none "removed Sheriff Ops Helper" stub with no reachable
+    // UI, so re-syncing from it on every process click just round-trips whatever
+    // value state.debtTool.govOnly already has (see processDebtToolInput()'s
+    // self-heal for the case where old/hand-edited data left it false).
     dutyNumber: document.getElementById("debtDutyNumber")?.value || "1",
     badgeNumber: document.getElementById("debtBadgeNumber")?.value || "",
     debtorFirstName: document.getElementById("debtDebtorFirstName")?.value || "",
@@ -4611,10 +4619,13 @@ function processDebtToolInput() {
   syncDebtToolFromInputs();
 
   if (state.debtTool.govOnly === false) {
-    toast("Sheriff debt processing should only be used for government fees. Re-enable the government-only filter first.", "warn");
-    renderDebtToolUI();
-    throttledAutosave();
-    return;
+    // No reachable control can set this to false anymore — the government-only
+    // filter's UI was removed (see LEGACY_COMPAT_STUB_IDS). Only old or hand-edited
+    // persisted data can still carry govOnly:false, and there is no way for a Sheriff
+    // to "re-enable" a control they can't see or click. Self-heal instead of
+    // permanently blocking debt processing.
+    state.debtTool.govOnly = true;
+    toast("Government-only debt filter was reset (legacy setting) — continuing.", "warn");
   }
 
   const cutoff = convertTZ(new Date(), "Australia/Melbourne");
@@ -5120,6 +5131,16 @@ function clearDebtTool() {
     return ["ACTION NOTICE", ...body];
   }
 
+  // Returns the Action Notice block for `type`, honoring the Instruction Block
+  // override (state.sheriffWarrant.instruction) if the Sheriff filled one in.
+  // Previously only the Debt generator checked this override — Arrest,
+  // Questioning and Court all silently ignored it despite the field being
+  // visible and editable for every report type.
+  function resolveActionNotice(type) {
+    const custom = norm(state.sheriffWarrant && state.sheriffWarrant.instruction);
+    return custom ? ["ACTION NOTICE", custom] : sheriffActionNotice(type);
+  }
+
   // Normalises a signature callsign to "SRF ###" form
   function formatSheriffCallsign(raw) {
     const cs = norm(raw);
@@ -5226,7 +5247,7 @@ function clearDebtTool() {
       add("- NIL");
     }
     add("");
-    sheriffActionNotice('arrest').forEach(x => add(x));
+    resolveActionNotice('arrest').forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
 
@@ -5325,7 +5346,7 @@ function clearDebtTool() {
       add("");
     }
 
-    sheriffActionNotice('questioning').forEach(x => add(x));
+    resolveActionNotice('questioning').forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
 
@@ -5425,7 +5446,7 @@ function clearDebtTool() {
       add("Images available in Sheriff Warrants under the Sheriff Warrants thread.");
     }
     add("");
-    sheriffActionNotice('court').forEach(x => add(x));
+    resolveActionNotice('court').forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
 
@@ -5461,9 +5482,7 @@ function clearDebtTool() {
     const debtNarrative = s(sw.debtNarrative) || (deadline ? `${who} has breached their payment plan by failing to keep up with their plan. ${who} must have their ${model} with the plate ${rego} impounded. ${who} has until ${deadline} to pay their debt, otherwise the vehicle will belong to Melbourne Sheriffs and be sold.` : `${who} has breached their payment plan by failing to keep up with their plan. ${who} must have their ${model} with the plate ${rego} impounded.`);
     const monitorLine = deadline ? `Sheriffs will monitor their debt and release the vehicle if all debt is cleared before ${deadline}. Failure to pay the debt will result in the vehicle being sold, with the proceeds used to pay all outstanding debt.` : `Sheriffs will monitor their debt and release the vehicle if all debt is cleared before the warrant is actioned. Failure to pay the debt will result in the vehicle being sold, with the proceeds used to pay all outstanding debt.`;
     // Handbook 11.6 default Action Notice; the Instruction Block override replaces the body.
-    const contactInstruction = s(sw.instruction)
-      ? ["ACTION NOTICE", s(sw.instruction)]
-      : sheriffActionNotice('debt');
+    const contactInstruction = resolveActionNotice('debt');
 
     add(`WARRANT DETAILS: (1) OUTSTANDING DEBT ENFORCEMENT WARRANT - ${who}`);
     add("");
@@ -8608,6 +8627,21 @@ Is there anything you would like to add at this time?`;
     const editPreviewBtn = document.getElementById('editPreviewBtn');
     if (editPreviewBtn && el.preview) {
       editPreviewBtn.addEventListener('click', () => {
+        // Manual preview edits are never captured back into state — they only
+        // survive while edit mode stays on. The instant another bound field
+        // changes, debouncedRenderPreview() overwrites the preview from state
+        // with no warning. Turning edit mode off is the one moment we can catch
+        // this before it happens silently, so confirm if the edited text has
+        // actually diverged from what state would currently regenerate.
+        if (window._editPreviewMode) {
+          let regenerated = "";
+          try { regenerated = normalizeGeneratedReport(generateCurrentReportText()); } catch (e) { /* fall through to compare as-is */ }
+          const edited = normalizeGeneratedReport(el.preview.textContent || "");
+          if (edited !== regenerated) {
+            const proceed = confirm("Your manual edits to the preview aren't saved to the form fields and will be overwritten the next time you edit a field. Turn off Edit mode anyway?");
+            if (!proceed) return;
+          }
+        }
         window._editPreviewMode = !window._editPreviewMode;
         el.preview.contentEditable = window._editPreviewMode ? 'true' : 'false';
         el.preview.style.outline = window._editPreviewMode ? '2px solid var(--accent)' : '';
@@ -13104,6 +13138,13 @@ function updateDebtTabModeHint() {
   function initSheriffUpgradeLayer() {
     state.reportType = sheriffGuardType(state.reportType);
     if (el.reportType && el.reportType.value !== state.reportType) el.reportType.value = state.reportType;
+    // The very first renderAll() (called from loadAutosave(); renderAll(); before this
+    // upgrade layer installs its guarded wrappers) ran the *base* updateReportTypeUI(),
+    // which has no default branch for an already-coerced-but-not-yet-corrected legacy
+    // report type — every optional card was left hidden. Re-run it now that
+    // state.reportType is fixed and this identifier resolves to the guarded wrapper
+    // above, so card visibility actually reflects the corrected type.
+    updateReportTypeUI();
 
     const exportReportTxtBtn = document.getElementById("exportReportTxtBtn");
     if (exportReportTxtBtn && exportReportTxtBtn.dataset.bound !== "1") {

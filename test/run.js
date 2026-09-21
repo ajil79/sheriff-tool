@@ -27,6 +27,10 @@ const CHECKS = [
   ['throwsites.js', 'INITIAL_STATE clone sites + legacy draft load'],
   ['uifixes.js', 'ID status banner states + corrupt-backup drafts panel'],
   ['statenull.js', 'deepMerge null-guard + preview try/catch do not throw'],
+  ['instructionblock.js', 'Instruction Block override applies to all 4 report types'],
+  ['debtgovonly.js', 'Debt Tool govOnly dead-end self-heals instead of blocking'],
+  ['editpreview.js', 'Edit Preview warns before discarding unsaved manual edits'],
+  ['dobvalidator.js', 'VALIDATORS.dob rejects an impossible day-of-month'],
 ];
 
 let failed = 0;
