@@ -26,6 +26,7 @@ const CHECKS = [
   ['ocrbug.js', 'no phantom "Traffic vehicle" rows in the OCR review modal'],
   ['throwsites.js', 'INITIAL_STATE clone sites + legacy draft load'],
   ['uifixes.js', 'ID status banner states + corrupt-backup drafts panel'],
+  ['statenull.js', 'deepMerge null-guard + preview try/catch do not throw'],
 ];
 
 let failed = 0;

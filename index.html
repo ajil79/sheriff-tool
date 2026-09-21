@@ -2514,17 +2514,22 @@
   function deepMerge(defaults, saved) {
     const out = { ...defaults };
     for (const key of Object.keys(saved)) {
+      const defaultIsObj = defaults[key] !== null && typeof defaults[key] === 'object' && !Array.isArray(defaults[key]);
       if (
         saved[key] !== null &&
         typeof saved[key] === 'object' &&
         !Array.isArray(saved[key]) &&
-        defaults[key] !== null &&
-        typeof defaults[key] === 'object' &&
-        !Array.isArray(defaults[key])
+        defaultIsObj
       ) {
         // Recursively merge nested objects so new fields added to defaults
         // in future versions are not lost when loading old saved states.
         out[key] = deepMerge(defaults[key], saved[key]);
+      } else if (saved[key] === null && defaultIsObj) {
+        // A stored null where a nested state object is expected (hand-edited or
+        // corrupted draft/autosave) must not clobber the default — the warrant
+        // generators and renderAll() read state.sheriffWarrant/.offender/.debtTool/
+        // .sheriffLogs unconditionally and would throw on a null sub-object.
+        out[key] = defaults[key];
       } else {
         out[key] = saved[key];
       }
@@ -5017,20 +5022,30 @@ function clearDebtTool() {
   }
 
   // Preview Generation (DEBOUNCED)
-  const debouncedRenderPreview = debounce(() => {
+  // Returns the generated report text for the current state.reportType, without
+  // writing to the DOM. Shared by debouncedRenderPreview() and the Edit Preview
+  // off-toggle's "did the preview text diverge from state?" check.
+  function generateCurrentReportText() {
     const type = state.reportType;
-    let output = "";
+    if (type === "sheriff_arrest") return generateSheriffArrest();
+    if (type === "sheriff_warrant") return generateSheriffWarrant();
+    if (type === "sheriff_court") return generateSheriffCourt();
+    if (type === "sheriff_debt") return generateSheriffDebtWarrant();
+    return generateSheriffArrest();
+  }
 
-    if (type === "sheriff_arrest") {
-      output = generateSheriffArrest();
-    } else if (type === "sheriff_warrant") {
-      output = generateSheriffWarrant();
-    } else if (type === "sheriff_court") {
-      output = generateSheriffCourt();
-    } else if (type === "sheriff_debt") {
-      output = generateSheriffDebtWarrant();
-    } else {
-      output = generateSheriffArrest();
+  const debouncedRenderPreview = debounce(() => {
+    let output = "";
+    try {
+      output = generateCurrentReportText();
+    } catch (e) {
+      // A thrown error here (e.g. from corrupted/partially-null state) used to
+      // silently freeze the preview forever with zero feedback. Fail loud instead,
+      // matching the OCR pipeline's try/catch/toast pattern, and keep the last-good
+      // preview on screen rather than blanking it.
+      console.error("Preview generation failed:", e);
+      toast("Preview failed to update — check console and report a bug", "err");
+      return;
     }
 
     if (el.preview && !window._editPreviewMode) el.preview.textContent = normalizeGeneratedReport(output);
@@ -5056,7 +5071,7 @@ function clearDebtTool() {
 
   // Builds output lines for selected vehicle defects (separate section)
   function buildDefectsOutputLines() {
-    if (!_defectHistory.length || sectionExcluded("defects")) return [];
+    if (!_defectHistory.length) return [];
     const lines = [];
     lines.push("VEHICLE DEFECTS IDENTIFIED:");
     _defectHistory.forEach((d, i) => {
@@ -5140,28 +5155,24 @@ function clearDebtTool() {
     const idLabel = idStatus === "CONFIRMED" ? "ID CONFIRMED" : "ID UNCONFIRMED";
     
     add(`(${++dn}) OUTSTANDING WARRANT FOR ARREST - ${who} (${idLabel})`);
-    if (!sectionExcluded("charges")) {
-      add(`(${++dn}) CHARGES:`);
-      if (norm(state.chargesList)) {
-        ensureLines(state.chargesList).split("\n").forEach(x => {
-          const clean = x.trim();
-          if (clean) add(clean.startsWith('-') ? clean : `- ${clean}`);
-        });
-      } else {
-        add("- NIL");
-      }
-      add("");
+    add(`(${++dn}) CHARGES:`);
+    if (norm(state.chargesList)) {
+      ensureLines(state.chargesList).split("\n").forEach(x => {
+        const clean = x.trim();
+        if (clean) add(clean.startsWith('-') ? clean : `- ${clean}`);
+      });
+    } else {
+      add("- NIL");
     }
+    add("");
 
-    if (!sectionExcluded("narrative")) {
-      add("REPORT:");
-      add("(1) Preliminary Details:");
-      buildPrelimLines().forEach(x => add(x));
-      add("");
-      const narrative = s(state.summary) || s(sw.details) || "(Add details here)";
-      add(narrative);
-      add("");
-    }
+    add("REPORT:");
+    add("(1) Preliminary Details:");
+    buildPrelimLines().forEach(x => add(x));
+    add("");
+    const narrative = s(state.summary) || s(sw.details) || "(Add details here)";
+    add(narrative);
+    add("");
 
     if (s(sw.rego)) {
       add("MELROADS VEHICLE LOOK-UP:");
@@ -5178,49 +5189,43 @@ function clearDebtTool() {
       add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
       add("");
     }
-    
-    if (!sectionExcluded("officers")) {
-      add(`(${++dn}) Officers Involved:`);
-      const off = lines(state.officersList);
-      if (off.length) {
-        off.forEach(x => add(`- ${getOfficerLineForPreview(x)}`));
-      } else {
-        add("- NIL");
-      }
-      add("");
-    }
-    
-    if (!sectionExcluded("sentence")) {
-      const sentenceNum = ++dn;
-      add(`(${sentenceNum}) Sentence:`);
-      const mrcWeeks = norm(sw.mrcWeeks);
-      if (mrcWeeks) add(`- The individual is to be remanded to MRC for ${mrcWeeks} weeks.`);
-      if (norm(state.sentence)) {
-        add(`- ${norm(state.sentence)}`);
-      } else if (!mrcWeeks) {
-        // Handbook 4.3 recommended Sheriff outcome for Failure to Stop.
-        add("- PRISON TIME: 65 WEEKS");
-      }
-      if (norm(state.sentenceApproval)) add(`- ${norm(state.sentenceApproval)}`);
-      add("");
 
-      if (norm(state.victims)) {
-        add(`(${sentenceNum}.1) Victim(s):`);
-        getLines(state.victims).forEach(x => add(`- ${x}`));
-        add("");
-      }
+    add(`(${++dn}) Officers Involved:`);
+    const off = lines(state.officersList);
+    if (off.length) {
+      off.forEach(x => add(`- ${getOfficerLineForPreview(x)}`));
+    } else {
+      add("- NIL");
+    }
+    add("");
+
+    const sentenceNum = ++dn;
+    add(`(${sentenceNum}) Sentence:`);
+    const mrcWeeks = norm(sw.mrcWeeks);
+    if (mrcWeeks) add(`- The individual is to be remanded to MRC for ${mrcWeeks} weeks.`);
+    if (norm(state.sentence)) {
+      add(`- ${norm(state.sentence)}`);
+    } else if (!mrcWeeks) {
+      // Handbook 4.3 recommended Sheriff outcome for Failure to Stop.
+      add("- PRISON TIME: 65 WEEKS");
+    }
+    if (norm(state.sentenceApproval)) add(`- ${norm(state.sentenceApproval)}`);
+    add("");
+
+    if (norm(state.victims)) {
+      add(`(${sentenceNum}.1) Victim(s):`);
+      getLines(state.victims).forEach(x => add(`- ${x}`));
+      add("");
     }
 
-    if (!sectionExcluded("narrative")) {
-      add(`(${++dn}) Evidence:`);
-      const ev = lines(state.evidence);
-      if (ev.length) {
-        ev.forEach(x => add(`- ${x}`));
-      } else {
-        add("- NIL");
-      }
-      add("");
+    add(`(${++dn}) Evidence:`);
+    const ev = lines(state.evidence);
+    if (ev.length) {
+      ev.forEach(x => add(`- ${x}`));
+    } else {
+      add("- NIL");
     }
+    add("");
     sheriffActionNotice('arrest').forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
@@ -5242,28 +5247,24 @@ function clearDebtTool() {
     const idLabel = idStatus === "CONFIRMED" ? "ID CONFIRMED" : "ID UNCONFIRMED";
     
     add(`(${++dn}) OUTSTANDING WARRANT FOR QUESTIONING - ${who} (${idLabel})`);
-    if (!sectionExcluded("charges")) {
-      add(`(${++dn}) CHARGE IF OFFENCE IS PROVEN:`);
-      if (norm(state.chargesList)) {
-        ensureLines(state.chargesList).split("\n").forEach(x => {
-          const clean = x.trim();
-          if (clean) add(clean.startsWith('-') ? clean : `- ${clean}`);
-        });
-      } else {
-        add("- NIL");
-      }
-      add("");
+    add(`(${++dn}) CHARGE IF OFFENCE IS PROVEN:`);
+    if (norm(state.chargesList)) {
+      ensureLines(state.chargesList).split("\n").forEach(x => {
+        const clean = x.trim();
+        if (clean) add(clean.startsWith('-') ? clean : `- ${clean}`);
+      });
+    } else {
+      add("- NIL");
     }
+    add("");
 
-    if (!sectionExcluded("narrative")) {
-      add("REPORT:");
-      add("(1) Preliminary Details:");
-      buildPrelimLines().forEach(x => add(x));
-      add("");
-      const narrative = s(state.summary) || s(sw.details) || "(Add details here)";
-      add(narrative);
-      add("");
-    }
+    add("REPORT:");
+    add("(1) Preliminary Details:");
+    buildPrelimLines().forEach(x => add(x));
+    add("");
+    const narrative = s(state.summary) || s(sw.details) || "(Add details here)";
+    add(narrative);
+    add("");
 
     if (s(sw.rego)) {
       add("MELROADS VEHICLE LOOK-UP:");
@@ -5280,48 +5281,42 @@ function clearDebtTool() {
       add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
       add("");
     }
-    
-    if (!sectionExcluded("officers")) {
-      add(`(${++dn}) Officers Involved:`);
-      const off = lines(state.officersList);
-      if (off.length) {
-        off.forEach(x => add(`- ${getOfficerLineForPreview(x)}`));
-      } else {
-        add("- NIL");
-      }
+
+    add(`(${++dn}) Officers Involved:`);
+    const off = lines(state.officersList);
+    if (off.length) {
+      off.forEach(x => add(`- ${getOfficerLineForPreview(x)}`));
+    } else {
+      add("- NIL");
+    }
+    add("");
+
+    const sentenceNum = ++dn;
+    add(`(${sentenceNum}) Sentence If Offence Is Proven:`);
+    if (norm(state.sentence)) {
+      add(`- ${norm(state.sentence)}`);
+    } else {
+      // Handbook 4.3 recommended Sheriff outcome for Failure to Stop.
+      add("- PRISON TIME: 65 WEEKS");
+    }
+    if (norm(state.sentenceApproval)) add(`- ${norm(state.sentenceApproval)}`);
+    add("");
+
+    if (norm(state.victims)) {
+      add(`(${sentenceNum}.1) Victim(s):`);
+      getLines(state.victims).forEach(x => add(`- ${x}`));
       add("");
     }
-    
-    if (!sectionExcluded("sentence")) {
-      const sentenceNum = ++dn;
-      add(`(${sentenceNum}) Sentence If Offence Is Proven:`);
-      if (norm(state.sentence)) {
-        add(`- ${norm(state.sentence)}`);
-      } else {
-        // Handbook 4.3 recommended Sheriff outcome for Failure to Stop.
-        add("- PRISON TIME: 65 WEEKS");
-      }
-      if (norm(state.sentenceApproval)) add(`- ${norm(state.sentenceApproval)}`);
-      add("");
-      
-      if (norm(state.victims)) {
-        add(`(${sentenceNum}.1) Victim(s):`);
-        getLines(state.victims).forEach(x => add(`- ${x}`));
-        add("");
-      }
+
+    add(`(${++dn}) Evidence:`);
+    const ev = lines(state.evidence);
+    if (ev.length) {
+      ev.forEach(x => add(`- ${x}`));
+    } else {
+      add("- NIL");
     }
-    
-    if (!sectionExcluded("narrative")) {
-      add(`(${++dn}) Evidence:`);
-      const ev = lines(state.evidence);
-      if (ev.length) {
-        ev.forEach(x => add(`- ${x}`));
-      } else {
-        add("- NIL");
-      }
-      add("");
-    }
-    if (!sectionExcluded("interview") && norm(state.interviewQs)) {
+    add("");
+    if (norm(state.interviewQs)) {
       add(`(${++dn}) INTERVIEW QUESTIONS (GUIDANCE ONLY - MAY VARY):`);
       lines(state.interviewQs).forEach(x => {
         const isHeader = x.endsWith(":") && !x.includes("?");
@@ -11104,11 +11099,9 @@ Is there anything you would like to add at this time?`;
   // SECTION VISIBILITY
   // ============================================================================
   // The per-section "eye toggle" UI was removed to simplify the tool for recruits.
-  // Sections are now driven solely by report type (updateReportTypeUI). This stub
-  // keeps the 12 generator call sites intact while guaranteeing every section is
-  // always emitted — identical to the previous default (nothing excluded).
-  function sectionExcluded() { return false; }
-
+  // Sections are now driven solely by report type (updateReportTypeUI). The
+  // generators no longer wrap sections in a sectionExcluded() check — it was a
+  // stub that always returned false, so every section was already unconditional.
 
   // Section clear buttons
   const SECTION_CLEAR_ORDER = [
