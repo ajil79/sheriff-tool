@@ -7621,7 +7621,15 @@ Is there anything you would like to add at this time?`;
   // and runs after a draft/autosave load, not on ordinary edits.
   // ============================================================================
 
-  function bindInputs() {
+  // ============================================================================
+  // bindInputs() sub-binders — split out of one ~1,330-line function (the
+  // largest in the file) into cohesive, independently-readable pieces. Each
+  // function below is a verbatim cut of what used to be inline in bindInputs()
+  // — no logic changed, only where it lives. bindInputs() itself is now just
+  // the sequence of calls, further down.
+  // ============================================================================
+
+  function bindReportTypeInput() {
     // Report type
     if (el.reportType) {
       el.reportType.addEventListener("change", () => {
@@ -7634,7 +7642,9 @@ Is there anything you would like to add at this time?`;
         throttledAutosave();
       });
     }
+  }
 
+  function bindHeaderFields() {
     // Header fields
     const headerFields = ['enteredBy', 'reportDateTime', 'enteredUnit'];
     headerFields.forEach(field => {
@@ -7654,7 +7664,9 @@ Is there anything you would like to add at this time?`;
         });
       }
     });
+  }
 
+  function bindOffenderFields() {
     // Offender fields
     const offenderFields = ['offenderName', 'offenderDOB', 'offenderSex', 'offenderAddress', 'offenderPhone'];
     offenderFields.forEach(field => {
@@ -7670,7 +7682,9 @@ Is there anything you would like to add at this time?`;
         el[field].addEventListener("change", updateFn); // For select elements
       }
     });
+  }
 
+  function bindDefectsPanelInputs() {
     // Vehicle Defects Reference panel toggle & search
     const defectsToggle = document.getElementById("defectsToggle");
     const defectsPanel = document.getElementById("defectsPanel");
@@ -7754,7 +7768,9 @@ Is there anything you would like to add at this time?`;
     }
   });
   window.renderSelectedDefectsChips = renderSelectedDefectsChips;
+  }
 
+  function bindSheriffWarrantFields() {
     // Sheriff's Office Reference panel toggle & copy caution
     const sheriffRefToggle = document.getElementById("sheriffRefToggle");
     const sheriffRefPanel = document.getElementById("sheriffRefPanel");
@@ -7794,7 +7810,9 @@ Is there anything you would like to add at this time?`;
       const onFoot = state.sheriffWarrant.interactionType === "foot";
       if (el.swVehicleSection) el.swVehicleSection.style.display = onFoot ? "none" : "block";
     }
+  }
 
+  function bindDebtToolInputs() {
     if (el.debtInput) {
       el.debtInput.addEventListener("input", () => {
         state.debtTool.rawInput = el.debtInput.value || "";
@@ -8069,7 +8087,9 @@ Is there anything you would like to add at this time?`;
       toast("Report type set to Sheriff Debt Enforcement Warrant", "ok");
       showToolPage('report');
     });
+  }
 
+  function bindNarrativeFields() {
     // Preliminary details structured inputs
     ['prelimTime', 'prelimDate', 'prelimLocation'].forEach(field => {
       if (el[field]) {
@@ -8092,15 +8112,16 @@ Is there anything you would like to add at this time?`;
         });
       }
     });
+  }
 
-
+  function bindEvidenceEntry() {
     // Evidence entry system
     // (evidenceItems is module-scoped and pre-populated by renderAll)
     const evidenceQty = document.getElementById('evidenceQty');
     const evidenceItem = document.getElementById('evidenceItem');
     const addEvidenceBtn = document.getElementById('addEvidenceBtn');
     const evidenceList = document.getElementById('evidenceList');
-    
+
     function renderEvidenceList() {
       if (!evidenceList) return;
       // v47: Evidence items now support inline quantity editing
@@ -8146,7 +8167,7 @@ Is there anything you would like to add at this time?`;
         suggestions.textContent = "";
       }
     }
-    
+
     window.removeEvidence = (idx) => {
       evidenceItems.splice(idx, 1);
       renderEvidenceList();
@@ -8181,17 +8202,17 @@ Is there anything you would like to add at this time?`;
         }
       });
     }
-    
+
     if (addEvidenceBtn) {
       addEvidenceBtn.addEventListener('click', () => {
         const qty = evidenceQty && evidenceQty.value ? parseInt(evidenceQty.value) : 1;
         const item = evidenceItem && evidenceItem.value ? evidenceItem.value.trim() : '';
-        
+
         if (item) {
           const evidenceEntry = qty > 1 ? `${qty}x ${item}` : `1x ${item}`;
           evidenceItems.push(evidenceEntry);
           renderEvidenceList();
-          
+
           // Clear input
           if (evidenceItem) evidenceItem.value = '';
           if (evidenceQty) evidenceQty.value = '1';
@@ -8199,7 +8220,7 @@ Is there anything you would like to add at this time?`;
         }
       });
     }
-    
+
     if (evidenceItem) {
       evidenceItem.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -8230,7 +8251,9 @@ Is there anything you would like to add at this time?`;
         }
       });
     });
+  }
 
+  function bindMiscAndOfficerFields() {
     // Sentence & Signature
     const miscFields = ['sentence', 'sentenceApproval', 'victims', 'evidenceLocker', 'sigName', 'sigRank', 'sigDivision', 'sigCallsign'];
     miscFields.forEach(field => {
@@ -8362,7 +8385,9 @@ Is there anything you would like to add at this time?`;
         if (e.key === "Enter") { e.preventDefault(); el.addCallsignBtn.click(); }
       });
     }
+  }
 
+  function bindItemsList() {
     if (el.itemsList) {
       el.itemsList.addEventListener("input", () => {
         state.itemsList = el.itemsList.value;
@@ -8516,7 +8541,9 @@ Is there anything you would like to add at this time?`;
         if (e.key === "Enter") { e.preventDefault(); if (itemSerialInput) itemSerialInput.focus(); else el.addItemBtn.click(); }
       });
     }
+  }
 
+  function bindFormActionButtons() {
     // Buttons
     if (el.copyBtn) {
       el.copyBtn.addEventListener("click", async () => {
@@ -8633,7 +8660,7 @@ Is there anything you would like to add at this time?`;
         if (!panel) return;
         const totalIssues = warnings.length;
         const hasQuality = qualityHints.length > 0;
-        
+
         if (totalIssues === 0 && !hasQuality) {
           panel.innerHTML = '<div class="validation-panel ok">✓ Looks good — no issues found. Ready to submit. <button class="validation-close-btn" type="button" aria-label="Close" style="float:right;background:none;border:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;opacity:0.7">✕</button></div>';
           toast("✓ Validation passed", "ok");
@@ -8720,7 +8747,9 @@ Is there anything you would like to add at this time?`;
     if (el.fillQuestionsBtn) {
       el.fillQuestionsBtn.addEventListener("click", fillDefaultQuestions);
     }
+  }
 
+  function bindPresetAndSearchHandlers() {
     // ============================================================================
     // v47: NEW EVENT HANDLERS
     // ============================================================================
@@ -8839,6 +8868,9 @@ Is there anything you would like to add at this time?`;
     // ============================================================================
     // END v47 EVENT HANDLERS
     // ============================================================================
+  }
+
+  function bindChargePinListeners() {
     // Charge & PIN Event Listeners
     const addFtsBtn = document.getElementById("addFtsChargeBtn");
     if (addFtsBtn) {
@@ -8848,11 +8880,11 @@ Is there anything you would like to add at this time?`;
     if (el.chargeSearch) {
       el.chargeSearch.addEventListener("input", renderChargeList);
     }
-    
+
     if (el.chargeFilter) {
       el.chargeFilter.addEventListener("change", renderChargeList);
     }
-    
+
     if (el.clearChargesBtn) {
       el.clearChargesBtn.addEventListener("click", () => {
         selectedChargesSet.clear();
@@ -8861,15 +8893,15 @@ Is there anything you would like to add at this time?`;
         chargesChanged();
       });
     }
-    
+
     if (el.pinSearch) {
       el.pinSearch.addEventListener("input", renderPinList);
     }
-    
+
     if (el.pinFilter) {
       el.pinFilter.addEventListener("change", renderPinList);
     }
-    
+
     if (el.clearPinsBtn) {
       el.clearPinsBtn.addEventListener("click", () => {
         selectedPinsSet.clear();
@@ -8892,8 +8924,9 @@ Is there anything you would like to add at this time?`;
         throttledAutosave();
       });
     }
+  }
 
-    
+  function bindOcrEvents() {
     // OCR Events
     if (el.pasteZone) {
       el.pasteZone.addEventListener("click", () => {
@@ -8973,8 +9006,23 @@ Is there anything you would like to add at this time?`;
         throttledAutosave();
       });
     }
+  }
 
-
+  function bindInputs() {
+    bindReportTypeInput();
+    bindHeaderFields();
+    bindOffenderFields();
+    bindDefectsPanelInputs();
+    bindSheriffWarrantFields();
+    bindDebtToolInputs();
+    bindNarrativeFields();
+    bindEvidenceEntry();
+    bindMiscAndOfficerFields();
+    bindItemsList();
+    bindFormActionButtons();
+    bindPresetAndSearchHandlers();
+    bindChargePinListeners();
+    bindOcrEvents();
   }
 
   // Render All

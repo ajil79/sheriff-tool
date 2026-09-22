@@ -39,6 +39,7 @@ const CHECKS = [
   ['wizardvalidation.js', 'wizard validation jump-to-step and has-issues chips'],
   ['a11y.js', 'toast/h1/aria-labels/main-landmarks/wizard tab roles'],
   ['ocrtimeout.js', 'ensureTesseract() resolves false on a stalled CDN load'],
+  ['bindinputssmoke.js', 'bindInputs() split — SRF quick-add, presets, DOB, charges, OCR paste'],
 ];
 
 let failed = 0;
