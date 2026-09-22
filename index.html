@@ -5238,20 +5238,27 @@ function clearDebtTool() {
   }
 
   // Sheriff Arrest Generator
-  function generateSheriffArrest() {
+  // Shared builder for the Sheriff field warrants (Arrest and Questioning), which
+  // are ~90% identical per the Sheriff Warrant Handbook layout — this used to be
+  // two separately-maintained functions that had already drifted (see the
+  // mrcWeeks note below). `kind` controls the handful of places they differ:
+  // header/section label text, mrcWeeks handling, the Interview Questions block
+  // (Questioning only), and the Action Notice type.
+  function buildSheriffFieldWarrant(kind /* 'arrest' | 'questioning' */) {
     const L = [];
     const add = (s = "") => L.push(s);
     const sw = state.sheriffWarrant;
     const s = (v) => norm(v);
     const lines = (txt) => getLines(txt);
     let dn = 0; // dynamic numbering
-    
+
     const who = s(sw.warrantName) || s(state.offender.name) || s(sw.owner) || "UNKNOWN";
     const idStatus = (s(sw.idStatus) === "CONFIRMED" && s(sw.idBasis)) ? "CONFIRMED" : "UNCONFIRMED";
     const idLabel = idStatus === "CONFIRMED" ? "ID CONFIRMED" : "ID UNCONFIRMED";
-    
-    add(`(${++dn}) OUTSTANDING WARRANT FOR ARREST - ${who} (${idLabel})`);
-    add(`(${++dn}) CHARGES:`);
+
+    const headerLabel = kind === 'arrest' ? "OUTSTANDING WARRANT FOR ARREST" : "OUTSTANDING WARRANT FOR QUESTIONING";
+    add(`(${++dn}) ${headerLabel} - ${who} (${idLabel})`);
+    add(`(${++dn}) ${kind === 'arrest' ? "CHARGES:" : "CHARGE IF OFFENCE IS PROVEN:"}`);
     if (norm(state.chargesList)) {
       ensureLines(state.chargesList).split("\n").forEach(x => {
         const clean = x.trim();
@@ -5296,8 +5303,15 @@ function clearDebtTool() {
     add("");
 
     const sentenceNum = ++dn;
-    add(`(${sentenceNum}) Sentence:`);
-    const mrcWeeks = norm(sw.mrcWeeks);
+    add(`(${sentenceNum}) ${kind === 'arrest' ? "Sentence:" : "Sentence If Offence Is Proven:"}`);
+    // NOTE: Arrest reads sw.mrcWeeks (remands to MRC for N weeks, and skips the
+    // canned "PRISON TIME: 65 WEEKS" fallback once a value is set); Questioning
+    // never has. This predates the merge and may be intentional (Questioning
+    // precedes a guilt finding, so a specific MRC remand length may not apply
+    // yet) or may be undocumented copy-paste drift. Preserved exactly as it was
+    // for both — flagged for Sheriff leadership sign-off before changing, not
+    // silently equalized by this refactor.
+    const mrcWeeks = kind === 'arrest' ? norm(sw.mrcWeeks) : "";
     if (mrcWeeks) add(`- The individual is to be remanded to MRC for ${mrcWeeks} weeks.`);
     if (norm(state.sentence)) {
       add(`- ${norm(state.sentence)}`);
@@ -5322,97 +5336,8 @@ function clearDebtTool() {
       add("- NIL");
     }
     add("");
-    resolveActionNotice('arrest').forEach(x => add(x));
-    add("");
-    buildSheriffSignatureLines().forEach(x => add(x));
 
-    return L.join("\n");
-  }
-
-  // Sheriff Warrant Generator
-  function generateSheriffWarrant() {
-    const L = [];
-    const add = (s = "") => L.push(s);
-    const sw = state.sheriffWarrant;
-    const s = (v) => norm(v);
-    const lines = (txt) => getLines(txt);
-    let dn = 0; // dynamic numbering
-    
-    const who = s(sw.warrantName) || s(state.offender.name) || s(sw.owner) || "UNKNOWN";
-    const idStatus = (s(sw.idStatus) === "CONFIRMED" && s(sw.idBasis)) ? "CONFIRMED" : "UNCONFIRMED";
-    const idLabel = idStatus === "CONFIRMED" ? "ID CONFIRMED" : "ID UNCONFIRMED";
-    
-    add(`(${++dn}) OUTSTANDING WARRANT FOR QUESTIONING - ${who} (${idLabel})`);
-    add(`(${++dn}) CHARGE IF OFFENCE IS PROVEN:`);
-    if (norm(state.chargesList)) {
-      ensureLines(state.chargesList).split("\n").forEach(x => {
-        const clean = x.trim();
-        if (clean) add(clean.startsWith('-') ? clean : `- ${clean}`);
-      });
-    } else {
-      add("- NIL");
-    }
-    add("");
-
-    add("REPORT:");
-    add("(1) Preliminary Details:");
-    buildPrelimLines().forEach(x => add(x));
-    add("");
-    const narrative = s(state.summary) || s(sw.details) || "(Add details here)";
-    add(narrative);
-    add("");
-
-    if (s(sw.rego)) {
-      add("MELROADS VEHICLE LOOK-UP:");
-      add("=====================  MELROADS  ====================");
-      add(`    REGISTRATION:        ${s(sw.rego)}`);
-      add(`    MODEL:               ${s(sw.model) || "NIL"}`);
-      add(`    COLOUR:              ${s(sw.colour) || "NIL"}`);
-      add(`    REGISTERED:          ${s(sw.registered) || "NIL"}`);
-      add(`    EXPIRES:             ${s(sw.regoExpires) || "NIL"}`);
-      add(`    STOLEN:              ${s(sw.stolen) || "NO"}`);
-      add(`    SUSPENDED:           ${s(sw.suspended) || "NO"}`);
-      add("");
-      add("---------------------  OWNER DETAILS ---------------------------");
-      add(`    OWNER:               ${s(sw.owner) || "NIL"}`);
-      add("");
-    }
-
-    add(`(${++dn}) Officers Involved:`);
-    const off = lines(state.officersList);
-    if (off.length) {
-      off.forEach(x => add(`- ${getOfficerLineForPreview(x)}`));
-    } else {
-      add("- NIL");
-    }
-    add("");
-
-    const sentenceNum = ++dn;
-    add(`(${sentenceNum}) Sentence If Offence Is Proven:`);
-    if (norm(state.sentence)) {
-      add(`- ${norm(state.sentence)}`);
-    } else {
-      // Handbook 4.3 recommended Sheriff outcome for Failure to Stop.
-      add("- PRISON TIME: 65 WEEKS");
-    }
-    if (norm(state.sentenceApproval)) add(`- ${norm(state.sentenceApproval)}`);
-    add("");
-
-    if (norm(state.victims)) {
-      add(`(${sentenceNum}.1) Victim(s):`);
-      getLines(state.victims).forEach(x => add(`- ${x}`));
-      add("");
-    }
-
-    add(`(${++dn}) Evidence:`);
-    const ev = lines(state.evidence);
-    if (ev.length) {
-      ev.forEach(x => add(`- ${x}`));
-    } else {
-      add("- NIL");
-    }
-    add("");
-    if (norm(state.interviewQs)) {
+    if (kind === 'questioning' && norm(state.interviewQs)) {
       add(`(${++dn}) INTERVIEW QUESTIONS (GUIDANCE ONLY - MAY VARY):`);
       lines(state.interviewQs).forEach(x => {
         const isHeader = x.endsWith(":") && !x.includes("?");
@@ -5421,12 +5346,16 @@ function clearDebtTool() {
       add("");
     }
 
-    resolveActionNotice('questioning').forEach(x => add(x));
+    resolveActionNotice(kind === 'arrest' ? 'arrest' : 'questioning').forEach(x => add(x));
     add("");
     buildSheriffSignatureLines().forEach(x => add(x));
 
     return L.join("\n");
   }
+
+  function generateSheriffArrest() { return buildSheriffFieldWarrant('arrest'); }
+  // Sheriff Warrant Generator (Questioning)
+  function generateSheriffWarrant() { return buildSheriffFieldWarrant('questioning'); }
 
   // Sheriff Court Warrant Generator
   function generateSheriffCourt() {
