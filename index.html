@@ -3,8 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- script-src 'unsafe-inline' is required: this file has no build step to generate
+       per-deploy nonces/hashes, and 100% of the JS lives inline in a single script
+       element (see CLAUDE.md). Accepted risk, not an oversight — do not attempt to
+       remove 'unsafe-inline' without also adding a build step, or the app breaks. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' data: blob: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; worker-src 'self' blob: https://cdn.jsdelivr.net; child-src 'self' blob:; font-src 'self' data: https://fonts.gstatic.com;" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Second external network dependency besides Tesseract (see the OCR offline note
+       near ensureTesseract()): a render-blocking Google Fonts stylesheet. If it's
+       offline/blocked, the browser falls back to the generic sans-serif/monospace
+       families already listed after IBM Plex Sans/Mono in the font-family stacks below. -->
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
   <title>Sheriff Tool</title>
     <style>
     :root{
@@ -2291,17 +2299,33 @@
     // Avoid double-loading.
     if (ensureTesseract._loading) return ensureTesseract._loading;
     ensureTesseract._loading = new Promise((resolve) => {
+      let settled = false;
+      const finish = (ok) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (!ok) ensureTesseract._loading = null; // allow a retry on a later call
+        resolve(ok);
+      };
+      // A stalled request (captive portal, flaky VPN) fires neither onload nor
+      // onerror — without a timeout the UI was stuck on "Loading OCR library
+      // (optional)..." forever. 15s is generous for a ~2MB script on a slow link.
+      const timer = setTimeout(() => finish(false), 15000);
       const s = document.createElement("script");
       s.src = `${OCR_ASSET_BASE}/tesseract.min.js`;
       s.async = true;
       // crossOrigin is meaningful for the CDN copy only; setting it on a
       // same-origin vendored file would needlessly force a CORS check.
       if (ocrAssetSource !== "local") s.crossOrigin = "anonymous";
-      s.onload = () => resolve(true);
-      s.onerror = () => {
-        ensureTesseract._loading = null;
-        resolve(false);
-      };
+      // No Subresource Integrity hash here on purpose: OCR_CDN_ASSET_BASE pins
+      // only the major version ("tesseract.js@4"), so jsDelivr serves whatever
+      // the latest 4.x patch release is — the bytes are not stable, so a hash
+      // computed today would start silently hard-failing every load the moment
+      // a new 4.x patch ships upstream, with no code change here to explain why.
+      // SRI needs an exact pinned version (e.g. "@4.1.4") to be safe; revisit if
+      // OCR_CDN_ASSET_BASE is ever pinned that precisely.
+      s.onload = () => finish(true);
+      s.onerror = () => finish(false);
       document.head.appendChild(s);
     });
     return ensureTesseract._loading;
