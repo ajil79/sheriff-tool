@@ -37,6 +37,7 @@ const CHECKS = [
   ['sherifflogscopyall.js', 'Copy All is validated the same way per-command Copy is'],
   ['debthandoff.js', 'Debt-to-Report hand-off navigates to the Report Tool'],
   ['wizardvalidation.js', 'wizard validation jump-to-step and has-issues chips'],
+  ['a11y.js', 'toast/h1/aria-labels/main-landmarks/wizard tab roles'],
 ];
 
 let failed = 0;

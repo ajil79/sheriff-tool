@@ -46,7 +46,7 @@
       background: linear-gradient(180deg, var(--vp-blue) 0%, var(--vp-navy) 100%);
       border-bottom: 2px solid var(--vp-accent-btn);
     }
-    .title{font-weight:900; letter-spacing:1.5px; text-transform:uppercase}
+    .title{font-weight:900; letter-spacing:1.5px; text-transform:uppercase; margin:0}
     .sub{color:var(--muted); font-size:13px; margin-top:4px}
     .actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
     body.tool-nonreport #copyBtn,
@@ -107,7 +107,9 @@
       .kbd{display:none}
       .tool-nav{padding:0 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:0}
       .tool-nav button{padding:10px 14px;font-size:12px;white-space:nowrap;flex-shrink:0}
-      .quick-evidence{font-size:10px !important;padding:4px 8px !important}
+      /* Was font-size:10px/padding:4px 8px — smaller than the 11px/3px 9px desktop
+         size, backwards for a touch target meant for one-handed field use. */
+      .quick-evidence{font-size:12px !important;padding:8px 10px !important}
       #itemSearchInput{font-size:12px}
       #itemCategoryFilter{width:100% !important}
       .report-badge{font-size:9px;padding:3px 8px}
@@ -420,7 +422,9 @@
       --card:rgba(0,43,92,0.06);
       --card2:rgba(0,43,92,0.08);
       --text:rgba(0,18,41,0.88);
-      --muted:rgba(0,18,41,0.55);
+      --muted:rgba(0,18,41,0.60); /* 0.55 computed to ~4.0:1 against --bg, below WCAG AA's
+                                     4.5:1 minimum for normal text; 0.60 clears it (~4.7:1
+                                     against --bg #E8EDF2, ~5.0:1 against a white .card) */
       --border:rgba(0,43,92,0.18);
       --ok:#008844;
       --warn:#CC7700;
@@ -670,7 +674,7 @@
     .vic-badge-advisory{background:rgba(255,180,80,0.5)}
     .vic-num{width:24px;text-align:center;font-size:9px;color:var(--muted);flex-shrink:0}
     .vic-label{flex:1;padding:8px 6px;font-size:11px;line-height:1.3}
-    .vic-btn{flex-shrink:0;padding:6px 14px;font-size:10px;font-weight:700;background:transparent;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-family:inherit;transition:all 0.12s}
+    .vic-btn{flex-shrink:0;padding:10px 16px;font-size:12px;font-weight:700;background:transparent;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-family:inherit;transition:all 0.12s}
     .vic-btn-active-pass{color:rgba(100,255,150,0.95) !important;background:rgba(100,255,150,0.08) !important}
     .vic-btn-active-fail{color:rgba(255,100,100,0.95) !important;background:rgba(255,100,100,0.08) !important}
     body.light-mode .vic-row-even{background:rgba(0,0,0,0.02)}
@@ -926,7 +930,7 @@
   </noscript>
   <header>
     <div>
-      <div class="title">Sheriff Tool</div>
+      <h1 class="title">Sheriff Tool</h1>
       <div class="sub" id="appSubtitle">v3 - Sheriff Warrants, Debt Tool &amp; Logs</div>
       <div class="report-badge" id="reportBadge">SHERIFF WARRANT FOR ARREST</div>
     </div>
@@ -1204,7 +1208,7 @@
       <div id="reportStepper" class="wizard-stepper" role="tablist" aria-label="Report steps"></div>
 
       <!-- ═══ STEP 1 — Type & person ═══ -->
-      <div class="wizard-step active" data-step="1" data-step-title="Type &amp; person" data-step-cards="reportMetaCard,offenderCard,ocrCard">
+      <div id="wizardStep1" class="wizard-step active" role="tabpanel" aria-labelledby="wizardChip1" data-step="1" data-step-title="Type &amp; person" data-step-cards="reportMetaCard,offenderCard,ocrCard">
 
       <!-- Report Type -->
       <div class="card" id="reportMetaCard">
@@ -1294,7 +1298,7 @@
         <label for="imgFile" style="display:block;margin-top:10px;font-size:12px;font-weight:700;color:var(--muted)">Take / choose photo (phone or computer)</label>
         <input id="imgFile" type="file" accept="image/*" style="margin-top:4px"/>
         <div class="row" style="margin-top:10px">
-          <input id="ocrStatus" readonly value="OCR idle" style="background:rgba(0,0,0,0.3)"/>
+          <input id="ocrStatus" readonly value="OCR idle" aria-label="OCR status" aria-live="polite" style="background:rgba(0,0,0,0.3)"/>
           <button class="btn" id="clearOcrBtn" title="Clear the pasted LEAP/MDT text and reset auto-filled fields">Clear</button>
         </div>
         <label style="display:flex; align-items:center; gap:10px; margin-top:10px; cursor:pointer">
@@ -1307,7 +1311,7 @@
       </div><!-- ═══ /STEP 1 ═══ -->
 
       <!-- ═══ STEP 2 — Incident & vehicle ═══ -->
-      <div class="wizard-step" data-step="2" data-step-title="Incident &amp; vehicle" data-step-cards="chargesCard,sheriffWarrantCard,sheriffRefCard">
+      <div id="wizardStep2" class="wizard-step" role="tabpanel" aria-labelledby="wizardChip2" data-step="2" data-step-title="Incident &amp; vehicle" data-step-cards="chargesCard,sheriffWarrantCard,sheriffRefCard">
 
       <!-- Charges -->
       <div class="card" id="chargesCard" style="display:none" data-section="charges">
@@ -1433,7 +1437,7 @@
       </div><!-- ═══ /STEP 2 ═══ -->
 
       <!-- ═══ STEP 3 — Officers ═══ -->
-      <div class="wizard-step" data-step="3" data-step-title="Officers" data-step-cards="officersCard">
+      <div id="wizardStep3" class="wizard-step" role="tabpanel" aria-labelledby="wizardChip3" data-step="3" data-step-title="Officers" data-step-cards="officersCard">
 
       <!-- Officers -->
       <div class="card" id="officersCard" style="display:none;position:relative;z-index:20" data-section="officers">
@@ -1514,7 +1518,7 @@
       </div><!-- ═══ /STEP 3 ═══ -->
 
       <!-- ═══ STEP 4 — Narrative & evidence ═══ -->
-      <div class="wizard-step" data-step="4" data-step-title="Narrative &amp; evidence" data-step-cards="narrativeCard,interviewCard,sentenceCard">
+      <div id="wizardStep4" class="wizard-step" role="tabpanel" aria-labelledby="wizardChip4" data-step="4" data-step-title="Narrative &amp; evidence" data-step-cards="narrativeCard,interviewCard,sentenceCard">
 
       <!-- Report Narrative -->
       <div class="card" id="narrativeCard" style="display:none;position:relative;z-index:15" data-section="narrative">
@@ -1642,7 +1646,7 @@
       </div><!-- ═══ /STEP 4 ═══ -->
 
       <!-- ═══ STEP 5 — Sign & finish ═══ -->
-      <div class="wizard-step" data-step="5" data-step-title="Sign &amp; finish" data-step-cards="signatureCard,draftsCard,diagnosticsCard">
+      <div id="wizardStep5" class="wizard-step" role="tabpanel" aria-labelledby="wizardChip5" data-step="5" data-step-title="Sign &amp; finish" data-step-cards="signatureCard,draftsCard,diagnosticsCard">
 
       <!-- Signature -->
       <div class="card" id="signatureCard" style="position:relative;z-index:10">
@@ -1742,6 +1746,7 @@
 
   <!-- DEBT TOOL PAGE -->
 <div id="debtPage" class="tool-page" role="tabpanel" aria-labelledby="tab-debt" tabindex="0">
+<main role="main">
 <div style="max-width:980px;margin:0 auto;padding:16px 22px 40px">
   <div style="font-size:18px;font-weight:900;margin-bottom:14px">Sheriff Debt Tool</div>
 
@@ -1798,8 +1803,8 @@
       <div class="muted" style="font-size:12px;margin-top:5px;line-height:1.5">Drop or paste <strong>one or many</strong> screenshots at once — their <strong>ID / LEAP profile</strong> and their <strong>debt / financial records</strong>. Each one is auto-sorted into the right box below, and you review each before it applies. Prefer to be precise, or to type? Use the labelled boxes further down.</div>
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
-      <input id="debtDumpImgFile" type="file" accept="image/*" multiple style="flex:1;min-width:160px"/>
-      <input id="debtDumpStatus" readonly value="Waiting for screenshots" style="flex:2;min-width:160px;background:rgba(0,0,0,0.3);font-size:11px"/>
+      <input id="debtDumpImgFile" type="file" accept="image/*" multiple aria-label="Post any screenshots here — their ID or LEAP profile and their debt or financial records — to scan and auto-sort" style="flex:1;min-width:160px"/>
+      <input id="debtDumpStatus" readonly value="Waiting for screenshots" aria-label="Screenshot processing status" aria-live="polite" style="flex:2;min-width:160px;background:rgba(0,0,0,0.3);font-size:11px"/>
     </div>
   </div>
 
@@ -1822,8 +1827,8 @@
         <div class="muted" style="font-size:11px;margin-top:3px">Their ID, licence or LEAP profile — paste (Ctrl+V), drag &amp; drop, or pick a file. Auto-fills their name, phone, address &amp; vehicle below (you review first). Or just type the fields below.</div>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-        <input id="debtImgFile" type="file" accept="image/*" style="flex:1;min-width:140px"/>
-        <input id="debtOcrStatus" readonly value="OCR idle" style="flex:1;min-width:140px;background:rgba(0,0,0,0.3);font-size:11px"/>
+        <input id="debtImgFile" type="file" accept="image/*" aria-label="Post a screenshot of their ID or LEAP profile here to scan with OCR" style="flex:1;min-width:140px"/>
+        <input id="debtOcrStatus" readonly value="OCR idle" aria-label="OCR status" aria-live="polite" style="flex:1;min-width:140px;background:rgba(0,0,0,0.3);font-size:11px"/>
       </div>
     </div>
     <div class="grid2" style="margin-bottom:10px">
@@ -1877,8 +1882,8 @@
           <div class="muted" style="font-size:11px;margin-top:3px">Their LEAP financial / debt records — paste (Ctrl+V), drag &amp; drop, or pick a file. Reads the lines into the box below and totals the overdue government debt (you review first). Prefer to type? Paste the lines straight into the box below.</div>
         </div>
         <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-          <input id="debtFinanceImgFile" type="file" accept="image/*" style="flex:1;min-width:140px"/>
-          <input id="debtFinanceOcrStatus" readonly value="OCR idle" style="flex:1;min-width:140px;background:rgba(0,0,0,0.3);font-size:11px"/>
+          <input id="debtFinanceImgFile" type="file" accept="image/*" aria-label="Post a screenshot of their debt or financial records here to scan with OCR" style="flex:1;min-width:140px"/>
+          <input id="debtFinanceOcrStatus" readonly value="OCR idle" aria-label="OCR status" aria-live="polite" style="flex:1;min-width:140px;background:rgba(0,0,0,0.3);font-size:11px"/>
         </div>
       </div>
       <label><div class="lbl">Their debt history <span style="font-weight:400;color:var(--muted);font-size:10px">— LEAP financial records (typed or scanned)</span></div><textarea id="debtInput" rows="8" placeholder="09/01/2023 N $5000 CHARGE: Contempt of Court&#10;04/01/2023 N $3000 CHARGE: Engage in a Police Pursuit / Evade Police&#10;01/01/2023 N $12000 GOV INVOICE: Outstanding Government Debt"></textarea></label>
@@ -1961,11 +1966,13 @@
   </div>
 
 </div>
+</main>
 </div><!-- end #debtPage -->
 
 
   <!-- SHERIFF LOGS PAGE -->
   <div id="sheriffLogsPage" class="tool-page" role="tabpanel" aria-labelledby="tab-sherifflogs" tabindex="0">
+  <main role="main">
   <div style="max-width:860px;margin:0 auto;padding:16px 22px 40px">
     <div style="font-size:18px;font-weight:900;margin-bottom:14px">Sheriff Log Helper</div>
 
@@ -2055,9 +2062,10 @@
       <div class="hint" style="margin-top:10px"><span>📋</span><span>Required logs are <strong>!interact</strong>, <strong>!adddebt</strong>, <strong>!cleardebt</strong> and <strong>!addplan</strong>. Separate <strong>!tstop</strong> and <strong>!call</strong> logs are no longer used — enter stops and calls as interactions. (The Out and About handbook still shows <strong>!call</strong> on slide 11; that slide is out of date.)</span></div>
     </div>
   </div>
+  </main>
   </div><!-- end #sheriffLogsPage -->
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div id="undoBar" aria-live="polite" style="display:none"></div>
 
   <div class="review-modal-overlay" id="changeReviewOverlay">
@@ -7778,7 +7786,7 @@ Is there anything you would like to add at this time?`;
       _defectHistory.map((d, i) =>
         '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;background:rgba(255,100,100,0.1);border:1px solid rgba(255,100,100,0.25);border-radius:8px;font-size:11px;font-weight:700;color:rgba(255,180,180,0.9)">' +
         escapeHtml(d.name) +
-        '<button data-remove-defect="' + i + '" style="background:none;border:none;color:rgba(255,100,100,0.7);cursor:pointer;padding:0;margin:0;font-size:12px;font-family:inherit" title="Remove this defect">✕</button></span>'
+        '<button data-remove-defect="' + i + '" aria-label="Remove this defect" style="background:none;border:none;color:rgba(255,100,100,0.7);cursor:pointer;padding:0;margin:0;font-size:12px;font-family:inherit" title="Remove this defect">✕</button></span>'
       ).join("");
   }
   // Delegated click for defect chip removal
@@ -8675,7 +8683,7 @@ Is there anything you would like to add at this time?`;
         const hasQuality = qualityHints.length > 0;
         
         if (totalIssues === 0 && !hasQuality) {
-          panel.innerHTML = '<div class="validation-panel ok">✓ Looks good — no issues found. Ready to submit. <button class="validation-close-btn" type="button" style="float:right;background:none;border:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;opacity:0.7">✕</button></div>';
+          panel.innerHTML = '<div class="validation-panel ok">✓ Looks good — no issues found. Ready to submit. <button class="validation-close-btn" type="button" aria-label="Close" style="float:right;background:none;border:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;opacity:0.7">✕</button></div>';
           toast("✓ Validation passed", "ok");
         } else {
           let html = '<div class="validation-panel ' + (totalIssues > 0 ? 'issues' : 'ok') + '">';
@@ -8686,7 +8694,7 @@ Is there anything you would like to add at this time?`;
           } else {
             html += '✓ No missing fields — ' + qualityHints.length + ' suggestion' + (qualityHints.length > 1 ? 's' : '') + ' to improve quality';
           }
-          html += '</span><button class="validation-close-btn" type="button" style="background:none;border:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;opacity:0.7;flex-shrink:0">✕</button></div>';
+          html += '</span><button class="validation-close-btn" type="button" aria-label="Close" style="background:none;border:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;opacity:0.7;flex-shrink:0">✕</button></div>';
           // Required field warnings — each links back to the wizard step most
           // likely to fix it, when findCardForWarning() recognizes the message.
           html += warnings.map(w => {
@@ -11484,8 +11492,17 @@ Is there anything you would like to add at this time?`;
       else if (isVisited) stateClass = ' done';
       const chip = document.createElement('button');
       chip.type = 'button';
+      chip.id = 'wizardChip' + num;
       chip.className = 'wizard-chip' + stateClass;
       chip.dataset.stepTarget = String(num);
+      // The container declares role="tablist" (see #reportStepper in the HTML),
+      // but until now the generated chips carried no tab semantics of their own
+      // — a screen reader announcing a tablist was never told which "tab" is
+      // selected. Mirrors the .tool-nav tablist's existing correct pattern.
+      chip.setAttribute('role', 'tab');
+      chip.setAttribute('aria-selected', num === _wizardStep ? 'true' : 'false');
+      chip.setAttribute('aria-controls', 'wizardStep' + num);
+      chip.tabIndex = num === _wizardStep ? 0 : -1;
       chip.innerHTML = '<span class="wizard-chip-num">' + (i + 1) + '</span><span>' + escapeHtml(title) + '</span>';
       stepper.appendChild(chip);
     });
@@ -11572,6 +11589,29 @@ Is there anything you would like to add at this time?`;
         const chip = e.target.closest('[data-step-target]');
         if (!chip) return;
         showWizardStep(parseInt(chip.dataset.stepTarget, 10));
+      });
+    }
+    // Tablist arrow-key navigation (Left/Right/Home/End), mirroring the main
+    // .tool-nav tablist's existing pattern. Delegated on the stable stepper
+    // container rather than per-chip, since renderWizardStepper() rebuilds the
+    // chips (via innerHTML) on every step change.
+    if (stepper && stepper.dataset.keysBound !== '1') {
+      stepper.dataset.keysBound = '1';
+      stepper.addEventListener('keydown', (e) => {
+        if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return;
+        const chips = Array.from(stepper.querySelectorAll('.wizard-chip'));
+        const cur = chips.indexOf(document.activeElement);
+        if (cur === -1) return;
+        e.preventDefault();
+        let next = cur;
+        if (e.key === 'ArrowRight') next = (cur + 1) % chips.length;
+        else if (e.key === 'ArrowLeft') next = (cur - 1 + chips.length) % chips.length;
+        else if (e.key === 'Home') next = 0;
+        else if (e.key === 'End') next = chips.length - 1;
+        const target = chips[next];
+        showWizardStep(parseInt(target.dataset.stepTarget, 10));
+        const refocus = document.getElementById(target.id);
+        if (refocus) refocus.focus();
       });
     }
   }
